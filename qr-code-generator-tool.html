@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Code Generator</title>
+<style>
+body { font-family: Arial, sans-serif; background:#f0f2f5; color:#000; margin:0; padding:0; }
+header { background:#4a90e2; color:#fff; padding:20px; text-align:center; font-size:1.8em; }
+.container { max-width:700px; margin:30px auto; background:#fff; padding:25px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+.input-group { margin-bottom:15px; }
+input, select, textarea { width:100%; padding:10px; margin-top:5px; border-radius:6px; border:1px solid #ccc; font-size:14px; }
+button { padding:10px 15px; font-size:16px; border:none; border-radius:6px; background:#4a90e2; color:#fff; cursor:pointer; margin-top:10px; }
+button:hover { background:#357ab8; }
+.qrcode-container { text-align:center; margin-top:20px; }
+.qrcode-container canvas { margin-bottom:10px; }
+.hero-placeholder {
+  margin: 20px 0;
+  text-align: center;
+}
+.hero-placeholder img {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+footer { background:#333; color:white; text-align:center; padding:15px; margin-top:30px; font-size:0.9em; }
+
+</style>
+</head>
+<body>
+
+<header>QR Code Generator
+<a href="index.html"><button style="float:right;margin-right:20px;">Home</button></a>
+</header>
+
+<!-- Hero -->
+  <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
+<div class="container">
+  <div class="input-group">
+    <label for="qrType">Select QR Code Type:</label>
+    <select id="qrType" onchange="updateFields()">
+      <option value="url">URL</option>
+      <option value="text">Text</option>
+      <option value="email">Email</option>
+      <option value="phone">Phone / SMS</option>
+      <option value="vcard">Contact / vCard</option>
+      <option value="wifi">Wi-Fi</option>
+      <option value="custom">Custom Data</option>
+    </select>
+  </div>
+
+  <div id="fields"></div>
+
+  <div class="input-group">
+    <label>QR Code Size (px):</label>
+    <input type="number" id="qrSize" value="200" min="100" max="600">
+  </div>
+
+  <div class="input-group">
+    <label>Foreground Color:</label>
+    <input type="color" id="fgColor" value="#000000">
+  </div>
+
+  <div class="input-group">
+    <label>Background Color:</label>
+    <input type="color" id="bgColor" value="#ffffff">
+  </div>
+
+  <button onclick="generateQRCode()">Generate QR Code</button>
+
+  <div class="qrcode-container" id="qrcodeContainer"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+
+<footer style="margin:20px;">
+&copy; 2025: Web ToolBox.
+</footer>
+
+
+<script>
+function updateFields() {
+  const type = document.getElementById('qrType').value;
+  const container = document.getElementById('fields');
+  container.innerHTML = '';
+  switch(type){
+    case 'url':
+      container.innerHTML = `<label>URL:</label><input type="text" id="dataInput" placeholder="https://example.com">`;
+      break;
+    case 'text':
+      container.innerHTML = `<label>Text:</label><textarea id="dataInput" rows="4" placeholder="Enter your text"></textarea>`;
+      break;
+    case 'email':
+      container.innerHTML = `<label>Email Address:</label><input type="email" id="emailAddr" placeholder="example@example.com">
+        <label>Subject (optional):</label><input type="text" id="emailSubject">
+        <label>Body (optional):</label><textarea id="emailBody" rows="3"></textarea>`;
+      break;
+    case 'phone':
+      container.innerHTML = `<label>Phone Number:</label><input type="text" id="phoneNum" placeholder="+1234567890">
+        <label>SMS Message (optional):</label><textarea id="smsBody" rows="3"></textarea>`;
+      break;
+    case 'vcard':
+      container.innerHTML = `<label>Name:</label><input type="text" id="vName">
+        <label>Phone:</label><input type="text" id="vPhone">
+        <label>Email:</label><input type="email" id="vEmail">
+        <label>Company:</label><input type="text" id="vCompany">
+        <label>Address:</label><input type="text" id="vAddress">`;
+      break;
+    case 'wifi':
+      container.innerHTML = `<label>SSID:</label><input type="text" id="wifiSSID">
+        <label>Password:</label><input type="text" id="wifiPass">
+        <label>Encryption:</label>
+        <select id="wifiEnc">
+          <option value="WPA">WPA/WPA2</option>
+          <option value="WEP">WEP</option>
+          <option value="nopass">No Password</option>
+        </select>`;
+      break;
+    case 'custom':
+      container.innerHTML = `<label>Custom Data:</label><textarea id="dataInput" rows="4" placeholder="Enter your custom data"></textarea>`;
+      break;
+  }
+}
+
+function generateQRCode() {
+  let qrData = '';
+  const type = document.getElementById('qrType').value;
+  switch(type){
+    case 'url':
+    case 'text':
+    case 'custom':
+      qrData = document.getElementById('dataInput').value.trim();
+      break;
+    case 'email':
+      const email = document.getElementById('emailAddr').value.trim();
+      const subject = encodeURIComponent(document.getElementById('emailSubject').value.trim());
+      const body = encodeURIComponent(document.getElementById('emailBody').value.trim());
+      qrData = `mailto:${email}?subject=${subject}&body=${body}`;
+      break;
+    case 'phone':
+      const phone = document.getElementById('phoneNum').value.trim();
+      const sms = encodeURIComponent(document.getElementById('smsBody').value.trim());
+      qrData = `SMSTO:${phone}:${sms}`;
+      break;
+    case 'vcard':
+      const vName=document.getElementById('vName').value.trim();
+      const vPhone=document.getElementById('vPhone').value.trim();
+      const vEmail=document.getElementById('vEmail').value.trim();
+      const vCompany=document.getElementById('vCompany').value.trim();
+      const vAddress=document.getElementById('vAddress').value.trim();
+      qrData=`BEGIN:VCARD\nVERSION:3.0\nN:${vName}\nORG:${vCompany}\nTEL:${vPhone}\nEMAIL:${vEmail}\nADR:${vAddress}\nEND:VCARD`;
+      break;
+    case 'wifi':
+      const ssid=document.getElementById('wifiSSID').value.trim();
+      const pass=document.getElementById('wifiPass').value.trim();
+      const enc=document.getElementById('wifiEnc').value;
+      qrData=`WIFI:T:${enc};S:${ssid};P:${pass};;`;
+      break;
+  }
+
+  if(!qrData){alert("Please enter the required data!"); return;}
+  const container = document.getElementById('qrcodeContainer');
+  container.innerHTML='';
+  const size = parseInt(document.getElementById('qrSize').value) || 200;
+  const fg = document.getElementById('fgColor').value;
+  const bg = document.getElementById('bgColor').value;
+  const qr = new QRCode(container, { text: qrData, width: size, height: size, colorDark: fg, colorLight: bg });
+
+  // Add Download Button
+  setTimeout(()=>{
+    const canvas = container.querySelector('canvas');
+    if(canvas){
+      const btn = document.createElement('button');
+      btn.innerText = 'Download QR Code';
+      btn.style.display='block';
+      btn.style.margin='10px auto';
+      btn.onclick=()=>{ const link=document.createElement('a'); link.href=canvas.toDataURL("image/png"); link.download="QR_Code.png"; link.click(); };
+      container.appendChild(btn);
+    }
+  },100);
+}
+
+updateFields();
+</script>
+</body>
+</html>

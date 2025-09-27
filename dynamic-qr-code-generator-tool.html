@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Dynamic QR — Admin + Redirect</title>
+  <meta name="description" content="Create short codes with dynamic redirect targets and generate downloadable QR codes. LocalStorage-based admin panel with search, pagination, and redirect analytics." />
+  <meta name="keywords" content="qr, qr code, short url, url shortener, dynamic qr, redirect, qr download" />
+  <meta name="author" content="Web Tools Hub" />
+  <meta property="og:title" content="Dynamic QR — Admin + Redirect" />
+  <meta property="og:description" content="Create short codes and generate QR codes. Track redirects with counts and last accessed time." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#2563eb">
+
+  <style>
+    :root{
+      --bg:#f8fafc; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --text:#0f1724;
+      --radius:12px; --shadow: 0 8px 24px rgba(15,23,36,0.06);
+      --gap:12px;
+    }
+    *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial,Helvetica,sans-serif}
+    body{margin:0;background:var(--bg);color:var(--text);padding:18px}
+    header{background:linear-gradient(90deg,var(--accent),#1e3a8a);color:#fff;padding:16px;border-radius:12px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    header .title{display:flex;flex-direction:column}
+    header h1{margin:0;font-size:1.15rem}
+    header p{margin:4px 0 0;font-size:0.85rem;opacity:0.95}
+    nav.small{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+    nav.small button{background:#fff;color:var(--accent);border:none;padding:8px 10px;border-radius:8px;cursor:pointer}
+    .hero-placeholder{margin:20px 0;text-align:center}
+    .hero-placeholder img{width:100%;max-height:220px;object-fit:cover;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+    main{margin-top:14px}
+    .grid{display:grid;grid-template-columns:1fr;gap:14px}
+    .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:var(--shadow)}
+    label{display:block;color:var(--muted);font-weight:600;margin-bottom:6px}
+    /* Fix overflow in mapping form */
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .controls input,
+    .controls button {
+      flex: 1 1 auto;
+      min-width: 140px;
+      max-width: 100%;
+    }
+    /* Short code field narrower by default */
+    #code {
+      flex: 0 0 160px;
+    }
+    /* Buttons shrink nicely */
+    .controls button {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+    /* On very small screens, stack fully */
+    @media (max-width: 600px) {
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .controls input,
+      .controls button {
+        flex: 1 1 100%;
+        width: 100%;
+      }
+    }
+
+    input,select,textarea,button{font:inherit;padding:8px;border:1px solid #e6e9ef;border-radius:8px;background:transparent}
+    input[type=file]{padding:6px}
+    table{width:100%;border-collapse:collapse;margin-top:8px;font-size:0.9rem}
+    th,td{padding:8px;border-bottom:1px dashed #eef2f7;text-align:left;vertical-align:middle}
+    th.small{font-weight:600;color:var(--muted)}
+    .btn{cursor:pointer;padding:8px 10px;border-radius:8px;border:1px solid #e6e9ef;background:#fff}
+    .btn.primary{background:var(--accent);color:#fff;border:none}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .right{margin-left:auto}
+    .qr-preview{width:120px;height:120px;border:1px solid #eef2f7;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#fff}
+    .meta{font-size:0.85rem;color:var(--muted)}
+    .search-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .pagination{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:10px}
+    @media (min-width:900px){ .grid{grid-template-columns:1fr 360px} }
+    @media (max-width:700px){ th,td{font-size:0.8rem} .qr-preview{width:96px;height:96px} }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">
+      <h1>Dynamic QR Code Generator</h1>
+      <p>Create short codes, generate & download QR codes, and track redirects.</p>
+    </div>
+    <div class="right">
+      <a href="index.html"><button class="btn" aria-label="Go home">Home</button></a>
+    </div>
+  </header>
+
+  <!-- Hero placeholder -->
+  <section class="hero-placeholder" aria-label="Hero image">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder" />
+  </section>
+
+  <nav class="small" aria-label="Top navigation">
+    <a href="#admin"><button class="btn">Admin</button></a>
+    <a href="#r/example"><button class="btn">Redirect (test)</button></a>
+  </nav>
+
+  <main id="app" style="margin-top:14px"></main>
+
+  <footer style="margin-top:18px;text-align:center;color:var(--muted);font-size:0.9rem">
+    Made with ❤️ — LocalStorage demo (no backend). Keep for production only after adding persistent backend.
+  </footer>
+
+  <!-- ===========================
+       Embedded minimal QR library
+       (compact inline)
+       =========================== -->
+  <script>
+  (function(global){
+    const EXP_TABLE = new Array(512), LOG_TABLE = new Array(256);
+    (function initGF(){let x=1; for(let i=0;i<255;i++){EXP_TABLE[i]=x; LOG_TABLE[x]=i; x=(x<<1) ^ (x & 0x80 ? 0x1D : 0);} for(let i=255;i<512;i++) EXP_TABLE[i]=EXP_TABLE[i-255]; })();
+    function gfMul(a,b){ if(a===0||b===0) return 0; return EXP_TABLE[(LOG_TABLE[a]+LOG_TABLE[b])%255]; }
+    const VERSIONS=[null,{v:1,size:21,data:17,ecc:10},{v:2,size:25,data:32,ecc:16},{v:3,size:29,data:53,ecc:26},{v:4,size:33,data:78,ecc:36},{v:5,size:37,data:106,ecc:48}];
+    function chooseVersion(bytes){ for(let vi=1;vi<VERSIONS.length;vi++){ if(bytes <= VERSIONS[vi].data) return VERSIONS[vi]; } return VERSIONS[VERSIONS.length-1]; }
+    function encodeBytesToBits(bytes){ let bits='0100'; bits += bytes.length.toString(2).padStart(8,'0'); for(let i=0;i<bytes.length;i++) bits += bytes[i].toString(2).padStart(8,'0'); bits += '0000'; return bits; }
+    function bitsToBytes(bits){ const out=[]; for(let i=0;i<bits.length;i+=8){ out.push(parseInt(bits.slice(i,i+8).padEnd(8,'0'),2)); } return out; }
+    function buildCodewords(dataBytes){ const version = chooseVersion(dataBytes.length); let dat = Array.from(dataBytes); while(dat.length < version.data){ dat.push(0xEC); if(dat.length < version.data) dat.push(0x11); } return { version, codewords: dat }; }
+    function codewordsToBitStream(codewords){ return codewords.map(c => c.toString(2).padStart(8,'0')).join(''); }
+    function buildMatrix(versionInfo, codewords){
+      const size = versionInfo.size;
+      const m = new Array(size); for(let i=0;i<size;i++) m[i] = new Array(size).fill(null);
+      function placeFinder(r,c){ const p=[[1,1,1,1,1,1,1],[1,0,0,0,0,0,1],[1,0,1,1,1,0,1],[1,0,1,1,1,0,1],[1,0,1,1,1,0,1],[1,0,0,0,0,0,1],[1,1,1,1,1,1,1]]; for(let y=0;y<7;y++) for(let x=0;x<7;x++) m[r+y][c+x] = p[y][x]; }
+      placeFinder(0,0); placeFinder(0,size-7); placeFinder(size-7,0);
+      for(let i=0;i<8;i++){
+        if(m[6][i]===null) m[6][i] = (i%2===0)?1:0;
+        if(m[i][6]===null) m[i][6] = (i%2===0)?1:0;
+        if(m[6][size-1-i]===null) m[6][size-1-i] = (i%2===0)?1:0;
+        if(m[size-1-i][6]===null) m[size-1-i][6] = (i%2===0)?1:0;
+      }
+      const bits = codewordsToBitStream(codewords);
+      let bitIdx = 0, dirUp = true;
+      for(let col = size-1; col > 0; col -= 2){
+        if(col === 6) col--;
+        for(let i=0;i<size;i++){
+          let row = dirUp ? (size-1 - i) : i;
+          for(let c=0;c<2;c++){
+            const x = col - c;
+            if(m[row][x] !== null) continue;
+            const bit = bits[bitIdx++];
+            m[row][x] = bit === '1' ? 1 : 0;
+          }
+        }
+        dirUp = !dirUp;
+      }
+      for(let y=0;y<size;y++) for(let x=0;x<size;x++) if(m[y][x] === null) m[y][x] = 0;
+      return m;
+    }
+    function drawMatrixToCanvas(matrix, scale){
+      const size = matrix.length;
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = size * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle = '#000';
+      for(let y=0;y<size;y++){
+        for(let x=0;x<size;x++){
+          if(matrix[y][x]) ctx.fillRect(x*scale, y*scale, scale, scale);
+        }
+      }
+      return canvas;
+    }
+    function textToBytes(txt){ return Array.from(new TextEncoder().encode(txt)); }
+    function qrToDataURL(text, sizePx){
+      const bytes = textToBytes(text);
+      const bits = encodeBytesToBits(bytes);
+      const dataBytes = bitsToBytes(bits);
+      const built = buildCodewords(dataBytes);
+      const matrix = buildMatrix(built.version, built.codewords);
+      const scale = Math.max(1, Math.floor(sizePx / matrix.length));
+      return drawMatrixToCanvas(matrix, scale).toDataURL('image/png');
+    }
+    global.qrToDataURL = qrToDataURL;
+  })(window);
+  </script>
+
+  <!-- ===========================
+       Application logic (full)
+       =========================== -->
+  <script>
+  /* ---------- Storage & helpers ---------- */
+  const STORAGE_KEY = 'dqrs_mappings_v2';
+  function nowISO(){ return new Date().toISOString(); }
+  function loadMappings(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') }catch(e){ return {} } }
+  function saveMappings(m){ localStorage.setItem(STORAGE_KEY, JSON.stringify(m)); }
+
+  /* short id */
+  const ALPH = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  function randShort(len=6){ let s=''; for(let i=0;i<len;i++) s+=ALPH[Math.floor(Math.random()*ALPH.length)]; return s; }
+
+  /* ensure protocol */
+  function ensureUrl(url){ if(!url) return ''; if(!/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(url)) return 'https://' + url; return url; }
+
+  /* UI constants */
+  const DEFAULT_PAGE_SIZE = 8;
+
+  /* ---------- Render Admin (Create, QR Preview, Mappings) ---------- */
+  function renderAdmin(page=1, search=''){
+    const app = document.getElementById('app');
+    app.innerHTML = `
+      <div class="grid">
+        <!-- Create / Update Mapping -->
+        <div class="card" aria-labelledby="create-title">
+          <h2 id="create-title">Create / Update Mapping</h2>
+          <div class="controls" style="margin-top:8px">
+            <input id="dest" placeholder="Target URL (https://...)" />
+            <input id="code" placeholder="Short code (leave blank for random)" />
+            <button id="gen" class="btn primary">Create / Save</button>
+            <button id="gen-qr" class="btn">Generate QR</button>
+          </div>
+          <p class="meta" style="margin-top:8px">Generated redirect (preview): <code id="preview_url" class="meta"></code></p>
+        </div>
+
+        <!-- QR Preview (moved above mappings) -->
+        <div class="card">
+          <h2>QR Preview</h2>
+          <div id="qrwrap" class="qr-preview" aria-live="polite">Enter code &amp; click QR</div>
+        </div>
+
+        <!-- Mappings -->
+        <div class="card" aria-labelledby="list-title" style="min-height:220px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <h2 id="list-title" style="margin:0;flex:0 0 auto">Mappings</h2>
+            <div style="flex:1"></div>
+            <div class="search-row" style="flex:0 0 420px">
+              <input id="searchBox" placeholder="Search code or destination" style="flex:1" />
+              <select id="pageSize" style="width:80px">
+                <option value="5">5</option>
+                <option value="8" selected>8</option>
+                <option value="12">12</option>
+              </select>
+              <button id="reload" class="btn">Reload</button>
+            </div>
+          </div>
+
+          <div style="overflow:auto;max-height:420px">
+            <table id="maptable" aria-label="Mappings table">
+              <thead><tr>
+                <th class="small">Code</th>
+                <th class="small">Destination</th>
+                <th class="small">QR</th>
+                <th class="small">Stats</th>
+                <th class="small">Actions</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="pagination" id="pagination"></div>
+
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+            <button id="export" class="btn">Export CSV</button>
+            <button id="importBtn" class="btn">Import CSV</button>
+            <button id="clearAll" class="btn">Clear All</button>
+            <input type="file" id="importFile" accept="text/csv" style="display:none" />
+            <div style="margin-left:auto" class="meta">LocalStorage keys: <code>${STORAGE_KEY}</code></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // wire up elements and functions
+    const destEl = document.getElementById('dest');
+    const codeEl = document.getElementById('code');
+    const previewUrlEl = document.getElementById('preview_url');
+    const qrwrap = document.getElementById('qrwrap');
+
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+    function escapeAttr(s){ return String(s||'').replace(/"/g,'&quot;'); }
+
+    function updateTable(pageNumber, q){
+      const tbody = document.querySelector('#maptable tbody');
+      tbody.innerHTML = '';
+      const map = loadMappings();
+      const rows = Object.keys(map).map(code => ({ code, ...map[code] }));
+      const query = (q || '').toLowerCase().trim();
+      const filtered = rows.filter(r => {
+        if(!query) return true;
+        return r.code.toLowerCase().includes(query) || (r.dest && r.dest.toLowerCase().includes(query));
+      });
+      const ps = parseInt(document.getElementById('pageSize').value || DEFAULT_PAGE_SIZE);
+      const total = filtered.length;
+      const totalPages = Math.max(1, Math.ceil(total / ps));
+      const pageIdx = Math.max(1, Math.min(pageNumber, totalPages));
+      const start = (pageIdx - 1) * ps;
+      const pageItems = filtered.slice(start, start + ps);
+
+      pageItems.forEach(item=>{
+        const tr = document.createElement('tr');
+        const destShort = escapeHtml(item.dest).length > 70 ? escapeHtml(item.dest).slice(0,70) + '…' : escapeHtml(item.dest);
+        const stats = `count: ${item.redirectCount||0}<br><span class="meta">last: ${item.lastAccessed ? new Date(item.lastAccessed).toLocaleString() : '—'}</span>`;
+        tr.innerHTML = `
+          <td><code>/${escapeHtml(item.code)}</code></td>
+          <td title="${escapeAttr(item.dest)}">${destShort}</td>
+          <td><button class="btn" data-act="qr" data-key="${escapeAttr(item.code)}">Preview QR</button></td>
+          <td>${stats}</td>
+          <td>
+            <button class="btn" data-act="use" data-key="${escapeAttr(item.code)}">Copy</button>
+            <button class="btn" data-act="dl" data-key="${escapeAttr(item.code)}">Download QR</button>
+            <button class="btn" data-act="edit" data-key="${escapeAttr(item.code)}">Edit</button>
+            <button class="btn" data-act="del" data-key="${escapeAttr(item.code)}">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // pagination UI
+      const pagDom = document.getElementById('pagination');
+      pagDom.innerHTML = '';
+      if(totalPages > 1){
+        const makeBtn = (txt, p) => {
+          const b = document.createElement('button'); b.className='btn'; b.textContent = txt;
+          b.onclick = ()=> updateTable(p, query);
+          return b;
+        };
+        if(pageIdx>1) pagDom.appendChild(makeBtn('Prev', pageIdx-1));
+        const info = document.createElement('div'); info.style.padding='6px 10px'; info.textContent=`Page ${pageIdx}/${totalPages} (${total})`;
+        pagDom.appendChild(info);
+        if(pageIdx<totalPages) pagDom.appendChild(makeBtn('Next', pageIdx+1));
+      }
+    }
+
+    // initialize table
+    document.getElementById('pageSize').value = DEFAULT_PAGE_SIZE;
+    updateTable(page, search);
+
+    // Create / Save mapping
+    document.getElementById('gen').onclick = ()=>{
+      const destRaw = destEl.value.trim();
+      if(!destRaw) return alert('Enter destination URL');
+      const dest = ensureUrl(destRaw);
+      let code = (codeEl.value||'').trim() || randShort();
+      const map = loadMappings();
+      map[code] = map[code] || {};
+      map[code].dest = dest;
+      map[code].updated = nowISO();
+      map[code].redirectCount = map[code].redirectCount || 0;
+      map[code].lastAccessed = map[code].lastAccessed || null;
+      saveMappings(map);
+      updateTable(page, search);
+      previewUrlEl.textContent = location.origin + location.pathname + '#r/' + code;
+      alert('Saved mapping: ' + code);
+    };
+
+    // Generate QR for code in input
+    document.getElementById('gen-qr').onclick = ()=>{
+      const code = (codeEl.value||'').trim();
+      if(!code) return alert('Enter the short code to generate QR for (or fill Code field)');
+      const url = location.origin + location.pathname + '#r/' + code;
+      const dataUrl = qrToDataURL(url, 240);
+      qrwrap.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = dataUrl; img.alt = 'QR for ' + code; img.style.maxWidth='100%'; img.style.borderRadius='6px';
+      qrwrap.appendChild(img);
+    };
+
+    // reload button
+    document.getElementById('reload').onclick = ()=> updateTable(1, document.getElementById('searchBox').value || '');
+
+    // search box
+    document.getElementById('searchBox').oninput = (e)=> updateTable(1, e.target.value);
+
+    // export / import / clear
+    document.getElementById('export').onclick = ()=>{
+      const map = loadMappings();
+      let csv = 'code,destination,redirectCount,lastAccessed,updated\n';
+      for(const k in map){
+        csv += `${k},"${(map[k].dest||'').replace(/"/g,'""')}",${map[k].redirectCount||0},"${map[k].lastAccessed||''}","${map[k].updated||''}"\n`;
+      }
+      const blob = new Blob([csv],{type:'text/csv'}); const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'dqrs_export.csv'; a.click(); URL.revokeObjectURL(url);
+    };
+
+    document.getElementById('importBtn').onclick = ()=> document.getElementById('importFile').click();
+    document.getElementById('importFile').onchange = function(e){
+      const f = this.files[0]; if(!f) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        const txt = reader.result.split(/\r?\n/).slice(1).filter(Boolean);
+        const map = loadMappings();
+        for(const line of txt){
+          const parts = line.split(',');
+          const code = (parts.shift() || '').trim();
+          if(!code) continue;
+          let dest = parts.shift() || '';
+          if(dest.startsWith('"') && !dest.endsWith('"')){
+            while(parts.length && !dest.endsWith('"')) dest += ',' + parts.shift();
+          }
+          dest = dest.replace(/^"|"$/g,'').trim();
+          map[code.trim()] = map[code.trim()] || {};
+          map[code.trim()].dest = dest || map[code.trim()].dest || '';
+          map[code.trim()].redirectCount = map[code.trim()].redirectCount || 0;
+          map[code.trim()].lastAccessed = map[code.trim()].lastAccessed || null;
+          map[code.trim()].updated = nowISO();
+        }
+        saveMappings(map); updateTable(1, document.getElementById('searchBox').value || ''); alert('Imported');
+      };
+      reader.readAsText(f);
+    };
+
+    document.getElementById('clearAll').onclick = ()=>{
+      if(confirm('Clear all mappings from localStorage?')){ localStorage.removeItem(STORAGE_KEY); updateTable(1, document.getElementById('searchBox').value || ''); }
+    };
+
+    // delegate table actions
+    document.querySelector('#maptable tbody').onclick = (e)=>{
+      const btn = e.target.closest('button');
+      if(!btn) return;
+      const act = btn.dataset.act;
+      const key = btn.dataset.key;
+      const map = loadMappings();
+      if(!map[key]) { alert('Mapping not found'); return; }
+
+      if(act === 'qr'){
+        const url = location.origin + location.pathname + '#r/' + key;
+        const dataUrl = qrToDataURL(url, 240);
+        qrwrap.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = dataUrl; img.alt = 'QR for ' + key; img.style.maxWidth='100%'; img.style.borderRadius='6px';
+        qrwrap.appendChild(img);
+      }
+
+      if(act === 'use'){ // copy short link
+        const short = location.origin + location.pathname + '#r/' + key;
+        copyToClipboard(short).then(()=> alert('Short link copied: ' + short)).catch(()=> alert('Copy failed'));
+      }
+
+      if(act === 'dl'){ // download QR
+        const url = location.origin + location.pathname + '#r/' + key;
+        const dataUrl = qrToDataURL(url, 600);
+        const a = document.createElement('a'); a.href = dataUrl; a.download = key + '.png'; document.body.appendChild(a); a.click(); a.remove();
+      }
+
+      if(act === 'edit'){
+        document.getElementById('dest').value = map[key].dest || '';
+        document.getElementById('code').value = key;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      if(act === 'del'){
+        if(confirm('Delete '+key+'?')){ delete map[key]; saveMappings(map); updateTable(1, document.getElementById('searchBox').value || ''); }
+      }
+    };
+
+    // pageSize change updates table
+    document.getElementById('pageSize').onchange = ()=> updateTable(1, document.getElementById('searchBox').value || '');
+  }
+
+  /* ---------- Redirect handler ---------- */
+  function handleRedirect(code){
+    const map = loadMappings();
+    if(!map[code]){
+      document.getElementById('app').innerHTML = `
+        <div class="card">
+          <h2>Unknown code: ${code}</h2>
+          <p class="meta">This short code has no mapping yet. As admin, go to <a href="#admin">Admin</a> and create mapping for <code>${code}</code>.</p>
+        </div>`;
+      return;
+    }
+    // update stats
+    map[code].redirectCount = (map[code].redirectCount || 0) + 1;
+    map[code].lastAccessed = nowISO();
+    saveMappings(map);
+
+    const target = map[code].dest;
+    const sep = target.includes('?') ? '&' : '?';
+    document.getElementById('app').innerHTML = `
+      <div class="card">
+        <h2>Redirecting…</h2>
+        <p class="meta">Code: <code>${code}</code></p>
+        <p>Destination: <a id="destlink" href="${escapeAttr(target)}" target="_blank" rel="noopener">${escapeHtml(target)}</a></p>
+        <p>Redirecting in <span id="count">3</span> seconds. <a id="now" href="${escapeAttr(target)}" target="_blank" rel="noopener">Go now</a></p>
+      </div>`;
+    document.getElementById('now').href = target;
+    let c = 3;
+    const iv = setInterval(()=>{
+      c--; const el = document.getElementById('count'); if(!el){ clearInterval(iv); return; } el.textContent = c;
+      if(c <= 0){ clearInterval(iv); window.location.href = target + sep + 'dqrs_ts=' + encodeURIComponent(nowISO()); }
+    }, 1000);
+
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+    function escapeAttr(s){ return String(s||'').replace(/"/g,'&quot;'); }
+  }
+
+  /* ---------- Router ---------- */
+  function route(){
+    const raw = location.hash.replace(/^#/,'');
+    if(!raw || raw.startsWith('admin')){ renderAdmin(1, ''); return; }
+    const m = raw.match(/^r\/(.+)$/);
+    if(m){ handleRedirect(m[1]); return; }
+    renderAdmin(1,'');
+  }
+
+  window.addEventListener('hashchange', route);
+  window.addEventListener('load', route);
+
+  /* ---------- Utilities used in multiple places ---------- */
+  function copyToClipboard(text){
+    if(navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+    return new Promise((res,rej)=>{
+      try{ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); res(); }catch(e){ rej(e); }
+    });
+  }
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+  function escapeAttr(s){ return String(s||'').replace(/"/g,'&quot;'); }
+  </script>
+</body>
+</html>

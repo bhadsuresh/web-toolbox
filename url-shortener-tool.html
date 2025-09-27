@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>URL Shortener with QR Codes</title>
+  <meta name="description" content="Create short links, generate per-link QR codes and downloads, import/export CSV, and manage history. Mobile-friendly, single-file tool." />
+  <meta name="keywords" content="url shortener, qr code, short link, csv import, csv export, localStorage" />
+  <meta name="author" content="Web Tools Hub" />
+  <meta name="theme-color" content="#2563eb">
+
+  <style>
+    :root{
+      --bg:#f8fafc; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --text:#0f1724;
+      --radius:12px; --shadow:0 8px 24px rgba(15,23,36,0.06);
+    }
+    *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif}
+    body{margin:0;background:var(--bg);color:var(--text);padding:18px}
+    header{background:linear-gradient(90deg,var(--accent),#1e3a8a);color:#fff;padding:16px;border-radius:12px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    header h1{margin:0;font-size:1.15rem}
+    header p{margin:4px 0 0;font-size:0.9rem;opacity:0.95}
+    .hero-placeholder{margin:20px 0;text-align:center}
+    .hero-placeholder img{width:100%;max-height:220px;object-fit:cover;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+    main{margin-top:14px;max-width:1100px;margin-left:auto;margin-right:auto}
+    .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:14px}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    input[type="text"], select, button, input[type="file"]{font:inherit;padding:10px;border:1px solid #e6e9ef;border-radius:8px;background:transparent}
+    .input-full{flex:1;min-width:180px}
+    .btn{cursor:pointer;padding:8px 10px;border-radius:8px;border:1px solid #e6e9ef;background:#fff}
+    .btn.primary{background:var(--accent);color:#fff;border:none}
+    .btn.small{padding:6px 8px;font-size:0.86rem;border-radius:6px}
+    .table-wrapper{overflow:auto;max-height:420px}
+    table{width:100%;border-collapse:collapse;margin-top:10px;font-size:0.95rem}
+    th,td{padding:10px;border-bottom:1px dashed #eef2f7;text-align:left;vertical-align:middle}
+    th.sortable{cursor:pointer;color:var(--muted)}
+    .qrcode-cell{text-align:center;width:160px}
+    .qrcode-cell canvas, .qrcode-cell img{display:block;margin:0 auto}
+    .meta{font-size:0.85rem;color:var(--muted)}
+    .pagination{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:12px;flex-wrap:wrap}
+    .highlight{animation:highlightAnim 1.8s ease}
+    @keyframes highlightAnim{0%{background:rgba(37,99,235,0.12)}100%{background:transparent}}
+    @media (max-width:760px){
+      .qrcode-cell{width:110px}
+      th,td{font-size:0.85rem;padding:8px}
+      .controls{flex-direction:column;align-items:stretch}
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>URL Shortener</h1>
+      <p>Create short links, generate per-link QR codes and download them. History stored locally.</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <a href="index.html"><button class="btn">Home</button></a>
+    </div>
+  </header>
+
+  <!-- Hero placeholder (added) -->
+  <section class="hero-placeholder" aria-label="Hero image placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
+  <main>
+    <div class="card" aria-labelledby="create-title">
+      <h2 id="create-title" style="margin:0 0 8px 0">Create a Short Link</h2>
+      <div class="controls">
+        <input id="longUrl" class="input-full" type="text" placeholder="Enter long URL here (https://...)" />
+        <button id="shortenBtn" class="btn primary">Shorten URL</button>
+      </div>
+      <p class="meta" style="margin-top:8px">Last generated: <code id="shortUrlOutput">—</code></p>
+    </div>
+
+    <div class="card" aria-labelledby="import-title">
+      <h2 id="import-title" style="margin:0 0 8px 0">Import / Export</h2>
+      <div class="controls">
+        <input id="csvFile" type="file" accept=".csv" />
+        <button id="undoImportBtn" class="btn">Undo Last Import</button>
+      </div>
+      <p class="meta" style="margin-top:8px">Import expects CSV with header: <code>Unique ID,Short Form,Short URL,Original URL</code></p>
+    </div>
+
+    <div class="card" aria-labelledby="history-title">
+      <h2 id="history-title" style="margin:0 0 8px 0">History</h2>
+	<button id="exportBtn" class="btn" style="float:right;margin-right:0px;">Export History (CSV)</button>
+        <button id="deleteAllBtn" class="btn" style="float:right;margin-left:10px; margin-right:10px;">Delete All History</button>
+
+      <div class="controls" style="margin-bottom:12px">
+        <input id="searchInput" class="input-full" type="text" placeholder="Search by id, short form, short URL or original URL" />
+        <select id="rowsPerPage" style="width:110px">
+          <option value="5">5 / page</option>
+          <option value="8" selected>8 / page</option>
+          <option value="12">12 / page</option>
+        </select>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="summaryTable" aria-label="History table">
+          <thead>
+            <tr>
+              <th class="sortable" onclick="sortTable(0)">Unique ID ⇅</th>
+              <th class="sortable" onclick="sortTable(1)">Short Form ⇅</th>
+              <th class="sortable" onclick="sortTable(2)">Short URL ⇅</th>
+              <th class="sortable" onclick="sortTable(3)">Original URL ⇅</th>
+              <th>QR Code</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </main>
+
+  <footer style="margin-top:18px;text-align:center;color:var(--muted);font-size:0.9rem">
+    Made with ❤️ — localStorage demo. Add a backend for production redirects.
+  </footer>
+
+  <!-- QRCode.js (kept from original) -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+
+  <script>
+    // --- Data & state
+    const base62chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const domain = "https://short.ly/"; // publish domain used in generated short URLs
+    let urlData = localStorage.getItem('urlData') ? JSON.parse(localStorage.getItem('urlData')) : [];
+    let lastImportBackup = null;
+    let currentPage = 1;
+    let rowsPerPage = parseInt(document.getElementById('rowsPerPage').value || 8);
+    let lastAddedId = null;
+    let searchTimeout = null;
+    // counter / unique id logic
+    let maxID = urlData.length ? Math.max(...urlData.map(e => e.id)) : 0;
+    let counter = maxID + 1;
+    const DEFAULT_ROWS = 8;
+
+    // --- Helpers
+    function toBase62(num){
+      let result = '';
+      while(num > 0){
+        result = base62chars[num % 62] + result;
+        num = Math.floor(num / 62);
+      }
+      return result || '0';
+    }
+
+    function saveData(){ localStorage.setItem('urlData', JSON.stringify(urlData)); }
+
+    // --- Table rendering & pagination
+    function filterData(){
+      const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+      if(!q) return urlData.slice();
+      return urlData.filter(entry =>
+        String(entry.id).includes(q) ||
+        (entry.shortForm && entry.shortForm.toLowerCase().includes(q)) ||
+        (entry.shortURL && entry.shortURL.toLowerCase().includes(q)) ||
+        (entry.originalURL && entry.originalURL.toLowerCase().includes(q))
+      );
+    }
+
+    function renderTable(){
+      const tableBody = document.querySelector('#summaryTable tbody');
+      tableBody.classList.add('fade-out');
+      setTimeout(() => {
+        tableBody.innerHTML = '';
+        const filtered = filterData();
+        rowsPerPage = parseInt(document.getElementById('rowsPerPage').value || DEFAULT_ROWS);
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const pageData = filtered.slice(start, end);
+
+        pageData.forEach(entry => {
+          const tr = document.createElement('tr');
+          if(entry.id === lastAddedId){
+            tr.classList.add('highlight');
+            setTimeout(()=> tr.scrollIntoView({behavior:'smooth', block:'center'}), 50);
+          }
+          tr.innerHTML = `
+            <td>${entry.id}</td>
+            <td>${escapeHtml(entry.shortForm)}</td>
+            <td>
+              <a href="${escapeAttr(entry.shortURL)}" target="_blank" title="${escapeAttr(entry.originalURL)}">${escapeHtml(entry.shortURL)}</a>
+              <button class="btn small" onclick="copyToClipboard('${escapeJs(entry.shortURL)}')">Copy</button>
+            </td>
+            <td>
+              <input type="text" value="${escapeAttr(entry.originalURL)}" style="width:95%" onchange="editOriginalURL(${entry.id}, this.value)" />
+            </td>
+            <td class="qrcode-cell" id="qrcode-${entry.id}">
+              <div></div>
+              <div style="margin-top:6px">
+                <button class="btn small" onclick="downloadQRCode(${entry.id}, '${escapeJs(entry.shortForm)}')">Download</button>
+              </div>
+            </td>
+          `;
+          tableBody.appendChild(tr);
+          // generate QR into the container div
+          generateQRCode(entry.id, entry.shortURL);
+        });
+
+        tableBody.classList.remove('fade-out');
+        tableBody.classList.add('fade-in');
+        renderPagination(filtered.length);
+        lastAddedId = null;
+      }, 120);
+    }
+
+    function renderPagination(totalItems){
+      const pagination = document.getElementById('pagination');
+      pagination.innerHTML = '';
+      const totalPages = Math.max(1, Math.ceil(totalItems / rowsPerPage));
+      if(totalPages <= 1) return;
+      for(let i=1;i<=totalPages;i++){
+        const b = document.createElement('button');
+        b.className = 'btn small';
+        b.textContent = i;
+        if(i === currentPage) { b.style.fontWeight = '600'; b.classList.add('primary'); }
+        b.onclick = () => { currentPage = i; renderTable(); };
+        pagination.appendChild(b);
+      }
+    }
+
+    // --- QR code functions (uses QRCode.js)
+    function generateQRCode(id, url){
+      const container = document.querySelector(`#qrcode-${id} div`);
+      if(!container) return;
+      container.innerHTML = '';
+      try{
+        // create a QRCode into the container (100x100)
+        new QRCode(container, { text: url, width: 100, height: 100, correctLevel: QRCode.CorrectLevel.M });
+      }catch(e){
+        // fallback: draw a small placeholder
+        const c = document.createElement('canvas'); c.width = c.height = 100;
+        const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0,0,100,100);
+        ctx.fillStyle = '#000'; ctx.fillText('QR', 44, 54);
+        container.appendChild(c);
+      }
+    }
+
+    function downloadQRCode(id, shortForm){
+      const canvas = document.querySelector(`#qrcode-${id} canvas`);
+      if(canvas){
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL("image/png");
+        link.download = `QR_${shortForm}.png`;
+        link.click();
+      } else {
+        alert('QR not available yet — try again in a moment.');
+      }
+    }
+
+    // --- core actions
+    function shortenURL(){
+      const longUrlInput = document.getElementById('longUrl');
+      const longUrl = (longUrlInput.value || '').trim();
+      if(!longUrl){ alert("Please enter a valid URL!"); return; }
+
+      const uniqueID = counter++;
+      const shortForm = toBase62(uniqueID);
+      const shortURL = domain + shortForm;
+
+      urlData.push({ id: uniqueID, shortForm, shortURL, originalURL: longUrl });
+      saveData();
+      lastAddedId = uniqueID;
+      currentPage = Math.ceil(urlData.length / rowsPerPage);
+      renderTable();
+
+      document.getElementById('shortUrlOutput').textContent = shortURL;
+      longUrlInput.value = '';
+      longUrlInput.focus();
+    }
+
+    function copyToClipboard(text){
+      if(!text) return;
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(()=> alert('Copied: ' + text)).catch(()=> alert('Copy failed'));
+      } else {
+        // fallback
+        const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+        try{ document.execCommand('copy'); alert('Copied: ' + text); }catch(e){ alert('Copy failed'); } ta.remove();
+      }
+    }
+
+    function deleteHistory(){
+      if(!confirm('Are you sure you want to delete all history?')) return;
+      urlData = [];
+      counter = 1;
+      saveData();
+      currentPage = 1;
+      renderTable();
+      document.getElementById('shortUrlOutput').textContent = '—';
+    }
+
+    function editOriginalURL(id, newURL){
+      const entry = urlData.find(e => e.id === id);
+      if(entry){ entry.originalURL = (newURL||'').trim(); saveData(); }
+    }
+
+    function exportCSV(){
+      if(!urlData.length){ alert('No data to export!'); return; }
+      let csv = "Unique ID,Short Form,Short URL,Original URL\n";
+      urlData.forEach(e => {
+        // naive CSV escaping
+        csv += `${e.id},"${(e.shortForm||'').replace(/"/g,'""')}","${(e.shortURL||'').replace(/"/g,'""')}","${(e.originalURL||'').replace(/"/g,'""')}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'url_shortener_history.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importCSV(event){
+      const file = event.target.files && event.target.files[0];
+      if(!file) return;
+      lastImportBackup = JSON.parse(JSON.stringify(urlData)); // deep copy
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const lines = e.target.result.split(/\r?\n/).slice(1);
+        lines.forEach(line => {
+          if(!line.trim()) return;
+          // naive CSV parse (original format)
+          // Unique ID,Short Form,Short URL,Original URL
+          const parts = parseCSVLine(line);
+          if(parts.length < 4) return;
+          let id = parseInt(parts[0]) || counter++;
+          // ensure id unique
+          while(urlData.some(d => d.id === id)) id++;
+          const newShortForm = toBase62(id);
+          const newShortURL = domain + newShortForm;
+          const originalURL = parts[3] || '';
+          urlData.push({ id, shortForm: newShortForm, shortURL: newShortURL, originalURL });
+          lastAddedId = id;
+        });
+        maxID = urlData.length ? Math.max(...urlData.map(e => e.id)) : 0;
+        counter = maxID + 1;
+        saveData();
+        renderTable();
+      };
+      reader.readAsText(file);
+      // clear input so same file can be reimported if needed
+      event.target.value = '';
+    }
+
+    function undoImport(){
+      if(!lastImportBackup){ alert('No import to undo!'); return; }
+      if(!confirm('Undo last import and restore previous data?')) return;
+      urlData = JSON.parse(JSON.stringify(lastImportBackup));
+      lastImportBackup = null;
+      maxID = urlData.length ? Math.max(...urlData.map(e => e.id)) : 0;
+      counter = maxID + 1;
+      saveData();
+      renderTable();
+    }
+
+    // --- Utility parsing / sorting / searching
+    function parseCSVLine(line){
+      // basic CSV parsing that supports quoted values containing commas
+      const out = [];
+      let cur = '';
+      let inQuotes = false;
+      for(let i=0;i<line.length;i++){
+        const ch = line[i];
+        if(ch === '"' ) { inQuotes = !inQuotes; continue; }
+        if(ch === ',' && !inQuotes){ out.push(cur); cur = ''; continue; }
+        cur += ch;
+      }
+      if(cur !== '') out.push(cur);
+      return out;
+    }
+
+    function sortTable(columnIndex){
+      // columnIndex: 0=id,1=shortForm,2=shortURL,3=originalURL
+      const dirKey = 'sortDir';
+      const lastKey = 'sortLast';
+      if(window[lastKey] !== columnIndex) window[dirKey] = 1;
+      else window[dirKey] = -window[dirKey] || -1;
+      window[lastKey] = columnIndex;
+      urlData.sort((a,b) => {
+        const va = [a.id, a.shortForm, a.shortURL, a.originalURL][columnIndex] || '';
+        const vb = [b.id, b.shortForm, b.shortURL, b.originalURL][columnIndex] || '';
+        if(va > vb) return 1 * window[dirKey];
+        if(va < vb) return -1 * window[dirKey];
+        return 0;
+      });
+      renderTable();
+    }
+
+    function filterTableDebounced(){
+      if(searchTimeout) clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(()=>{ currentPage = 1; renderTable(); }, 200);
+    }
+
+    // --- Small helpers to avoid injection issues when inserting into attributes
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+    function escapeAttr(s){ return String(s||'').replace(/"/g,'&quot;'); }
+    function escapeJs(s){ return String(s||'').replace(/'/g,"\\'").replace(/"/g,'\\"'); }
+
+    // --- init wiring
+    document.getElementById('shortenBtn').addEventListener('click', shortenURL);
+    document.getElementById('exportBtn').addEventListener('click', exportCSV);
+    document.getElementById('csvFile').addEventListener('change', importCSV);
+    document.getElementById('undoImportBtn').addEventListener('click', undoImport);
+    document.getElementById('deleteAllBtn').addEventListener('click', deleteHistory);
+    document.getElementById('rowsPerPage').addEventListener('change', (e)=>{ rowsPerPage = parseInt(e.target.value); currentPage = 1; renderTable(); });
+    document.getElementById('searchInput').addEventListener('input', filterTableDebounced);
+
+    // --- initial render
+    renderTable();
+
+    // Expose a couple functions to global for onclick handlers built into HTML rows
+    window.copyToClipboard = copyToClipboard;
+    window.downloadQRCode = downloadQRCode;
+    window.editOriginalURL = editOriginalURL;
+    window.sortTable = sortTable;
+
+  </script>
+</body>
+</html>

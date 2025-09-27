@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Web ToolBox</title>
+  <meta name="description" content="A collection of free online web tools including QR code generator, URL shortener, color picker, and more.">
+
+  <!-- Robots for SEO -->
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph for social sharing -->
+  <meta property="og:title" content="Web ToolBox">
+  <meta property="og:description" content="A collection of free online web tools including QR code generator, URL shortener, color picker, and more.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://username.github.io/">
+  <meta property="og:image" content="https://username.github.io/images/webtools-hero-image4.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Web ToolBox">
+  <meta name="twitter:description" content="A collection of free online web tools including QR code generator, URL shortener, color picker, and more.">
+  <meta name="twitter:image" content="https://username.github.io/images/webtools-hero-image4.png">
+
+<!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Web ToolBox",
+    "url": "https://username.github.io/"
+  }
+  </script>
+<!-- Favicon -->
+  <link rel="icon" href="https://username.github.io/images/favicon.ico" type="image/x-icon">
+
+<title>Web ToolBox</title>
+<style>
+body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f9f9f9; transition: background 0.3s, color 0.3s; }
+body.dark-mode { background:#121212; color:#f0f0f0; }
+header { background:#fafafa; color:black; padding:10px; text-align:center; position:relative; }
+header h1 { margin:0; font-size:2em; }
+header img.logo { height:80px; margin-right:15px; }
+header .title-wrap { flex:1; text-align:center;}
+
+.hero { background-image:url('images/webtools-hero-image4.png'); background-size: cover; background-position: center; height: 400px; display: flex; justify-content: center; align-items: center;  }
+
+ .hero-text-container {
+        background-color: rgba(0, 0, 0, 0.75); /* Black with 60% opacity */
+        padding: 20px;
+        color: white; /* Or a contrasting color for your text */
+        text-align: center;
+        border-radius: 0px; /* Optional: for rounded corners */
+    }
+
+nav { margin:20px 0; text-align:center; }
+nav a { margin:0 15px; text-decoration:none; color:#4CAF50; font-weight:bold; }
+nav a:hover { text-decoration:underline; }
+.search-bar, .category-filter { text-align:center; margin:10px 0; }
+.search-bar input { width:60%; max-width:400px; padding:10px; border-radius:5px; border:1px solid #ddd; }
+.category-filter button { margin:5px; padding:8px 15px; border:none; border-radius:5px; background:#657383; color:white; cursor:pointer; font-weight:bold; }
+.category-filter button.active { background:#45a049; }
+.tools-section { display:flex; flex-wrap:wrap; justify-content:center; padding:10px; gap:10px; }
+.tool-card { background:#D3D3D3; border:1px solid #ddd; border-radius:0px; width:220px; padding:20px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s; flex:1 1 200px; max-width:250px; position:relative; }
+.tool-card:hover { transform: translateY(-5px); }
+.tool-card img { width:50px; height:50px; margin-bottom:10px; }
+.tool-card a { display:inline-block; margin-top:10px; padding:10px 15px; background:#4CAF50; color:white; text-decoration:none; border-radius:5px; }
+.tool-card a:hover { background:#45a049; }
+.highlight { background:yellow; }
+.badge { position:absolute; top:10px; left:10px; background:#FF5722; color:white; padding:3px 7px; font-size:0.8em; border-radius:3px; }
+.favorite-btn { position:absolute; top:10px; right:10px; background:transparent; border:none; cursor:pointer; font-size:1.2em; color:#f44336; }
+.dark-mode-toggle { position:absolute; top:15px; right:15px; background:#fff; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-weight:bold; }
+.ad-banner { width:100%; background:#D4D4D4; color: grey; text-align:center; padding:12px; margin:20px 0; border-radius:0px; font-size:1.5em; }
+.affiliate-label { display:block; font-size:0.8em; color:#FF5722; margin-top:5px; }
+.premium-section { text-align:center; padding:20px; background:#D4D4D4; color:grey;margin:20px; border-radius:0px; }
+section { padding:20px; text-align:center; }
+footer { background:#333; color:white; text-align:center; padding:15px; margin-top:30px; font-size:0.9em; }
+body.dark-mode .tool-card { background:#1e1e1e; border-color:#333; }
+body.dark-mode a { color:#4CAF50; }
+body.dark-mode .category-filter button { background:#4CAF50; }
+@media screen and (max-width:768px) { .search-bar input { width:80%; } }
+@media screen and (max-width:500px) { nav a { display:block; margin:8px 0; } .tool-card { width:90%; } }
+
+/* Sticky Affiliate Panel */
+#affiliatePanel{position:fixed; top:50%; right:0; transform:translateY(-50%); width:220px; background:rgba(255,255,255,0.95); border:1px solid #ddd; border-radius:10px 0 0 10px; box-shadow:0 2px 5px rgba(0,0,0,0.2); padding:10px; z-index:9999; transition: width 0.3s;}
+#affiliatePanel ul{list-style:none; padding:0; margin:0; font-size:0.9em;}
+#affiliatePanel h4{margin:5px 0; text-align:center;}
+#affiliatePanel a{display:block; padding:4px 0; text-decoration:none; color:#333;}
+#affiliatePanel a:hover{color:#4CAF50;}
+#togglePanel{position:absolute; left:-25px; top:10px; background:#4CAF50; color:white; border:none; border-radius:5px 0 0 5px; cursor:pointer; padding:5px;}
+
+
+/* Desktop panel */
+#affiliatePanel{position:fixed; top:50%; right:0; transform:translateY(-50%); width:220px; background:rgba(255,255,255,0.95); border:1px solid #ddd; border-radius:10px 0 0 10px; box-shadow:0 2px 5px rgba(0,0,0,0.2); padding:10px; z-index:9999; transition: width 0.3s;}
+#affiliatePanel ul{list-style:none; padding:0; margin:0; font-size:0.9em;}
+#affiliatePanel h4{margin:5px 0; text-align:center;}
+#affiliatePanel a{display:block; padding:4px 0; text-decoration:none; color:#333;}
+#affiliatePanel a:hover{color:#4CAF50;}
+#togglePanel{position:absolute; left:-25px; top:10px; background:#4CAF50; color:white; border:none; border-radius:5px 0 0 5px; cursor:pointer; padding:5px;}
+
+/* Mobile: hide desktop panel, show bottom bar */
+@media screen and (max-width:768px) {
+  #affiliatePanel { top:auto; bottom:0; right:0; left:0; transform:none; width:100%; border-radius:0; padding:5px; display:flex; justify-content:center; align-items:center; }
+  #affiliatePanel h4, #affiliatePanel ul { display:none; }
+  #togglePanel { position:absolute; top:-25px; left:50%; transform:translateX(-50%); border-radius:5px 5px 0 0; }
+}
+
+/*FREE CARDS HERE*/
+.free-card {
+  	/* Add shadows to create the "card" effect */
+  	flex:1;
+  	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  	transition: 0.3s;
+  	padding: 20px 16px;
+	text-align:center;
+	background:#B8BCB6;
+	}
+
+	/* On mouse-over, add a deeper shadow */
+.free-card:hover {
+  	box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+		}
+
+	/* Add some padding inside the card container */
+.free-container {
+	display: flex;
+	flex-wrap: wrap; 
+	gap: 1rem;
+	}
+
+.free-button {
+  border-radius:5px; border:1px solid #4CAF50;
+  color: white;
+  padding: 12px 22px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 6px 2px;
+  cursor: pointer;
+  background:#4CAF50;
+}
+
+.free-button:hover {
+  background-color: #2E6F40;
+  color: white;
+}
+</style>
+</head>
+<body>
+
+<header>
+ <h1> WEB TOOLBOX </h1>
+	<button class="dark-mode-toggle" style="float:right;margin-right:20px; padding:10px; background:#657383;" id="darkModeToggle" >🌙 / ☀️ Mode</button>
+	
+</header>
+<section class="hero">
+  	<div class="hero-text-container">
+		
+		<p style="font-size: 2.5em;">All your favorite online web tools in one place</p>
+		<p style="font-size: 1.1em; color:#B8BCB6;">QR Code Generator, URL Shortener, UTM Builder and many more...</p>
+	</div>
+</section>
+
+<div class="ad-banner">
+TRY OUR FREE TOOLS              
+</div>
+<div style="margin:20px;">
+<!--this section creates cards for free tools-->
+<!--URL SHORTENER-->
+<div class="free-container">
+	<div class="free-card">
+  	  <img src="images/url-shortener.png" alt="url-shortener" >
+    	  <h3><b>URL SHORTENER</b></h3>
+    	  <p>Shorten long URLs easily. 100% client-side.</p>
+	  <p style="color:red;">Free</p>
+    	  <a href="url-shortener-tool.html"><button class="free-button" type="button">TRY NOW</button></a>
+	</div>
+
+<!--Static QR CODE GENERATOR-->
+	<div class="free-card">
+  	  <img src="images/qr-code.png" alt="QR Code" >
+    	  <h3><b>Static QR CODE GENERATOR</b></h3>
+    	  <p>Create QR codes for links, text, and more. 100% client-side.</p>
+	  <p style="color:red;">Free</p>
+    	  <a href="qr-code-generator-tool.html"><button class="free-button" type="button"> TRY NOW</button></a>
+	</div>
+<!--Dynamic QR Code Generator-->
+	<div class="free-card">
+  	  <img src="images/qr-code.png" alt="Dynamic QR Code" >
+    	  <h3><b>Dynamic QR Code Generator</b></h3>
+    	  <p>Build Dynamic QR Code. It's 100% Client-side!</p>
+	  <p style="color:red;">Free</p>
+    	  <a href="dynamic-qr-code-generator-tool.html"><button class="free-button" type="button">TRY NOW</button> </a>
+	</div>
+
+<!--JSON Formatter-->
+	<div class="free-card">
+  	  <img src="images/json-formatter.png" alt="JSON Formatter" >
+    	  <h3><b>JSON Formatter</b></h3>
+    	  <p>Beautify, validate, minify, and edit JSON. 100% client-side.</p>
+	  <p style="color:red;">Free</p>
+    	  <a href="json-formatter-tool.html"><button class="free-button" type="button">TRY NOW</button></a>
+	</div>
+<!--Bulk UTM Builder-->
+	<div class="free-card">
+  	  <img src="images/utm-builder.png" alt="Bulk UTM Builder" >
+    	  <h3><b>Bulk UTM Builder</b></h3>
+    	  <p>Build UTM and Track Campaign Performance and more..</p>
+	  <p style="color:red;">Free</p>
+    	  <a href="bulk-utm-generator-tool.html"><button class="free-button" type="button">TRY NOW</button> </a>
+	</div>
+<!--Color Picker Tool-->
+	<div class="free-card">
+  	  <img src="images/color-picker.png" alt="Color Picker" >
+    	  <h3><b>COLOR Picker</b></h3>
+    	  <p>Pick a base color, generate palettes, extract from images and more..</p>
+	  <p style="color:red;">Free</p>
+    	  <a href="color-picker-tool.html"><button class="free-button" type="button">TRY NOW</button> </a>
+	</div>
+</div>
+</div>
+
+<div class="ad-banner" style="margin:20px;">
+TRY 3RD PARTY TOOLS              
+</div>
+
+<div class="category-filter" id="categoryFilter">
+<button id="clearFilters" style="background:#f44336;">Clear Filters</button>
+</div>
+
+<div class="search-bar">
+<input type="text" id="searchInput" placeholder="Search tools..." onkeyup="renderTools()">
+</div>
+
+<section id="recentTools" class="tools-section"></section>
+<section id="tools" class="tools-section"></section>
+
+<section class="premium-section">
+<h2>Recommended Tools</h2>
+<p>Some links are affiliate links and help support this site at no extra cost to you.</p>
+<a href="https://bitly.com/blog/affiliate-link-shortener/?utm_source=yourwebsite" target="_blank" style="text-decoration:none;color:grey;"><button style="padding:10px; margin:2px; background-color:#4CAF50; border-radius:4px; border:0px solid grey; color:white; cursor:pointer;">Bitly Pro – Advanced URL Shortener</button></a>
+<a href="https://qrcode-ai.com/affiliate-program?utm_source=yourwebsite" target="_blank"style="text-decoration:none;color:grey;"><button style="padding:10px; margin:2px; background-color:#4CAF50; border-radius:4px; border:0px solid grey; color:white;cursor:pointer;">QR Code AI – AI-Powered QR Generator</button></a>
+<a href="https://nordpass.com/affiliate/?utm_source=yourwebsite" target="_blank" style="text-decoration:none;color:grey;"><button style="padding:10px; margin:2px; background-color:#4CAF50; border-radius:4px; border:0px solid grey; color:white;cursor:pointer;">NordPass – Secure Password Manager</button></a>
+<a href="https://www.grammarly.com/affiliates" target="_blank" style="text-decoration:none;color:grey;"><button style="padding:10px; margin:2px; background-color:#4CAF50; border-radius:4px; border:0px solid grey; color:white;cursor:pointer;">Grammarly – Writing Assistance</button></a>
+
+<p style="font-size:0.8em; color:#555;">Disclaimer: Some links on this site are affiliate links and help support the website at no extra cost to you.</p>
+</section>
+
+<section id="about" style="background-color:#D4D4D4; color:grey; margin:20px;">
+<h2>About</h2>
+<p>This website hosts practical online tools. Monetization is subtle via sponsored tools and affiliate links.</p>
+</section>
+
+<section id="contact" style="background-color:#D4D4D4; color:grey; margin:20px;">
+<h2>Contact</h2>
+<p>Email us at: <a href="mailto:bhadsuresh@gmail.com" style="text-decoration:none;color:grey;">bhadsuresh@gmail.com</a>.</p>
+</section>
+
+<footer style="margin:20px;">
+&copy; 2025: Web ToolBox.
+</footer>
+
+<!-- Responsive Sticky Affiliate Panel -->
+<div id="affiliatePanel">
+  <button id="togglePanel">&#10094;</button>
+  <h4>Featured Tools</h4>
+  <ul>
+    <li><a href="https://bitly.com/blog/affiliate-link-shortener/?utm_source=yourwebsite" target="_blank">🔗 Bitly Pro <span style="color:#FF5722;">(Affiliate)</span></a></li>
+    <li><a href="https://qrcode-ai.com/affiliate-program?utm_source=yourwebsite" target="_blank">📱 QR Code AI <span style="color:#FF5722;">(Affiliate)</span></a></li>
+    <li><a href="https://nordpass.com/affiliate/?utm_source=yourwebsite" target="_blank">🔑 NordPass <span style="color:#FF5722;">(Affiliate)</span></a></li>
+    <li><a href="https://www.grammarly.com/affiliates" target="_blank">✍ Grammarly <span style="color:#FF5722;">(Affiliate)</span></a></li>
+  </ul>
+</div>
+
+<script>
+// Toggle sticky affiliate panel
+const panel=document.getElementById("affiliatePanel");
+const toggle=document.getElementById("togglePanel");
+let collapsed=false;
+toggle.addEventListener("click",()=>{
+  collapsed=!collapsed;
+  if(window.innerWidth>768){
+    panel.style.width=collapsed?"35px":"220px";
+    panel.querySelector("ul").style.display=collapsed?"none":"block";
+    panel.querySelector("h4").style.display=collapsed?"none":"block";
+    toggle.innerHTML=collapsed?"&#10095;":"&#10094;";
+  } else {
+    panel.querySelector("ul").style.display=collapsed?"block":"none";
+    panel.querySelector("h4").style.display=collapsed?"block":"none";
+    toggle.innerHTML=collapsed?"&#10094;":"&#10095;";
+  }
+});
+
+// Tools data
+const tools=[
+{name:"URL Shortener", description:"Shorten long URLs easily. Upgrade to Bitly Pro for advanced analytics.", link:"https://bitly.com/blog/affiliate-link-shortener/?utm_source=yourwebsite", icon:"https://img.icons8.com/fluency/48/link.png", categories:["Web","Productivity"], featured:true, affiliate:true},
+{name:"QR Code Generator", description:"Create QR codes for links, text, and more.", link:"https://qrcode-ai.com/affiliate-program?utm_source=yourwebsite", icon:"https://img.icons8.com/fluency/48/qr-code.png", categories:["Web"], featured:false, affiliate:true},
+{name:"Password Manager", description:"Securely generate and store passwords. Use NordPass for advanced password management.", link:"https://nordpass.com/affiliate/?utm_source=yourwebsite", icon:"https://img.icons8.com/fluency/48/key.png", categories:["Security","Web"], featured:true, affiliate:true},
+{name:"Grammarly", description:"Improve your writing with Grammarly.", link:"https://www.grammarly.com/affiliates", icon:"https://img.icons8.com/fluency/48/text.png", categories:["Productivity","Text"], featured:false, affiliate:true},
+{name:"JSON Formatter", description:"Format and validate JSON data.", link:"#", icon:"https://img.icons8.com/fluency/48/code.png", categories:["Data"], featured:false, affiliate:false}
+];
+
+const toolsSection=document.getElementById("tools");
+const recentSection=document.getElementById("recentTools");
+const categoryFilter=document.getElementById("categoryFilter");
+let selectedCategories=new Set();
+let favorites=JSON.parse(localStorage.getItem("favorites"))||[];
+let recentTools=JSON.parse(localStorage.getItem("recentTools"))||[];
+const allCategories=[...new Set(tools.flatMap(t=>t.categories))];
+
+const darkModeToggle=document.getElementById("darkModeToggle");
+darkModeToggle.addEventListener("click",()=>{
+document.body.classList.toggle("dark-mode");
+darkModeToggle.textContent=document.body.classList.contains("dark-mode")?"Light Mode":"Dark Mode";
+});
+
+function renderCategoryButtons(){
+categoryFilter.querySelectorAll('button:not(#clearFilters)').forEach(btn=>btn.remove());
+allCategories.forEach(cat=>{
+const count=tools.filter(t=>t.categories.includes(cat)).length;
+const btn=document.createElement("button");
+btn.textContent=`${cat} (${count})`;
+btn.addEventListener("click",()=>{
+if(selectedCategories.has(cat)){ selectedCategories.delete(cat); btn.classList.remove("active"); }
+else { selectedCategories.add(cat); btn.classList.add("active"); }
+renderTools();
+});
+categoryFilter.appendChild(btn);
+});
+}
+
+document.getElementById("clearFilters").addEventListener("click",()=>{
+selectedCategories.clear();
+document.querySelectorAll(".category-filter button").forEach(btn=>btn.classList.remove("active"));
+document.getElementById("searchInput").value="";
+renderTools();
+});
+
+function highlightText(text, searchTerm){
+if(!searchTerm) return text;
+const regex=new RegExp(`(${searchTerm.replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&')})`,'gi');
+return text.replace(regex,'<span class="highlight">$1</span>');
+}
+
+function renderTools(){
+const searchTerm=document.getElementById("searchInput").value.toLowerCase();
+toolsSection.innerHTML="";
+tools.filter(tool=>
+(selectedCategories.size===0||tool.categories.some(c=>selectedCategories.has(c))) &&
+tool.name.toLowerCase().includes(searchTerm)
+).forEach(tool=>{
+const card=document.createElement("div");
+card.className="tool-card";
+const isFav=favorites.includes(tool.name);
+card.innerHTML=`
+${tool.featured?'<div class="badge">Featured</div>':''}
+<button class="favorite-btn">${isFav?'★':'☆'}</button>
+${tool.icon?`<img src="${tool.icon}" alt="${tool.name} Icon">`:""}
+<h3>${highlightText(tool.name,searchTerm)}</h3>
+<p>${highlightText(tool.description,searchTerm)}</p>
+${tool.affiliate?'<span class="affiliate-label">Affiliate</span>':""}
+<a href="${tool.link}" target="_blank">Open Tool</a>
+`;
+card.querySelector(".favorite-btn").addEventListener("click",()=>{
+if(favorites.includes(tool.name)){ favorites=favorites.filter(f=>f!==tool.name); }
+else { favorites.push(tool.name); }
+localStorage.setItem("favorites",JSON.stringify(favorites));
+renderTools();
+});
+card.querySelector("a").addEventListener("click",()=>{
+recentTools=[tool.name,...recentTools.filter(t=>t!==tool.name)].slice(0,5);
+localStorage.setItem("recentTools",JSON.stringify(recentTools));
+renderRecentTools();
+});
+toolsSection.appendChild(card);
+});
+renderRecentTools();
+}
+
+<!--****recent tool render removed for better clarity***-->
+
+renderCategoryButtons();
+renderTools();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>JSON Formatter Tool — Pretty Print, Minify & History</title>
+  <meta name="description" content="Validate, pretty-print, minify and share JSON. Save history, import/export and download. Mobile-friendly JSON formatter tool." />
+  <meta name="keywords" content="json formatter, json pretty print, json minify, json validator, json history, json tool, format JSON" />
+  <meta name="author" content="Web Tools Hub" />
+  <meta property="og:title" content="JSON Formatter Tool" />
+  <meta property="og:description" content="Validate, pretty-print and minify JSON. Save history, import/export, download entries and share links." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#2563eb" />
+
+  <style>
+    :root{
+      --bg:#f8fafc; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --text:#0f1724;
+      --radius:12px; --shadow:0 8px 24px rgba(15,23,36,0.06);
+    }
+    *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+    body{margin:0;background:var(--bg);color:var(--text);padding:20px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(90deg,var(--accent),#1e3a8a);color:#fff;padding:16px;border-radius:var(--radius);box-shadow:var(--shadow);flex-wrap:wrap}
+    header h1{margin:0;font-size:1.15rem}
+    header p{margin:6px 0 0;font-size:0.9rem;opacity:0.95}
+    header a button{background:#fff;color:var(--accent);border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+    .hero-placeholder{margin:18px 0;text-align:center}
+    .hero-placeholder img{width:100%;max-height:240px;object-fit:cover;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+    main{max-width:1100px;margin:0 auto}
+    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:18px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    textarea,input[type="text"],select,button{font:inherit}
+    textarea{width:100%;min-height:160px;padding:10px;border:1px solid #e6e9ef;border-radius:10px;font-family:ui-monospace,monospace;font-size:0.95rem}
+    button{padding:8px 10px;border-radius:8px;border:1px solid #e6e9ef;background:#fff;cursor:pointer}
+    .btn.primary{background:var(--accent);color:#fff;border:none}
+    .btn.positive{background:#16a34a;color:#fff;border:none}
+    .btn.warn{background:#f59e0b;color:#fff;border:none}
+    .btn.negative{background:#dc2626;color:#fff;border:none}
+    .output-box{background:#f3f4f6;border-radius:10px;padding:12px;font-family:ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto;border:1px solid #eef2f7}
+    .output-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+    .table-wrapper{overflow:auto;max-height:420px;border-radius:8px}
+    table{width:100%;border-collapse:collapse;font-size:0.92rem}
+    th,td{padding:10px;border-bottom:1px dashed #eef2f7;text-align:left;vertical-align:top}
+    th{color:var(--muted);font-weight:600}
+    .pagination{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:12px;flex-wrap:wrap}
+    /* syntax highlighting */
+    .string{color:#10b981}
+    .number{color:#3b82f6}
+    .boolean{color:#ef4444}
+    .null{color:#a855f7}
+    .key{color:var(--accent)}
+    @media(max-width:640px){.controls{flex-direction:column;align-items:stretch} .output-box{max-height:200px}}
+    .toast{position:fixed;right:20px;bottom:20px;background:#111;color:#fff;padding:10px 14px;border-radius:8px;opacity:0;transition:opacity .25s}
+    .toast.show{opacity:1}
+    .tips{background:#eff6ff;color:#1e3a8a;border-left:4px solid var(--accent);padding:10px;border-radius:8px;text-align:left}
+    /* collapsible history */
+    .history-content{max-height:1000px;overflow:hidden;transition:max-height 0.4s ease}
+    .history-content.collapsed{max-height:0;padding-top:0;padding-bottom:0;overflow:hidden}
+    .toggle-btn{margin-bottom:10px;display:inline-block}
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>JSON Formatter Tool</h1>
+      <p>Validate, pretty-print, minify, share and save JSON snippets locally.</p>
+    </div>
+    <a href="index.html"><button>Home</button></a>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
+  <!-- Quick Tips -->
+  <section class="card tips">
+    <strong>💡 How to Use:</strong>
+    <ul>
+      <li>Paste or type your JSON in the box below.</li>
+      <li>Click <em>Validate</em> to check syntax.</li>
+      <li><em>Pretty Print</em> makes JSON readable.</li>
+      <li><em>Minify</em> removes spaces for compact form.</li>
+      <li>All operations are saved in History below for reuse.</li>
+    </ul>
+  </section>
+
+  <main>
+    <!-- Tool -->
+    <section class="card">
+      <label for="jsonInput">Your JSON Input</label>
+      <textarea id="jsonInput" placeholder='{"name":"Alice","age":30}'></textarea>
+      <div class="controls" style="margin-top:12px">
+        <button class="btn primary" id="validateBtn">Validate</button>
+        <button class="btn" id="prettyBtn">Pretty Print</button>
+        <button class="btn" id="minifyBtn">Minify</button>
+        <button class="btn positive" id="shareBtn">Share</button>
+        <button class="btn warn" id="shortenBtn">Shorten Link</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="output-header">
+        <h3>Pretty Output</h3>
+        <button class="btn" onclick="copyOutput('prettyOutput')">Copy</button>
+      </div>
+      <pre id="prettyOutput" class="output-box"></pre>
+    </section>
+
+    <section class="card">
+      <div class="output-header">
+        <h3>Minified Output</h3>
+        <button class="btn" onclick="copyOutput('minifyOutput')">Copy</button>
+      </div>
+      <pre id="minifyOutput" class="output-box"></pre>
+    </section>
+
+    <!-- Collapsible History -->
+    <section class="card">
+      <h2>History</h2>
+      <button id="toggleHistory" class="btn toggle-btn">Hide History</button>
+      <div class="history-content" id="historyContent">
+        <div class="controls" style="margin-bottom:12px">
+          <button class="btn negative" id="clearUIBtn">Clear Table (UI only)</button>
+          <button class="btn" id="restoreBtn">Restore From Storage</button>
+        </div>
+
+        <!-- Search -->
+        <div class="controls" style="margin-bottom:12px">
+          <input id="searchInput" type="text" placeholder="Search history..." style="flex:1;padding:8px;border:1px solid #e6e9ef;border-radius:8px"/>
+        </div>
+
+        <label for="entriesPerPage">Entries per page</label>
+        <div class="controls" style="margin:8px 0 12px">
+          <select id="entriesPerPage">
+            <option value="5">5</option><option value="10" selected>10</option><option value="25">25</option>
+          </select>
+          <div style="flex:1"></div>
+          <input id="csvImport" type="file" accept=".csv"/>
+          <button class="btn" id="saveBackupBtn">Backup</button>
+          <button class="btn" id="restoreBackupBtn">Restore Backup</button>
+        </div>
+        <div class="table-wrapper">
+          <table id="historyTable">
+            <thead><tr><th>ID</th><th>Raw</th><th>Formatted</th><th>Timestamp</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let historyData = JSON.parse(localStorage.getItem('jsonHistory') || '[]');
+    let idCounter = parseInt(localStorage.getItem('idCounter')||'1',10);
+    let currentPage=1, entriesPerPage=parseInt(document.getElementById('entriesPerPage').value,10)||10;
+    let searchQuery="";
+    const toastEl=document.getElementById('toast');
+    function toast(msg,bg='#111'){toastEl.textContent=msg;toastEl.style.background=bg;toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),1500);}
+    function syntaxHighlight(json){return String(json).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/(\"(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\\"])*\"(?=\\s*:))/g,'<span class="key">$&</span>').replace(/\"(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\\"])*\"/g,'<span class="string">$&</span>').replace(/\b(true|false)\b/g,'<span class="boolean">$1</span>').replace(/\b(null)\b/g,'<span class="null">$1</span>').replace(/\b(-?\\d+(\\.\\d+)?([eE][+\\-]?\\d+)?)\b/g,'<span class="number">$1</span>');}
+    function saveHistory(){localStorage.setItem('jsonHistory',JSON.stringify(historyData));localStorage.setItem('idCounter',idCounter);}
+    function addHistory(raw,formatted){historyData.push({id:idCounter++,raw,formatted,timestamp:new Date().toLocaleString()});saveHistory();renderHistory();}
+    function filterData(){if(!searchQuery) return historyData;const q=searchQuery.toLowerCase();return historyData.filter(e=>(e.raw+e.formatted+e.timestamp).toLowerCase().includes(q));}
+    function renderHistory(){const tb=document.querySelector('#historyTable tbody');tb.innerHTML='';entriesPerPage=parseInt(document.getElementById('entriesPerPage').value,10)||10;const filtered=filterData();const start=(currentPage-1)*entriesPerPage;filtered.slice(start,start+entriesPerPage).forEach(e=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${e.id}</td><td><pre>${escapeHtml(e.raw)}</pre></td><td><pre>${escapeHtml(e.formatted)}</pre></td><td>${e.timestamp}</td><td><button onclick="reload(${e.id})">Reload</button> <button onclick="copyHist(${e.id})">Copy</button> <button onclick="delHist(${e.id})">Delete</button></td>`;tb.appendChild(tr);});renderPagination(filtered.length);}
+    function renderPagination(total){const pc=document.getElementById('pagination');pc.innerHTML='';const totalPages=Math.ceil(total/entriesPerPage)||1;pc.innerHTML=`Page ${currentPage} / ${totalPages}`;}
+    function validateJSON(){try{JSON.parse(document.getElementById('jsonInput').value);toast('Valid JSON','#16a34a');}catch(e){toast('Invalid JSON','#dc2626');}}
+    function prettyPrint(){try{const p=JSON.parse(document.getElementById('jsonInput').value);const f=JSON.stringify(p,null,2);document.getElementById('prettyOutput').innerHTML=syntaxHighlight(f);addHistory(document.getElementById('jsonInput').value,f);}catch(e){toast('Invalid JSON','#dc2626');}}
+    function minifyJSON(){try{const p=JSON.parse(document.getElementById('jsonInput').value);const m=JSON.stringify(p);document.getElementById('minifyOutput').innerHTML=syntaxHighlight(m);addHistory(document.getElementById('jsonInput').value,JSON.stringify(p,null,2));}catch(e){toast('Invalid JSON','#dc2626');}}
+    function shareJSON(){location.hash='data='+encodeURIComponent(document.getElementById('jsonInput').value);toast('Share link in URL');}
+    function shortenLink(){const id=Math.floor(Math.random()*1e6);localStorage.setItem('short_'+id,document.getElementById('jsonInput').value);location.hash='s='+id;toast('Short link: #s='+id);}
+    function reload(id){const e=historyData.find(x=>x.id===id);if(e){document.getElementById('jsonInput').value=e.raw;document.getElementById('prettyOutput').textContent=e.formatted;toast('Reloaded');}}
+    function copyHist(id){const e=historyData.find(x=>x.id===id);navigator.clipboard.writeText(e.formatted).then(()=>toast('Copied'));}
+    function delHist(id){historyData=historyData.filter(x=>x.id!==id);saveHistory();renderHistory();toast('Deleted','#dc2626');}
+    function escapeHtml(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+    function copyOutput(id){const text=document.getElementById(id).innerText;navigator.clipboard.writeText(text).then(()=>toast('Copied output'));}
+    // events
+    document.getElementById('validateBtn').onclick=validateJSON;
+    document.getElementById('prettyBtn').onclick=prettyPrint;
+    document.getElementById('minifyBtn').onclick=minifyJSON;
+    document.getElementById('shareBtn').onclick=shareJSON;
+    document.getElementById('shortenBtn').onclick=shortenLink;
+    document.getElementById('clearUIBtn').onclick=()=>{document.querySelector('#historyTable tbody').innerHTML='';};
+    document.getElementById('restoreBtn').onclick=()=>{historyData=JSON.parse(localStorage.getItem('jsonHistory')||'[]');renderHistory();};
+    document.getElementById('entriesPerPage').onchange=()=>{currentPage=1;renderHistory();};
+    // collapsible toggle
+    const historyContent=document.getElementById('historyContent');
+    const toggleBtn=document.getElementById('toggleHistory');
+    function setCollapsed(c){historyContent.classList.toggle('collapsed',c);toggleBtn.textContent=c?'Show History':'Hide History';}
+    toggleBtn.onclick=()=>setCollapsed(historyContent.classList.contains('collapsed')?false:true);
+    if(window.innerWidth<768){setCollapsed(true);}
+    // search debounce
+    let searchTimer=null;
+    document.getElementById('searchInput').addEventListener('input',e=>{
+      clearTimeout(searchTimer);
+      searchTimer=setTimeout(()=>{searchQuery=e.target.value.trim();currentPage=1;renderHistory();},200);
+    });
+    renderHistory();
+  </script>
+</body>
+</html>
