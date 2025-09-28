@@ -3,51 +3,52 @@
 
   <!-- Homepage -->
   <url>
-    <loc>https://bhadsuresh.github.io/</loc>
+    <loc>https://bhadsuresh.github.io/web-toolbox/index.html</loc>
     <lastmod>2025-09-27</lastmod>
     <priority>1.0</priority>
   </url>
 
 <!-- 1. URL Shortener -->
   <url>
-    <loc>https://bhadsuresh.github.io/url-shortener-tool.html</loc>
+    <loc>https://bhadsuresh.github.io/web-toolbox/url-shortener-tool.html</loc>
     <lastmod>2025-09-27</lastmod>
     <priority>0.8</priority>
   </url>
 
   <!-- 2. QR Code Generator -->
   <url>
-    <loc>https://bhadsuresh.github.io/qr-code-generator-tool.html</loc>
+    <loc>https://bhadsuresh.github.io/web-toolbox/qr-code-generator-tool.html</loc>
     <lastmod>2025-09-27</lastmod>
     <priority>0.8</priority>
   </url>
  
 <!-- 3. JSON Formatter -->
   <url>
-    <loc>https://bhadsuresh.github.io/json-formatter-tool.html</loc>
+    <loc>https://bhadsuresh.github.io/web-toolbox/json-formatter-tool.html</loc>
     <lastmod>2025-09-27</lastmod>
     <priority>0.8</priority>
   </url>
   
 <!-- 4. Bulk UTM Generator -->
   <url>
-    <loc>https://bhadsuresh.github.io/bulk-utm-generator-tool.html</loc>
+    <loc>https://bhadsuresh.github.io/web-toolbox/bulk-utm-generator-tool.html</loc>
     <lastmod>2025-09-27</lastmod>
     <priority>0.8</priority>
   </url>
 
 <!-- 5. Dynamic QR Code Generator -->
   <url>
-    <loc>https://bhadsuresh.github.io/dynamic-qr-code-generator-tool.html</loc>
+    <loc>https://bhadsuresh.github.io/web-toolbox/dynamic-qr-code-generator-tool.html</loc>
     <lastmod>2025-09-27</lastmod>
     <priority>0.8</priority>
   </url>
 
 <!-- 6. Color Picker -->
   <url>
-    <loc>https://bhadsuresh.github.io/color-picker-tool.html</loc>
+    <loc>https://bhadsuresh.github.io/web-toolbox/color-picker-tool.html</loc>
     <lastmod>2025-09-27</lastmod>
     <priority>0.8</priority>
   </url>
 
 </urlset>
+
