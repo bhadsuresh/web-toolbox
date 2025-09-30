@@ -1,52 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
+  <!-- Homepage -->
   <url>
-    <loc>https://bhadsuresh.github.io/web-toolbox/</loc>
-    <lastmod>2025-09-27</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://bhadsuresh.github.io/web-toolbox</loc>
+    <lastmod>2025-09-30</lastmod>
+	<changefreq>yearly</changefreq>
     <priority>1.0</priority>
   </url>
 
+<!-- 1. URL Shortener -->
   <url>
     <loc>https://bhadsuresh.github.io/web-toolbox/url-shortener-tool.html</loc>
-    <lastmod>2025-09-27</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2025-09-30</lastmod>
+	<changefreq>yearly</changefreq>
     <priority>0.8</priority>
   </url>
 
+  <!-- 2. QR Code Generator -->
   <url>
     <loc>https://bhadsuresh.github.io/web-toolbox/qr-code-generator-tool.html</loc>
-    <lastmod>2025-09-27</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2025-09-30</lastmod>
+	<changefreq>yearly</changefreq>
     <priority>0.8</priority>
   </url>
  
+<!-- 3. JSON Formatter -->
   <url>
     <loc>https://bhadsuresh.github.io/web-toolbox/json-formatter-tool.html</loc>
-    <lastmod>2025-09-27</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2025-09-30</lastmod>
+	<changefreq>yearly</changefreq>
     <priority>0.8</priority>
   </url>
   
+<!-- 4. Bulk UTM Generator -->
   <url>
     <loc>https://bhadsuresh.github.io/web-toolbox/bulk-utm-generator-tool.html</loc>
-    <lastmod>2025-09-27</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2025-09-30</lastmod>
+	<changefreq>yearly</changefreq>
     <priority>0.8</priority>
   </url>
 
+<!-- 5. Dynamic QR Code Generator -->
   <url>
     <loc>https://bhadsuresh.github.io/web-toolbox/dynamic-qr-code-generator-tool.html</loc>
-    <lastmod>2025-09-27</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2025-09-30</lastmod>
+	<changefreq>yearly</changefreq>
     <priority>0.8</priority>
   </url>
 
+<!-- 6. Color Picker -->
   <url>
     <loc>https://bhadsuresh.github.io/web-toolbox/color-picker-tool.html</loc>
-    <lastmod>2025-09-27</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2025-09-30</lastmod>
+	<changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+<!-- 7. Barcode Generator Tool -->
+  <url>
+    <loc>https://bhadsuresh.github.io/web-toolbox/barcode-generator-tool.html</loc>
+    <lastmod>2025-09-30</lastmod>
+	<changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+<!-- 8. Hash Generator Tool -->
+  <url>
+    <loc>https://bhadsuresh.github.io/web-toolbox/hash-generator-tool.html</loc>
+    <lastmod>2025-09-30</lastmod>
+	<changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+<!-- 9. Markdown Previewer Tool -->
+  <url>
+    <loc>https://bhadsuresh.github.io/web-toolbox/markdown-previewer-tool.html</loc>
+    <lastmod>2025-09-30</lastmod>
+	<changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+<!-- 10. Robots Generator Tool -->
+  <url>
+    <loc>https://bhadsuresh.github.io/web-toolbox/robots-generator.html</loc>
+    <lastmod>2025-09-30</lastmod>
+	<changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+<!-- 11. xml-sitemap-generator Tool -->
+  <url>
+    <loc>https://bhadsuresh.github.io/web-toolbox/xml-sitemap-generator.html</loc>
+    <lastmod>2025-09-30</lastmod>
+	<changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+<!-- 12. Network Latency Simulator Tool -->
+  <url>
+    <loc>https://bhadsuresh.github.io/web-toolbox/network-simulator-pro.html</loc>
+    <lastmod>2025-09-30</lastmod>
+	<changefreq>yearly</changefreq>
     <priority>0.8</priority>
   </url>
 
