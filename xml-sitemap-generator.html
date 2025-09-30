@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free Online Sitemap Generator - Generate XML sitemaps for SEO.">
+  <meta name="keywords" content="sitemap generator, xml sitemap, SEO tools, website sitemap">
+  <meta name="author" content="Web Toolbox">
+  <title>Sitemap Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; line-height: 1.6; background:#f9f9f9; color:#333; }
+    header { background:#4CAF50; color:white; padding:15px; text-align:center; }
+    header h1 { margin:0; font-size:1.8em; }
+	.hero-placeholder{margin:18px 0;text-align:center}
+    .hero-placeholder img{width:100%;max-height:240px;object-fit:cover;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+
+    .hero { width:100%; max-height:250px; overflow:hidden; }
+    .hero img { width:100%; height:auto; display:block; }
+    main { padding:20px; max-width:900px; margin:auto; }
+    section { background:#fff; padding:20px; margin-bottom:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+    h2 { margin-top:0; color:#4CAF50; }
+    textarea, input[type=text], input[type=url], select, input[type=date] { width:100%; padding:10px; margin:5px 0 15px; border:1px solid #ccc; border-radius:5px; }
+    button { padding:10px 15px; border:none; background:#4CAF50; color:#fff; cursor:pointer; border-radius:5px; margin-right:10px; }
+    button:hover { background:#45a049; }
+    .output { white-space:pre-wrap; background:#272822; color:#f8f8f2; padding:15px; border-radius:5px; overflow:auto; max-height:300px; }
+    .drop-zone { border:2px dashed #aaa; border-radius:8px; padding:20px; text-align:center; margin-bottom:20px; background:#fafafa; }
+    .drop-zone.dragover { border-color:#4CAF50; background:#f0fff0; }
+  </style>
+</head>
+<body>
+  <header>Sitemap Generator
+	<a href="index.html"><button style="float:right;margin-right:20px;">Home</button></a>
+  </header>
+
+   <!-- Hero -->
+  <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
+
+
+  <main>
+    <section style="padding-bottom:60px;">
+      <h2>Input URLs or HTML</h2>
+      <textarea id="inputArea" placeholder="Paste URLs (one per line) OR HTML code with links..."></textarea>
+      <div class="drop-zone" id="dropZone">Drag & Drop an HTML file here</div>
+      <label>Base URL (optional if relative links used):</label>
+      <input type="url" id="baseUrl" placeholder="https://example.com">
+
+      <label>Default Changefreq:</label>
+      <select id="changefreq">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+        <option value="yearly">Yearly</option>
+      </select>
+
+      <label>Default Priority:</label>
+      <select id="priority">
+        <option value="1.0">1.0</option>
+        <option value="0.8" selected>0.8</option>
+        <option value="0.5">0.5</option>
+        <option value="0.3">0.3</option>
+      </select>
+
+      <label>Lastmod Date:<small>(Leave empty to use today)</small></label>
+      <input type="date" id="lastmodDate"> 
+      <button onclick="clearAll()" style="float:right;margin-right:0px;">Clear</button>
+      <button onclick="generateSitemap()" style="float:right;margin-right:10px;">Generate Sitemap</button>
+    </section>
+
+    <section style="padding-top:10px;padding-bottom:100px;">
+      <h2>Output</h2>
+      <div id="output" class="output" contenteditable="false"></div>
+      <button onclick="downloadSitemap()" style="margin-top:10px; float:right;margin-right:0px;">Download Sitemap</button>
+      <button onclick="copyXML()" style="margin-top:10px; float:right;margin-right:10px;">Copy XML</button>
+      <button onclick="copyURLs()" style="margin-top:10px;float:right;margin-right:10px;">Copy URLs</button>
+    </section>
+  </main>
+
+  <script>
+    const dropZone = document.getElementById('dropZone');
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.includes('html')) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          document.getElementById('inputArea').value = event.target.result;
+        };
+        reader.readAsText(file);
+      } else {
+        alert('Please drop a valid HTML file.');
+      }
+    });
+
+    function escapeXML(str) {
+      return str.replace(/[<>&'"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','\"':'&quot;','\'':'&apos;'}[c]));
+    }
+
+    function normalizeURL(url, baseUrl) {
+      try {
+        const absoluteUrl = new URL(url, baseUrl).href;
+        return absoluteUrl.replace(/index\.html$/, '');
+      } catch {
+        return null;
+      }
+    }
+
+    function generateSitemap() {
+      const input = document.getElementById('inputArea').value;
+      const baseUrl = document.getElementById('baseUrl').value.trim();
+      const changefreq = document.getElementById('changefreq').value;
+      const priority = document.getElementById('priority').value;
+      const customLastmod = document.getElementById('lastmodDate').value;
+      const today = new Date().toISOString().split('T')[0];
+      const lastmod = customLastmod || today;
+
+      let urls = [];
+      if (/<a\s/i.test(input)) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(input, 'text/html');
+        doc.querySelectorAll('a[href]').forEach(a => urls.push(a.getAttribute('href')));
+      } else {
+        urls = input.split(/\n+/).map(u => u.trim()).filter(Boolean);
+      }
+
+      let unique = new Set();
+      let validUrls = [];
+      urls.forEach(u => {
+        const normalized = normalizeURL(u, baseUrl || location.origin);
+        if (normalized && !unique.has(normalized)) {
+          unique.add(normalized);
+          validUrls.push(normalized);
+        }
+      });
+
+      if (validUrls.length === 0) {
+        alert('No valid URLs found.');
+        return;
+      }
+
+      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+      validUrls.forEach(url => {
+        xml += '  <url>\n';
+        xml += '    <loc>' + escapeXML(url) + '</loc>\n';
+        xml += '    <lastmod>' + lastmod + '</lastmod>\n';
+        xml += '    <changefreq>' + changefreq + '</changefreq>\n';
+        xml += '    <priority>' + priority + '</priority>\n';
+        xml += '  </url>\n';
+      });
+      xml += '</urlset>';
+
+      document.getElementById('output').textContent = xml;
+    }
+
+    function downloadSitemap() {
+      const content = document.getElementById('output').textContent;
+      const blob = new Blob([content], { type: 'application/xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sitemap.xml';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function copyXML() {
+      const content = document.getElementById('output').textContent;
+      navigator.clipboard.writeText(content);
+      alert('XML copied!');
+    }
+
+    function copyURLs() {
+      const xml = document.getElementById('output').textContent;
+      const urls = [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1]).join('\n');
+      navigator.clipboard.writeText(urls);
+      alert('URLs copied!');
+    }
+
+    function clearAll() {
+      document.getElementById('inputArea').value = '';
+      document.getElementById('baseUrl').value = '';
+      document.getElementById('lastmodDate').value = '';
+      document.getElementById('output').textContent = '';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barcode Generator | Web Toolbox</title>
+  <meta name="description" content="Free online Barcode Generator. Generate barcodes in multiple formats (EAN, UPC, Code128, ITF, Pharmacode, etc.). Supports bulk generation, downloads as PNG, SVG, or ZIP.">
+  <style>
+    body { font-family: Arial, sans-serif; margin:0; background:#f9fafb; color:#333; }
+    header { background:#4f46e5; color:#fff; padding:1rem 2rem; text-align:center; }
+    header h1 { margin:0; font-size:1.8rem; }
+    
+    main { max-width:900px; margin:2rem auto; padding:1rem; }
+    section { background:#fff; border-radius:12px; padding:1.5rem; box-shadow:0 4px 8px rgba(0,0,0,0.1); margin-bottom:2rem; }
+    h2 { margin-top:0; }
+    label { display:block; margin-top:1rem; font-weight:bold; }
+    input, select, textarea { width:100%; padding:0.6rem; border:1px solid #ccc; border-radius:6px; margin-top:0.5rem; }
+    textarea { resize:vertical; min-height:100px; }
+    button { background:#4f46e5; color:#fff; padding:0.6rem 1rem; border:none; border-radius:6px; cursor:pointer; margin-top:1rem; }
+    button:hover { background:#4338ca; }
+    .secondary { background:#9ca3af; }
+    .secondary:hover { background:#6b7280; }
+    .mode-switch { display:flex; gap:1rem; margin-top:1rem; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-top:1.5rem; }
+    .barcode-card { background:#f3f4f6; padding:1rem; border-radius:8px; text-align:center; }
+    .barcode-card canvas, .barcode-card svg { max-width:100%; height:auto; }
+    .download-buttons { margin-top:0.5rem; display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center; }
+    footer { text-align:center; padding:1.5rem; color:#555; }
+    @media (max-width:600px) {
+      header h1 { font-size:1.4rem; }
+      .hero img { height:120px; }
+    }
+ .hero-placeholder {
+  margin: 20px 0;
+  text-align: center;
+}
+.hero-placeholder img {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Barcode Generator</h1>
+    <a href="index.html"><button style="float:right;margin-right:20px;">Home</button></a>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
+
+  <main>
+    <section>
+      <h2>Generate Barcodes</h2>
+
+      <div class="mode-switch">
+        <label><input type="radio" name="mode" value="single" checked> Single</label>
+        <label><input type="radio" name="mode" value="bulk"> Bulk</label>
+      </div>
+
+      <!-- Single Mode -->
+      <div id="single-mode">
+        <label for="barcode-value">Value:</label>
+        <input type="text" id="barcode-value" placeholder="Enter text or number">
+
+        <label for="barcode-format">Format:</label>
+        <select id="barcode-format">
+          <option value="CODE128">Code128</option>
+          <option value="EAN13">EAN-13</option>
+          <option value="UPC">UPC</option>
+          <option value="ITF">ITF</option>
+          <option value="ITF14">ITF-14</option>
+          <option value="pharmacode">Pharmacode</option>
+          <option value="MSI">MSI</option>
+          <option value="codabar">Codabar</option>
+          <option value="gs1databar">GS1 DataBar</option>
+        </select>
+
+        <button onclick="generateSingle()" style="float:right;margin-right:0px;">Generate Barcode</button>
+        <button class="secondary" onclick="clearSingle()" style="float:right;margin-right:10px;">Clear</button>
+        <div id="single-output" class="barcode-card" style="margin-top:60px;"></div>
+      </div>
+
+      <!-- Bulk Mode -->
+      <div id="bulk-mode" style="display:none;">
+        <label for="bulk-values">Enter multiple values (one per line):</label>
+        <textarea id="bulk-values" placeholder="12345&#10;67890&#10;ABCDE"></textarea>
+
+        <label for="bulk-format">Format:</label>
+        <select id="bulk-format">
+          <option value="CODE128">Code128</option>
+          <option value="EAN13">EAN-13</option>
+          <option value="UPC">UPC</option>
+          <option value="ITF">ITF</option>
+          <option value="ITF14">ITF-14</option>
+          <option value="pharmacode">Pharmacode</option>
+          <option value="MSI">MSI</option>
+          <option value="codabar">Codabar</option>
+          <option value="gs1databar">GS1 DataBar</option>
+        </select>
+
+        <button onclick="generateBulk()">Generate Bulk Barcodes</button>
+        <button class="secondary" onclick="clearBulk()">Clear</button>
+        <div id="bulk-output" class="grid"></div>
+        <button onclick="downloadBulkZIP()">Download All as ZIP</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&COPY; 2025:Web Toolbox</p>
+  </footer>
+
+  <script>
+    const modeRadios = document.querySelectorAll('input[name="mode"]');
+    const singleMode = document.getElementById('single-mode');
+    const bulkMode = document.getElementById('bulk-mode');
+
+    modeRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.value === 'single') {
+          singleMode.style.display = 'block';
+          bulkMode.style.display = 'none';
+        } else {
+          singleMode.style.display = 'none';
+          bulkMode.style.display = 'block';
+        }
+      });
+    });
+
+    function generateSingle() {
+      const value = document.getElementById('barcode-value').value.trim();
+      const format = document.getElementById('barcode-format').value;
+      if (!value) { alert('Please enter a value'); return; }
+
+      const output = document.getElementById('single-output');
+      output.innerHTML = `<svg id="barcode"></svg>
+        <div class="download-buttons">
+          <button onclick="downloadBarcode('barcode','${value}','svg')">Download SVG</button>
+          <button onclick="downloadBarcode('barcode','${value}','png')">Download PNG</button>
+        </div>`;
+
+      JsBarcode("#barcode", value, { format, displayValue:true });
+    }
+
+    function generateBulk() {
+      const values = document.getElementById('bulk-values').value.trim().split("\n");
+      const format = document.getElementById('bulk-format').value;
+      const container = document.getElementById('bulk-output');
+      container.innerHTML = "";
+
+      values.forEach((val, idx) => {
+        if (!val) return;
+        const id = `barcode-bulk-${idx}`;
+        const card = document.createElement('div');
+        card.className = "barcode-card";
+        card.innerHTML = `<svg id="${id}"></svg>
+          <div class="download-buttons">
+            <button onclick="downloadBarcode('${id}','${val}','svg')">SVG</button>
+            <button onclick="downloadBarcode('${id}','${val}','png')">PNG</button>
+          </div>`;
+        container.appendChild(card);
+        JsBarcode(`#${id}`, val, { format, displayValue:true });
+      });
+    }
+
+    function downloadBarcode(id, value, type) {
+      const svg = document.getElementById(id);
+      if (type === 'svg') {
+        const serializer = new XMLSerializer();
+        const source = serializer.serializeToString(svg);
+        const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+        saveAs(blob, `${value}.svg`);
+      } else {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const xml = new XMLSerializer().serializeToString(svg);
+        const img = new Image();
+        const svg64 = btoa(unescape(encodeURIComponent(xml)));
+        img.src = "data:image/svg+xml;base64," + svg64;
+        img.onload = function() {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob(function(blob) {
+            saveAs(blob, `${value}.png`);
+          });
+        };
+      }
+    }
+
+    async function downloadBulkZIP() {
+      const container = document.getElementById('bulk-output');
+      const svgs = container.querySelectorAll('svg');
+      if (svgs.length === 0) { alert("Generate barcodes first"); return; }
+
+      const zip = new JSZip();
+      for (let i=0; i<svgs.length; i++) {
+        const svg = svgs[i];
+        const serializer = new XMLSerializer();
+        const source = serializer.serializeToString(svg);
+        zip.file(`barcode${i+1}.svg`, source);
+      }
+      const blob = await zip.generateAsync({ type:"blob" });
+      saveAs(blob, "barcodes.zip");
+    }
+
+    function clearSingle() {
+      document.getElementById('barcode-value').value = "";
+      document.getElementById('single-output').innerHTML = "";
+    }
+
+    function clearBulk() {
+      document.getElementById('bulk-values').value = "";
+      document.getElementById('bulk-output').innerHTML = "";
+    }
+  </script>
+</body>
+</html>

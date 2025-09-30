@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Previewer | Web Toolbox</title>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background: #f9fafb;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      background: #2c3e50;
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    header h1 { margin: 0; font-size: 1.4rem; }
+    .hero {
+      background: #eaf2f8;
+      text-align: center;
+      padding: 2rem 1rem;
+      border-bottom: 1px solid #ddd;
+    }
+    .hero img {
+      max-width: 100%;
+      height: 200px;
+      background: #ccc;
+      display: block;
+      margin: 0 auto 1rem;
+    }
+    .toolbar {
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+      padding: 0.5rem 1rem;
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+    .toolbar button {
+      background: #2c3e50;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toolbar button:hover { background: #1a242f; }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      height: 100%;
+    }
+    textarea {
+      width: 50%;
+      padding: 1rem;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      font-family: monospace;
+      resize: none;
+    }
+    #preview {
+      width: 50%;
+      padding: 1rem;
+      overflow-y: auto;
+      background: #fff;
+      border-left: 1px solid #ddd;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      background: #f0f0f0;
+      font-size: 0.9rem;
+      border-top: 1px solid #ddd;
+    }
+    @media(max-width: 768px) {
+      main { flex-direction: column; }
+      textarea, #preview { width: 100%; height: 50%; }
+    }
+.hero-placeholder {
+  margin: 20px 0;
+  text-align: center;
+}
+.hero-placeholder img {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+footer { background:#333; color:white; text-align:center; padding:15px; margin-top:30px; font-size:0.9em; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Markdown Previewer</h1>
+    <a href="index.html"><button style="float:right;margin-right:20px;">Home</button></a>
+  </header>
+
+<!-- Hero -->
+  <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+    <p>Write Markdown on the left, preview live formatting on the right. Export your work to HTML, PDF, or Word.</p>
+  </section>
+
+  <div class="toolbar">
+    <button onclick="exportHTML()">Export HTML</button>
+    <button onclick="exportPDF()">Export PDF</button>
+    <button onclick="exportWord()">Export Word</button>
+    <button onclick="clearEditor()">Clear</button>
+    <button onclick="resetSample()">Reset to Sample</button>
+  </div>
+
+  <main>
+    <textarea id="markdown" placeholder="Type your Markdown here..."></textarea>
+    <div id="preview"></div>
+  </main>
+
+  <footer>
+    &copy; 2025: Web Toolbox
+  </footer>
+
+  <script>
+    const md = window.markdownit();
+    const mdEl = document.getElementById("markdown");
+    const previewEl = document.getElementById("preview");
+
+    const sampleMarkdown = `# Welcome to Markdown Previewer
+
+This is **Markdown Previewer**.
+
+## Features
+- Live preview
+- Export to **HTML**, **PDF**, and **Word**
+- Mobile-friendly
+- Clear & Reset options
+
+> Try editing this sample or start fresh!`;
+
+    function updatePreview() {
+      previewEl.innerHTML = md.render(mdEl.value);
+    }
+    mdEl.addEventListener("input", updatePreview);
+
+    function sanitizeFilename(name) {
+      return name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    }
+
+    function exportHTML() {
+      const blob = new Blob([previewEl.innerHTML], {type: "text/html"});
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = sanitizeFilename("markdown") + ".html";
+      link.click();
+    }
+
+    async function exportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF("p", "pt", "a4");
+
+      await doc.html(previewEl, {
+        callback: function (doc) {
+          doc.save(sanitizeFilename('markdown') + ".pdf");
+        },
+        x: 20,
+        y: 20,
+        width: 550,
+        windowWidth: previewEl.scrollWidth
+      });
+    }
+
+    function exportWord() {
+      const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' " +
+        "xmlns:w='urn:schemas-microsoft-com:office:word' " +
+        "xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'></head><body>";
+      const footer = "</body></html>";
+      const sourceHTML = header + previewEl.innerHTML + footer;
+
+      const blob = new Blob(['\ufeff', sourceHTML], { type: 'application/msword' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = sanitizeFilename("markdown") + ".doc";
+      link.click();
+    }
+
+    function clearEditor() {
+      mdEl.value = "";
+      previewEl.innerHTML = "";
+    }
+
+    function resetSample() {
+      mdEl.value = sampleMarkdown;
+      updatePreview();
+    }
+
+    // Initialize with sample content on load
+    resetSample();
+  </script>
+</body>
+</html>

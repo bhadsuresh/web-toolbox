@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Robots.txt Generator - Create and customize robots.txt files with presets for common CMS.">
+  <meta name="keywords" content="robots.txt generator, SEO, CMS presets, WordPress, Shopify">
+  <meta name="author" content="YourSite">
+  <title>Robots.txt Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f4f6f9; color: #333; }
+    header { background: #2c3e50; color: white; padding: 15px; text-align: center; }
+    .hero { width: 100%; height: 180px; background: url('hero-placeholder.png') center/cover no-repeat; margin-bottom: 20px; }
+    .container { max-width: 900px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    h1 { text-align: center; margin-bottom: 10px; }
+    label { font-weight: bold; display: block; margin-top: 10px; }
+    textarea { width: 100%; height: 180px; margin-top: 10px; font-family: monospace; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    input, select, button { padding: 8px 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; }
+    button { cursor: pointer; background: #3498db; color: white; border: none; transition: background 0.3s; }
+    button:hover { background: #2980b9; }
+    .actions { margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .preset-container, .baseurl-container { margin: 15px 0; }
+    .preview-container { margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: #fafafa; }
+    .preview-container h2 { margin-top: 0; font-size: 1.1em; color: #444; }
+    pre { background: #272822; color: #f8f8f2; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    footer { text-align: center; margin: 20px; font-size: 0.9em; color: #777; }
+    @media (max-width: 600px) {
+      textarea { height: 150px; }
+      .actions { flex-direction: column; }
+    }
+    .hero-placeholder {
+  margin: 20px 0;
+  text-align: center;
+}
+.hero-placeholder img {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+  </style>
+</head>
+<body>
+  <header style="padding-bottom:30px;">Robots.txt Generator
+	<a href="index.html"><button style="float:right;margin-right:20px;">Home</button></a>
+  </header>
+  
+<!-- Hero -->
+  <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
+  <div class="container">
+    <div class="baseurl-container">
+      <label for="baseUrl">Enter your site base URL:</label>
+      <input type="url" id="baseUrl" placeholder="https://example.com" oninput="updatePreview()">
+    </div>
+
+    <div class="preset-container">
+      <label for="presets">Choose a preset:</label>
+      <select id="presets">
+        <option value="default">-- Select a preset --</option>
+        <option value="wordpress">WordPress</option>
+        <option value="shopify">Shopify</option>
+        <option value="drupal">Drupal</option>
+        <option value="joomla">Joomla</option>
+        <option value="magento">Magento</option>
+      </select>
+      <button onclick="applyPreset()">Apply Preset</button>
+    </div>
+
+    <label for="robotsContent">robots.txt content:</label>
+    <textarea id="robotsContent" oninput="updatePreview()">User-agent: *\nDisallow:\nAllow: /</textarea>
+
+    <div class="actions">
+      <button onclick="downloadRobots()">Download robots.txt</button>
+      <button onclick="copyRobots()">Copy to Clipboard</button>
+      <button onclick="clearContent()">Clear</button>
+      <button onclick="resetDefault()">Reset to Default</button>
+    </div>
+
+    <div class="preview-container">
+      <h2>Live Preview:</h2>
+      <pre id="previewOutput">User-agent: *\nDisallow:\nAllow: /</pre>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025:Web ToolBox </p>
+  </footer>
+
+  <script>
+    const textarea = document.getElementById('robotsContent');
+    const baseUrlInput = document.getElementById('baseUrl');
+    const previewOutput = document.getElementById('previewOutput');
+
+    const defaultContent = `User-agent: *\nDisallow:\nAllow: /`;
+
+    const presets = {
+      wordpress: `User-agent: *\nDisallow: /wp-admin/\nAllow: /wp-admin/admin-ajax.php\nSitemap: {{baseUrl}}/sitemap.xml`,
+      shopify: `User-agent: *\nDisallow: /admin/\nDisallow: /cart\nDisallow: /checkout\nDisallow: /orders\nDisallow: /account\nSitemap: {{baseUrl}}/sitemap.xml`,
+      drupal: `User-agent: *\nDisallow: /core/\nDisallow: /modules/\nDisallow: /profiles/\nDisallow: /scripts/\nDisallow: /themes/\nSitemap: {{baseUrl}}/sitemap.xml`,
+      joomla: `User-agent: *\nDisallow: /administrator/\nDisallow: /cache/\nDisallow: /components/\nDisallow: /includes/\nDisallow: /installation/\nSitemap: {{baseUrl}}/sitemap.xml`,
+      magento: `User-agent: *\nDisallow: /downloader/\nDisallow: /errors/\nDisallow: /includes/\nDisallow: /var/\nSitemap: {{baseUrl}}/sitemap.xml`
+    };
+
+    function applyPreset() {
+      const selected = document.getElementById('presets').value;
+      const baseUrl = baseUrlInput.value.trim() || 'https://example.com';
+      if (selected !== 'default' && presets[selected]) {
+        textarea.value = presets[selected].replace(/\{\{baseUrl\}\}/g, baseUrl);
+        updatePreview();
+      }
+    }
+
+    function updatePreview() {
+      previewOutput.textContent = textarea.value;
+    }
+
+    function downloadRobots() {
+      const blob = new Blob([textarea.value], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'robots.txt';
+      link.click();
+    }
+
+    function copyRobots() {
+      textarea.select();
+      document.execCommand('copy');
+      alert('robots.txt content copied to clipboard!');
+    }
+
+    function clearContent() {
+      textarea.value = '';
+      updatePreview();
+    }
+
+    function resetDefault() {
+      textarea.value = defaultContent;
+      updatePreview();
+    }
+
+    // Initialize preview
+    updatePreview();
+  </script>
+</body>
+</html>

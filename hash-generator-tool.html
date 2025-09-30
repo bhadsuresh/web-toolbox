@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hash Generator Tool | MD5, SHA-1, SHA-256 Online</title>
+  <meta name="description" content="Free online Hash Generator tool. Generate MD5, SHA-1, SHA-256, SHA-512 hashes instantly. Supports bulk input, drag-and-drop, and mobile-friendly UI.">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9f9f9; color: #333; }
+    header { background: #2c3e50; color: white; padding: 20px; text-align: center; }
+    .hero { background: #ddd; height: 200px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+    .hero span { font-size: 20px; color: #555; }
+    main { max-width: 900px; margin: auto; padding: 20px; }
+    section { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    h2 { margin-top: 0; }
+    textarea, select, input[type="text"] { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: 1px solid #ccc; }
+    button { background: #3498db; color: white; border: none; padding: 10px 20px; margin: 5px; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #2980b9; }
+    #result, #bulkResults { background: #f4f4f4; padding: 15px; border-radius: 6px; overflow-x: auto; }
+    .bulk-box { border: 2px dashed #ccc; min-height: 100px; padding: 10px; border-radius: 6px; background: #fff; transition: 0.3s; }
+    .bulk-box.dragover { border-color: #3498db; background: #eef7ff; }
+    table { width: 100%; border-collapse: collapse; }
+    td, th { border: 1px solid #ddd; padding: 8px; }
+    th { background: #f0f0f0; }
+    @media(max-width:600px){ textarea{height:100px;} }
+	  }
+.hero-placeholder {
+  margin: 20px 0;
+  text-align: center;
+}
+.hero-placeholder img {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+footer { background:#333; color:white; text-align:center; padding:15px; margin-top:30px; font-size:0.9em; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Hash Generator Tool",
+    "url": "https://bhadsuresh.github.io/web-toolbox/hash-generator.html",
+    "description": "Free online Hash Generator tool to create MD5, SHA-1, SHA-256, and SHA-512 hashes instantly.",
+    "applicationCategory": "Utility",
+    "operatingSystem": "Any"
+  </script>
+</head>
+<body>
+  <header>
+	<a href="index.html"><button style="float:right;margin-right:20px;">Home</button></a>
+    <h1>Hash Generator Tool</h1>
+    <p>Generate MD5, SHA-1, SHA-256, and SHA-512 hashes instantly</p>
+  </header>
+<!-- Hero -->
+  <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
+  <main>
+    <!-- Single Input Mode -->
+    <section>
+      <h2>Single Hash Generator</h2>
+      <input type="text" id="textInput" placeholder="Enter text here...">
+      <select id="algorithm">
+        <option value="MD5">MD5</option>
+        <option value="SHA1">SHA-1</option>
+        <option value="SHA256">SHA-256</option>
+        <option value="SHA512">SHA-512</option>
+      </select>
+      <button onclick="generateHash()">Generate Hash</button>
+      <div id="result"></div>
+    </section>
+
+    <!-- Bulk Input Mode -->
+    <section>
+      <h2>Bulk Hash Generator</h2>
+      <p>Enter multiple lines or drag & drop a .txt file:</p>
+      <textarea id="bulkInput" class="bulk-box" placeholder="Enter one value per line..."></textarea>
+      <select id="bulkAlgorithm">
+        <option value="MD5">MD5</option>
+        <option value="SHA1">SHA-1</option>
+        <option value="SHA256">SHA-256</option>
+        <option value="SHA512">SHA-512</option>
+      </select>
+      <button onclick="generateBulkHashes()">Generate Bulk Hashes</button>
+      <button onclick="clearBulk()">Clear</button>
+      <div id="bulkResults"></div>
+    </section>
+  </main>
+<footer style="margin:20px;">
+&copy; 2025: Web ToolBox.
+</footer>
+
+  <script>
+    function generateHash() {
+      const text = document.getElementById("textInput").value;
+      const algo = document.getElementById("algorithm").value;
+      if (!text) { alert("Please enter text!"); return; }
+      let hash;
+      switch(algo) {
+        case "MD5": hash = CryptoJS.MD5(text).toString(); break;
+        case "SHA1": hash = CryptoJS.SHA1(text).toString(); break;
+        case "SHA256": hash = CryptoJS.SHA256(text).toString(); break;
+        case "SHA512": hash = CryptoJS.SHA512(text).toString(); break;
+      }
+      document.getElementById("result").innerHTML = `<strong>${algo} Hash:</strong><br><code>${hash}</code>`;
+    }
+
+    function generateBulkHashes() {
+      const lines = document.getElementById("bulkInput").value.trim().split("\n");
+      const algo = document.getElementById("bulkAlgorithm").value;
+      if (lines.length === 0 || lines[0] === "") { alert("Please enter values!"); return; }
+      let html = `<table><tr><th>Input</th><th>${algo} Hash</th></tr>`;
+      lines.forEach(line => {
+        let hash;
+        switch(algo) {
+          case "MD5": hash = CryptoJS.MD5(line).toString(); break;
+          case "SHA1": hash = CryptoJS.SHA1(line).toString(); break;
+          case "SHA256": hash = CryptoJS.SHA256(line).toString(); break;
+          case "SHA512": hash = CryptoJS.SHA512(line).toString(); break;
+        }
+        html += `<tr><td>${line}</td><td><code>${hash}</code></td></tr>`;
+      });
+      html += `</table>`;
+      document.getElementById("bulkResults").innerHTML = html;
+    }
+
+    function clearBulk() {
+      document.getElementById("bulkInput").value = "";
+      document.getElementById("bulkResults").innerHTML = "";
+    }
+
+    // Drag & Drop for bulk input
+    const bulkInput = document.getElementById("bulkInput");
+    bulkInput.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      bulkInput.classList.add("dragover");
+    });
+    bulkInput.addEventListener("dragleave", () => {
+      bulkInput.classList.remove("dragover");
+    });
+    bulkInput.addEventListener("drop", (e) => {
+      e.preventDefault();
+      bulkInput.classList.remove("dragover");
+      if (e.dataTransfer.files.length > 0) {
+        const file = e.dataTransfer.files[0];
+        if (file.type === "text/plain") {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            bulkInput.value = event.target.result.trim();
+          };
+          reader.readAsText(file);
+        } else {
+          alert("Please upload a plain text (.txt) file.");
+        }
+      }
+    });
+  </script>
+</body>
+</html>

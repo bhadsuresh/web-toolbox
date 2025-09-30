@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Network Simulator (Pro Tier) 🚀</title>
+  <style>
+    /* 1. CSS FIX: Apply fixed width to the container */
+    body{font-family:sans-serif;margin:0;padding:20px;background:#f5f7fa;color:#2c3e50}
+    .container{
+      width:600px; /* FIXED WIDTH for extension popup */
+      background:#fff;padding:20px;border-radius:10px;
+      box-shadow:0 4px 12px rgba(0,0,0,.1)
+    }
+    /* Rest of the styles are fine */
+    h2{color:#3498db;margin:0 0 16px;font-weight:600}
+    .toggle-section{display:flex;justify-content:space-between;align-items:center;
+      background:#ecf6fd;padding:10px 14px;border-radius:8px;margin-bottom:20px;border:1px solid #d0e6f8}
+    .switch{position:relative;display:inline-block;width:44px;height:24px}
+    .switch input{opacity:0;width:0;height:0}
+    .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;
+      transition:.4s;border-radius:24px}
+    .slider:before{position:absolute;content:"";height:16px;width:16px;left:4px;bottom:4px;background:#fff;
+      transition:.4s;border-radius:50%}
+    input:checked+.slider{background:#3498db}
+    input:checked+.slider:before{transform:translateX(20px)}
+    .control-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px; border:1px solid #d3d3d3;border-radius:6px;padding:8px;}
+    .control-group label{display:flex;justify-content:space-between;margin-bottom:6px;font-weight:600}
+    input[type=range]{width:100%}
+    input[type=number],select,input[type=text]{width:100%;padding:8px;border:1px solid #bdc3c7;border-radius:6px}
+    #log-output{padding:10px;border:1px solid #bdc3c7;border-radius:6px;background:#fafafa;
+      min-height:120px;max-height:250px;overflow-y:auto;font:12px monospace;white-space:pre-wrap}
+    .log-status-error{color:#e74c3c;font-weight:bold}
+    .chart-container{margin-top:20px;}
+.hidden-chart {max-height: 0;overflow: hidden;opacity: 0;transition: max-height 0.5s ease-in-out, opacity 0.3s ease-in-out;}
+    canvas{width:100%;max-height:150px}
+    #toggle-chart{background:none;border:none;color:#3498db;cursor:pointer;font-size:.9rem;margin:10px 0}
+    .test-controls{display:flex;gap:10px;margin:15px 0;border:1px solid #d3d3d3;border-radius:6px;padding:8px;}
+    .test-controls button{padding:8px 14px;background:#2ecc71;color:#fff;border:none;border-radius:6px;cursor:pointer}
+    .test-controls button:hover{background:#27ae60}
+    #clear-log{margin-top:10px;padding:6px 12px;background:#95a5a6;color:#fff;border:none;
+      border-radius:6px;cursor:pointer;font-size:.85rem}
+    #clear-log:hover{background:#7f8c8d}
+    #presets{margin-top:8px; margin-bottom:8px;padding:8px 12px;background:#3498db;color:#fff;border:none;border-radius:6px;cursor:pointer}
+    #presets:hover{background:#2980b9}
+    .auto-test{display:flex;align-items:center;gap:10px;margin:10px 0}
+    .auto-test input[type=number]{width:80px}
+/* --- New Styles for Collapsible/Accordion Menu --- */
+.accordion-item {
+  border: 1px solid #dcdcdc;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.accordion-header {
+  background-color: #f7f7f7;
+  color: #2c3e50;
+  cursor: pointer;
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+.accordion-header:hover {
+  background-color: #e9e9e9;
+}
+.accordion-header:after {
+  content: '▼'; /* Down arrow */
+  font-size: 14px;
+  transition: transform 0.3s;
+}
+.accordion-header.active:after {
+  content: '▲'; /* Up arrow */
+  transform: rotate(180deg);
+}
+.accordion-content {
+  padding: 0 15px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
+  border-top: 1px solid #dcdcdc;
+}
+.accordion-content ul {
+    margin-top: 10px;
+    padding-left: 20px;
+}
+.accordion-content li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+  </style>
+</head>
+<body>
+<header><a href="index.html"><button style="float:center;padding:5px;margin:10px;">Home</button></a></header>
+<div class="container">
+  <h2>Network Simulator (Pro Tier) 🚀</h2>
+<div id="intro-accordion">
+  <div class="accordion-item">
+    <div class="accordion-header">
+      💡 1. Introduction: Network Latency Simulator (Pro Tier)
+    </div>
+    <div class="accordion-content">
+      <p>This application is an "advanced browser extension designed for developers and QA engineers" to accurately simulate real-world network conditions directly within the browser environment. By overriding standard JavaScript network calls (`fetch` and `XMLHttpRequest`), it allows you to inject controllable, non-deterministic latency, jitter, and error states without relying on OS-level throttling.</p>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <div class="accordion-header">
+      ⚙️ 2. Detailed Use Cases
+    </div>
+    <div class="accordion-content">
+      <ul>
+        <li>
+          Robustness Testing (Error Simulation):Verify graceful handling of server failures by setting 'Error Rate %' and 'Status Code' (e.g., 500 or 404).
+        </li>
+        <li>
+          High Jitter and Burst Testing: Simulate unstable environments (crowded Wi-Fi, satellite connections) using high 'Jitter' and the 'Burst' or 'Normal' Distribution presets.
+        </li>
+        <li>
+          Progressive Loading and Timeouts: Test user experience on slow networks (e.g., 3G preset) to ensure content loads progressively and timeouts are respected.
+        </li>
+        <li>
+          Continuous Integration/Automated Testing: Use fixed 'Latency' and 'Jitter = 0' with 'Auto Fetch' to run consistent, reproducible performance tests across environments.
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <div class="accordion-header">
+      🧪 3. Testing Procedure (How to Use)
+    </div>
+    <div class="accordion-content">
+      <ul>
+        <li>**Load & Toggle:** Open the extension and click the **Enable Simulation** switch.</li>
+        <li>**Set Profile:** Either manually adjust **Latency**, **Jitter**, and **Error Rate %**, or click **Apply Preset** (e.g., `4G`).</li>
+        <li>**Monitor:** Click **📈 Show Delay Chart** to visualize the injected latency variability (Jitter).</li>
+        <li>**Run Test:** Click **Run Fetch** (for single test) or enable **Auto Fetch** (for continuous testing).</li>
+        <li>**Analyze:** Observe the **Logs** section to confirm simulated delays and status codes, then use your target application to test its behavior.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<hr><br>
+  <div class="toggle-section">
+    <label>Enable Simulation</label>
+    <label class="switch">
+      <input type="checkbox" id="sim-toggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+<p style="text-align:right;">[NOTE:** When you are finished using this tool, please switch off this enabler**]</p>
+  <p> PROFILE PARAMETERS:</P><p>Option-1: Adjust Manually
+  <div class="control-grid">
+    <div class="control-group">
+      <label>Base Latency (ms)<span id="latency-val">200</span></label>
+      <input type="range" id="latency" min="0" max="5000" value="200">
+    </div>
+    <div class="control-group">
+      <label>Jitter (± ms)<span id="jitter-val">20</span></label>
+      <input type="range" id="jitter" min="0" max="2000" value="20">
+    </div>
+    <div class="control-group">
+      <label>Distribution<span id="dist-val">uniform</span></label>
+      <select id="distribution">
+        <option value="uniform">Uniform</option>
+        <option value="normal">Normal</option>
+        <option value="burst">Burst</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>Error Rate %<span id="err-val">0</span></label>
+      <input type="range" id="error" min="0" max="100" value="0">
+    </div>
+    <div class="control-group">
+      <label>Status Code</label>
+      <select id="status">
+        <option value="200">200 OK</option>
+        <option value="201">201 Created</option>
+        <option value="401">401 Unauthorized</option>
+        <option value="403">403 Forbidden</option>
+        <option value="404">404 Not Found</option>
+        <option value="500">500 Internal Error</option>
+        <option value="503">503 Service Unavailable</option>
+      </select>
+    </div>
+  </div>
+   <p>Option-2: Apply Preset Profile</p>
+<div class="control-grid">
+  <button id="presets">Apply Preset {e.g. 3G, 4G, BadWiFi, Satellite}</button> 
+</div>
+<p>EXECUTE SIMULATION:</p>
+  <div class="test-controls">
+	<p> URL:</P>
+    <input type="text" id="test-url" value="https://jsonplaceholder.typicode.com/todos/1">
+    <button id="run-fetch">Run Fetch</button>
+  </div>
+    <div class="auto-test control-grid">
+      <label><input type="checkbox" id="auto-toggle"> Auto Fetch every</label>
+      <input type="number" id="auto-interval" value="5" min="1"> sec
+    </div>
+	<hr><br>
+  	<P>MONITOR:</P>
+	<button id="toggle-chart">📈 Show Delay Chart</button>
+    	<div class="chart-container hidden-chart"><canvas id="delayChart"></canvas></div>
+
+	<P>ANALYZE:</P>
+  	<h3>Logs</h3>
+      	<div id="log-output"></div>
+        <button id="clear-log">Clear Log</button>
+</div>
+
+<script type="module">
+  // This imports the module and exposes the Chart object globally
+  import { Chart } from './chart.min.js';
+  window.Chart = Chart;
+</script>
+<script src="pro-script.js"></script>
+
+</body>
+</html>

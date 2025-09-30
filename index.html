@@ -39,7 +39,7 @@
 <style>
 body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f9f9f9; transition: background 0.3s, color 0.3s; }
 body.dark-mode { background:#121212; color:#f0f0f0; }
-header { background:#fafafa; color:black; padding:10px; text-align:center; position:relative; }
+header { background:#fafafa; color:black; padding:15px; text-align:left; position:relative; }
 header h1 { margin:0; font-size:2em; }
 header img.logo { height:80px; margin-right:15px; }
 header .title-wrap { flex:1; text-align:center;}
@@ -106,17 +106,7 @@ body.dark-mode .category-filter button { background:#4CAF50; }
   #togglePanel { position:absolute; top:-25px; left:50%; transform:translateX(-50%); border-radius:5px 5px 0 0; }
 }
 
-/*FREE CARDS HERE*/
-.free-card {
-  	/* Add shadows to create the "card" effect */
-  	flex:1;
-  	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-  	transition: 0.3s;
-  	padding: 20px 16px;
-	text-align:center;
-	background:#B8BCB6;
-	}
-
+/*FREE CARDS HERE
 	/* On mouse-over, add a deeper shadow */
 .free-card:hover {
   	box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
@@ -146,13 +136,39 @@ body.dark-mode .category-filter button { background:#4CAF50; }
   background-color: #2E6F40;
   color: white;
 }
+
+/*style for FREE CARDS to display 2 cards per line*/
+
+.grid-container {
+    display: grid; /* Enables CSS Grid */
+    
+    /* Creates 2 columns, each taking up an equal fraction of the space */
+    grid-template-columns: 1fr 1fr; 
+    
+    /* Sets a uniform space between the grid items */
+    gap: 20px; 
+    
+    max-width: 600px; /* Optional: Constrains the width of the whole grid */
+    margin: 0 auto; /* Optional: Centers the container */
+
+}
+
+.free-card {
+    /* Basic styling for visibility */
+    	flex:1;
+  	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  	transition: 0.3s;
+  	padding: 20px 16px;
+	text-align:center;
+	background:#B8BCB6;
+}
 </style>
 </head>
 <body>
 
 <header>
  <h1> WEB TOOLBOX </h1>
-	<button class="dark-mode-toggle" style="float:right;margin-right:20px; padding:10px; background:#657383;" id="darkModeToggle" >🌙 / ☀️ Mode</button>
+	<button class="dark-mode-toggle" style="float:right;margin-right:0px; padding:10px; background:#657383;" id="darkModeToggle" >🌙Mode</button>
 	
 </header>
 <section class="hero">
@@ -168,8 +184,8 @@ TRY OUR FREE TOOLS
 </div>
 <div style="margin:20px;">
 <!--this section creates cards for free tools-->
-<!--URL SHORTENER-->
-<div class="free-container">
+<!--1.URL SHORTENER-->
+<div class="grid-container">
 	<div class="free-card">
   	  <img src="images/url-shortener.png" alt="url-shortener" >
     	  <h3><b>URL SHORTENER</b></h3>
@@ -178,7 +194,7 @@ TRY OUR FREE TOOLS
     	  <a href="url-shortener-tool.html"><button class="free-button" type="button">TRY NOW</button></a>
 	</div>
 
-<!--Static QR CODE GENERATOR-->
+<!--2.Static QR CODE GENERATOR-->
 	<div class="free-card">
   	  <img src="images/qr-code.png" alt="QR Code" >
     	  <h3><b>Static QR CODE GENERATOR</b></h3>
@@ -186,7 +202,7 @@ TRY OUR FREE TOOLS
 	  <p style="color:red;">Free</p>
     	  <a href="qr-code-generator-tool.html"><button class="free-button" type="button"> TRY NOW</button></a>
 	</div>
-<!--Dynamic QR Code Generator-->
+<!--3.Dynamic QR Code Generator-->
 	<div class="free-card">
   	  <img src="images/qr-code.png" alt="Dynamic QR Code" >
     	  <h3><b>Dynamic QR Code Generator</b></h3>
@@ -195,7 +211,7 @@ TRY OUR FREE TOOLS
     	  <a href="dynamic-qr-code-generator-tool.html"><button class="free-button" type="button">TRY NOW</button> </a>
 	</div>
 
-<!--JSON Formatter-->
+<!--4.JSON Formatter-->
 	<div class="free-card">
   	  <img src="images/json-formatter.png" alt="JSON Formatter" >
     	  <h3><b>JSON Formatter</b></h3>
@@ -203,7 +219,7 @@ TRY OUR FREE TOOLS
 	  <p style="color:red;">Free</p>
     	  <a href="json-formatter-tool.html"><button class="free-button" type="button">TRY NOW</button></a>
 	</div>
-<!--Bulk UTM Builder-->
+<!--5.Bulk UTM Builder-->
 	<div class="free-card">
   	  <img src="images/utm-builder.png" alt="Bulk UTM Builder" >
     	  <h3><b>Bulk UTM Builder</b></h3>
@@ -211,7 +227,7 @@ TRY OUR FREE TOOLS
 	  <p style="color:red;">Free</p>
     	  <a href="bulk-utm-generator-tool.html"><button class="free-button" type="button">TRY NOW</button> </a>
 	</div>
-<!--Color Picker Tool-->
+<!--6.Color Picker Tool-->
 	<div class="free-card">
   	  <img src="images/color-picker.png" alt="Color Picker" >
     	  <h3><b>COLOR Picker</b></h3>
@@ -219,6 +235,55 @@ TRY OUR FREE TOOLS
 	  <p style="color:red;">Free</p>
     	  <a href="color-picker-tool.html"><button class="free-button" type="button">TRY NOW</button> </a>
 	</div>
+<!--7.Barcode Generator Tool-->
+	<div class="free-card">
+  	  <img src="images/barcode-generator.png" alt="Barcode generator" >
+    	  <h3><b>Barcode Generator</b></h3>
+    	  <p>Create barcodes for links, text, and more.</p>
+	  <p style="color:red;">Free</p>
+    	  <a href="barcode-generator-tool.html"><button class="free-button" type="button">TRY NOW</button> </a>
+	</div>
+<!--8.Hash Generator Tool-->
+	<div class="free-card">
+  	  <img src="images/hash-generator.png" alt="Hash generator" >
+    	  <h3><b>Hash  Generator</b></h3>
+    	  <p>Create Hash code formats like MD5, SHA 1, SHA 256 and more.</p>
+	  <p style="color:red;">Free</p>
+    	  <a href="hash-generator-tool.html"><button class="free-button" type="button">TRY NOW</button> </a>
+	</div>
+<!--9.Markdown Previewer Tool-->
+	<div class="free-card">
+  	  <img src="images/markdown-preview.png" alt="markdown-previewer" >
+    	  <h3><b>Markdown Previewer</b></h3>
+    	  <p>Generate Markdown Previews and more.</p>
+	  <p style="color:red;">Free</p>
+    	  <a href="markdown-previewer-tool.html"><button class="free-button" type="button">TRY NOW</button> </a>
+	</div>
+<!--10.Robots Generator Tool-->
+	<div class="free-card">
+  	  <img src="images/robots-generator.png" alt="robots-generator" >
+    	  <h3><b>Robots.txt Generator</b></h3>
+    	  <p>Generate Robots.txt file for SEO and more.</p>
+	  <p style="color:red;">Free</p>
+    	  <a href="robots-generator.html"><button class="free-button" type="button">TRY NOW</button> </a>
+	</div>
+<!--11.xml-sitemap-generator Tool-->
+	<div class="free-card">
+  	  <img src="images/xml-generator.png" alt="xml-sitemap-generator" >
+    	  <h3><b>XML Sitemap Generator</b></h3>
+    	  <p>Generate sitemap.xml file for SEO and more.</p>
+	  <p style="color:red;">Free</p>
+    	  <a href="xml-sitemap-generator.html"><button class="free-button" type="button">TRY NOW</button> </a>
+	</div>
+<!--12.Network Latency Simulator Tool-->
+	<div class="free-card">
+  	  <img src="images/network-latency.png" alt="Network Latency Simulator" >
+    	  <h3><b>Network Latency Simulator</b></h3>
+    	  <p>Simulate real-world network conditions directly within the browser environment. Designed for developers and QA engineers..</p>
+	  <p style="color:red;">Free</p>
+    	  <a href="network-simulator-pro.html"><button class="free-button" type="button">TRY NOW</button> </a>
+	</div>
+
 </div>
 </div>
 
