@@ -20,17 +20,17 @@
     }
     *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial,Helvetica,sans-serif}
     body{margin:0;background:var(--bg);color:var(--text);padding:18px}
-    header{background:linear-gradient(90deg,var(--accent),#1e3a8a);color:#fff;padding:16px;border-radius:12px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    header{background:linear-gradient(90deg,var(--accent),#1e3a8a);color:#fff;padding:16px;border-radius:0px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     header .title{display:flex;flex-direction:column}
     header h1{margin:0;font-size:1.15rem}
     header p{margin:4px 0 0;font-size:0.85rem;opacity:0.95}
     nav.small{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
     nav.small button{background:#fff;color:var(--accent);border:none;padding:8px 10px;border-radius:8px;cursor:pointer}
     .hero-placeholder{margin:20px 0;text-align:center}
-    .hero-placeholder img{width:100%;max-height:220px;object-fit:cover;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+    .hero-placeholder img{width:100%;max-height:220px;object-fit:cover;border-radius:0px;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
     main{margin-top:14px}
-    .grid{display:grid;grid-template-columns:1fr;gap:14px}
-    .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:var(--shadow)}
+    .grid{ max-width:700px; margin:30px auto; background:#fff; padding:25px; padding-bottom:70px;border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+    .card{background:var(--card);padding:14px;margin:10px;border-radius:12px;box-shadow:var(--shadow)}
     label{display:block;color:var(--muted);font-weight:600;margin-bottom:6px}
     /* Fix overflow in mapping form */
     .controls {
@@ -76,19 +76,18 @@
     .btn.primary{background:var(--accent);color:#fff;border:none}
     .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .right{margin-left:auto}
-    .qr-preview{width:120px;height:120px;border:1px solid #eef2f7;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#fff}
+    .qr-preview{width:100%;height:120px;border:1px solid #eef2f7;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#fff}
     .meta{font-size:0.85rem;color:var(--muted)}
     .search-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .pagination{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:10px}
     @media (min-width:900px){ .grid{grid-template-columns:1fr 360px} }
-    @media (max-width:700px){ th,td{font-size:0.8rem} .qr-preview{width:96px;height:96px} }
+    @media (max-width:700px){ th,td{font-size:0.8rem} .qr-preview{width:100%;height:96px} }
   </style>
 </head>
 <body>
   <header>
     <div class="title">
-      <h1>Dynamic QR Code Generator</h1>
-      <p>Create short codes, generate & download QR codes, and track redirects.</p>
+      <h1>QR CODE GENERATOR</h1>
     </div>
     <div class="right">
       <a href="index.html"><button class="btn" aria-label="Go home">Home</button></a>
@@ -100,15 +99,10 @@
     <img src="images/webtools-hero-image4.png" alt="Hero image placeholder" />
   </section>
 
-  <nav class="small" aria-label="Top navigation">
-    <a href="#admin"><button class="btn">Admin</button></a>
-    <a href="#r/example"><button class="btn">Redirect (test)</button></a>
-  </nav>
-
   <main id="app" style="margin-top:14px"></main>
 
-  <footer style="margin-top:18px;text-align:center;color:var(--muted);font-size:0.9rem">
-    Made with ❤️ — LocalStorage demo (no backend). Keep for production only after adding persistent backend.
+  <footer style="margin-top:18px;text-align:center;color:var(--muted);font-size:0.9rem; background:black; padding:16px;">
+    &copy;2025: Web Toolbox [LocalStorage Demo]
   </footer>
 
   <!-- ===========================
@@ -208,9 +202,15 @@
     const app = document.getElementById('app');
     app.innerHTML = `
       <div class="grid">
+	<nav class="small" aria-label="Top navigation">
+    		<a href="#admin"><button class="btn">Admin</button></a>
+    		<a href="#r/example"><button class="btn">Redirect (test)</button></a>
+  	</nav>
         <!-- Create / Update Mapping -->
         <div class="card" aria-labelledby="create-title">
-          <h2 id="create-title">Create / Update Mapping</h2>
+	<P> <b>Dynamic QR Code Generation:</b></p>
+	<p>Create short codes, generate & download QR codes, and track redirects.</p>
+          <h2 id="create-title" style="font-size:14px;">Create / Update Mapping</h2>
           <div class="controls" style="margin-top:8px">
             <input id="dest" placeholder="Target URL (https://...)" />
             <input id="code" placeholder="Short code (leave blank for random)" />
@@ -222,17 +222,17 @@
 
         <!-- QR Preview (moved above mappings) -->
         <div class="card">
-          <h2>QR Preview</h2>
+          <h2 style="font-size:14px;">QR Preview</h2>
           <div id="qrwrap" class="qr-preview" aria-live="polite">Enter code &amp; click QR</div>
         </div>
 
         <!-- Mappings -->
         <div class="card" aria-labelledby="list-title" style="min-height:220px">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-            <h2 id="list-title" style="margin:0;flex:0 0 auto">Mappings</h2>
-            <div style="flex:1"></div>
-            <div class="search-row" style="flex:0 0 420px">
-              <input id="searchBox" placeholder="Search code or destination" style="flex:1" />
+            <h2 id="list-title" style="margin:0;flex:0 0 auto; font-size:14px;">Mappings</h2>
+            <div style="flex:1;"></div>
+            <div class="search-row" style="width:100%">
+              <input id="searchBox" placeholder="Search code or destination" style="width:100%;" />
               <select id="pageSize" style="width:80px">
                 <option value="5">5</option>
                 <option value="8" selected>8</option>
@@ -262,8 +262,8 @@
             <button id="importBtn" class="btn">Import CSV</button>
             <button id="clearAll" class="btn">Clear All</button>
             <input type="file" id="importFile" accept="text/csv" style="display:none" />
-            <div style="margin-left:auto" class="meta">LocalStorage keys: <code>${STORAGE_KEY}</code></div>
           </div>
+	    <div style="margin-left:auto; margin-top:10px;" class="meta">LocalStorage keys: <code>${STORAGE_KEY}</code></div>
         </div>
       </div>
     `;

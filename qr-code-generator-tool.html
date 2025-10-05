@@ -5,9 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QR Code Generator</title>
 <style>
+:root{
+      --bg:#f8fafc; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --text:#0f1724;
+      --radius:12px; --shadow:0 8px 24px rgba(15,23,36,0.06);
+    }
+
 body { font-family: Arial, sans-serif; background:#f0f2f5; color:#000; margin:0; padding:0; }
-header { background:#4a90e2; color:#fff; padding:20px; text-align:center; font-size:1.8em; }
-.container { max-width:700px; margin:30px auto; background:#fff; padding:25px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+header{background:linear-gradient(90deg,var(--accent),#1e3a8a);color:#fff;padding:16px;border-radius:0px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    header h1{margin:0;font-size:1.15rem}
+    header p{margin:4px 0 0;font-size:0.9rem;opacity:0.95}
+
+.container { max-width:700px; margin:30px auto; background:#fff; padding:25px; padding-bottom:70px;border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
 .input-group { margin-bottom:15px; }
 input, select, textarea { width:100%; padding:10px; margin-top:5px; border-radius:6px; border:1px solid #ccc; font-size:14px; }
 button { padding:10px 15px; font-size:16px; border:none; border-radius:6px; background:#4a90e2; color:#fff; cursor:pointer; margin-top:10px; }
@@ -31,9 +39,14 @@ footer { background:#333; color:white; text-align:center; padding:15px; margin-t
 </head>
 <body>
 
-<header>QR Code Generator
-<a href="index.html"><button style="float:right;margin-right:20px;">Home</button></a>
-</header>
+<header>
+    <div>
+      <h1>QR CODE GENERATOR</h1>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <a href="index.html"><button class="btn">Home</button></a>
+    </div>
+  </header>
 
 <!-- Hero -->
   <section class="hero-placeholder">
@@ -42,6 +55,7 @@ footer { background:#333; color:white; text-align:center; padding:15px; margin-t
 
 <div class="container">
   <div class="input-group">
+    <p> <b>Static QR Code Generator</b></p>
     <label for="qrType">Select QR Code Type:</label>
     <select id="qrType" onchange="updateFields()">
       <option value="url">URL</option>
@@ -54,7 +68,7 @@ footer { background:#333; color:white; text-align:center; padding:15px; margin-t
     </select>
   </div>
 
-  <div id="fields"></div>
+  <div id="fields" style="margin-bottom:15px;"></div>
 
   <div class="input-group">
     <label>QR Code Size (px):</label>
@@ -71,16 +85,16 @@ footer { background:#333; color:white; text-align:center; padding:15px; margin-t
     <input type="color" id="bgColor" value="#ffffff">
   </div>
 
-  <button onclick="generateQRCode()">Generate QR Code</button>
+  <button onclick="generateQRCode()" style="float:right;margin-right:0px;">Generate QR Code</button>
 
   <div class="qrcode-container" id="qrcodeContainer"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
 
-<footer style="margin:20px;">
-&copy; 2025: Web ToolBox.
-</footer>
+<footer style="margin-top:18px;text-align:center;color:var(--muted);font-size:0.9rem; background:black; padding:16px;">
+    &copy;2025: Web Toolbox
+  </footer>
 
 
 <script>

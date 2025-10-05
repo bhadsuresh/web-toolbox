@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>URL Shortener with QR Codes</title>
-  <meta name="description" content="Create short links, generate per-link QR codes and downloads, import/export CSV, and manage history. Mobile-friendly, single-file tool." />
+  <meta name="description" content="Create short links, Shorten the long URL, generate per-link QR codes and downloads, import/export CSV, and manage history. Mobile-friendly, single-file tool." />
   <meta name="keywords" content="url shortener, qr code, short link, csv import, csv export, localStorage" />
   <meta name="author" content="Web Tools Hub" />
   <meta name="theme-color" content="#2563eb">
@@ -16,13 +16,13 @@
     }
     *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif}
     body{margin:0;background:var(--bg);color:var(--text);padding:18px}
-    header{background:linear-gradient(90deg,var(--accent),#1e3a8a);color:#fff;padding:16px;border-radius:12px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    header{background:linear-gradient(90deg,var(--accent),#1e3a8a);color:#fff;padding:16px;border-radius:0px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     header h1{margin:0;font-size:1.15rem}
     header p{margin:4px 0 0;font-size:0.9rem;opacity:0.95}
     .hero-placeholder{margin:20px 0;text-align:center}
-    .hero-placeholder img{width:100%;max-height:220px;object-fit:cover;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+    .hero-placeholder img{width:100%;max-height:220px;object-fit:cover;border-radius:0px;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
     main{margin-top:14px;max-width:1100px;margin-left:auto;margin-right:auto}
-    .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:14px}
+    .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:14px;}
     .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
     input[type="text"], select, button, input[type="file"]{font:inherit;padding:10px;border:1px solid #e6e9ef;border-radius:8px;background:transparent}
@@ -51,8 +51,7 @@
 
   <header>
     <div>
-      <h1>URL Shortener</h1>
-      <p>Create short links, generate per-link QR codes and download them. History stored locally.</p>
+      <h1>URL SHORTENER</h1>
     </div>
     <div style="display:flex;gap:8px;align-items:center">
       <a href="index.html"><button class="btn">Home</button></a>
@@ -67,17 +66,18 @@
   <main>
     <div class="card" aria-labelledby="create-title">
       <h2 id="create-title" style="margin:0 0 8px 0">Create a Short Link</h2>
+	<p>Create short links, generate per-link QR codes and download them. History stored locally.</p>
       <div class="controls">
         <input id="longUrl" class="input-full" type="text" placeholder="Enter long URL here (https://...)" />
         <button id="shortenBtn" class="btn primary">Shorten URL</button>
       </div>
-      <p class="meta" style="margin-top:8px">Last generated: <code id="shortUrlOutput">—</code></p>
+      <p class="meta" style="margin-top:8px">Last generated <code id="shortUrlOutput">—</code></p>
     </div>
 
     <div class="card" aria-labelledby="import-title">
       <h2 id="import-title" style="margin:0 0 8px 0">Import / Export</h2>
       <div class="controls">
-        <input id="csvFile" type="file" accept=".csv" />
+        <input style="width:100%;" id="csvFile" type="file" accept=".csv" />
         <button id="undoImportBtn" class="btn">Undo Last Import</button>
       </div>
       <p class="meta" style="margin-top:8px">Import expects CSV with header: <code>Unique ID,Short Form,Short URL,Original URL</code></p>
@@ -85,8 +85,8 @@
 
     <div class="card" aria-labelledby="history-title">
       <h2 id="history-title" style="margin:0 0 8px 0">History</h2>
-	<button id="exportBtn" class="btn" style="float:right;margin-right:0px;">Export History (CSV)</button>
-        <button id="deleteAllBtn" class="btn" style="float:right;margin-left:10px; margin-right:10px;">Delete All History</button>
+	<button id="exportBtn" class="btn" >Export History (CSV)</button>
+        <button id="deleteAllBtn" class="btn" >Delete All History</button>
 
       <div class="controls" style="margin-bottom:12px">
         <input id="searchInput" class="input-full" type="text" placeholder="Search by id, short form, short URL or original URL" />
@@ -116,8 +116,8 @@
     </div>
   </main>
 
-  <footer style="margin-top:18px;text-align:center;color:var(--muted);font-size:0.9rem">
-    Made with ❤️ — localStorage demo. Add a backend for production redirects.
+  <footer style="margin-top:18px;text-align:center;color:var(--muted);font-size:0.9rem; background:black; padding:16px;">
+    &copy;2025: Web Toolbox [localStorage demo]
   </footer>
 
   <!-- QRCode.js (kept from original) -->
