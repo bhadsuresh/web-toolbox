@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Free online QR Code generator tool">
+
 <title>QR Code Generator</title>
 <style>
 :root{
@@ -76,6 +78,16 @@ footer { background:#333; color:white; text-align:center; padding:15px; margin-t
   </div>
 
   <div class="input-group">
+    <label>Error Correction Level:</label>
+    <select id="errorCorrectionLevel">
+      <option value="L">L (Low - 7%)</option>
+      <option value="M" selected>M (Medium - 15%)</option>
+      <option value="Q">Q (Quartile - 25%)</option>
+      <option value="H">H (High - 30%)</option>
+    </select>
+  </div>
+
+  <div class="input-group">
     <label>Foreground Color:</label>
     <input type="color" id="fgColor" value="#000000">
   </div>
@@ -95,7 +107,6 @@ footer { background:#333; color:white; text-align:center; padding:15px; margin-t
 <footer style="margin-top:18px;text-align:center;color:var(--muted);font-size:0.9rem; background:black; padding:16px;">
     &copy;2025: Web Toolbox
   </footer>
-
 
 <script>
 function updateFields() {
@@ -183,7 +194,16 @@ function generateQRCode() {
   const size = parseInt(document.getElementById('qrSize').value) || 200;
   const fg = document.getElementById('fgColor').value;
   const bg = document.getElementById('bgColor').value;
-  const qr = new QRCode(container, { text: qrData, width: size, height: size, colorDark: fg, colorLight: bg });
+  const ecc = document.getElementById('errorCorrectionLevel').value;
+
+  const qr = new QRCode(container, { 
+    text: qrData, 
+    width: size, 
+    height: size, 
+    colorDark: fg, 
+    colorLight: bg, 
+    correctLevel: QRCode.CorrectLevel[ecc]
+  });
 
   // Add Download Button
   setTimeout(()=>{
@@ -193,7 +213,12 @@ function generateQRCode() {
       btn.innerText = 'Download QR Code';
       btn.style.display='block';
       btn.style.margin='10px auto';
-      btn.onclick=()=>{ const link=document.createElement('a'); link.href=canvas.toDataURL("image/png"); link.download="QR_Code.png"; link.click(); };
+      btn.onclick=()=>{ 
+        const link=document.createElement('a'); 
+        link.href=canvas.toDataURL("image/png"); 
+        link.download="QR_Code.png"; 
+        link.click(); 
+      };
       container.appendChild(btn);
     }
   },100);

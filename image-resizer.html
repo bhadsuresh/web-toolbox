@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Resize JPG, PNG, WebP, and other images instantly. Free Image Resizer tool to adjust dimensions online — privacy-safe and mobile friendly." />
+<title>Image Resizer - Resize JPG, PNG, WebP, GIF, BMP, TIFF, HEIC, AVIF</title>
+<style>
+ :root{
+      --bg:#f8fafc; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --text:#0f1724;
+      --radius:12px; --shadow:0 8px 24px rgba(15,23,36,0.06);
+    }
+
+body {
+  font-family: "Segoe UI", sans-serif
+  background: #f8fafc;
+  margin: 0;
+  text-align: center;
+}
+
+header{background:linear-gradient(90deg,var(--accent),#1e3a8a);color:#fff;padding:16px;border-radius:0px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+    header h1{margin:0;font-size:1.15rem}
+    header p{margin:6px 0 0;font-size:0.9rem;opacity:0.95}
+    header a button{background:#fff;color:var(--accent);border:none;padding:8px 12px;border-radius:px;cursor:pointer;font-weight:600}
+    .hero-placeholder{margin:18px 0;text-align:center}
+    .hero-placeholder img{width:100%;max-height:240px;object-fit:cover;border-radius:0px;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+
+.container {
+  max-width: 600px;
+  margin: 20px auto;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.input-container {
+  display: flex; /* Makes the container a flex container */
+  /*justify-content: space-around; /* Distributes space evenly around items */*/
+  align-items: center; /* Vertically centers items within the container */
+  /* Optional: Add other styles like width, height, background-color for visualization */
+  width: 100%;
+  height: 100px;
+  /*background-color: #f0f0f0;*/
+}
+
+.item {
+  /* Optional: Add styles for individual items */
+  padding: 10px;
+ /* border: 1px solid #ccc;*/
+  /*background-color: #e0e0e0;*/
+}
+
+/* ✅ FIXED DROP ZONE */
+.drop-zone {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border: 2px dashed #1e90ff;
+  border-radius: 10px;
+  padding: 40px;
+  cursor: pointer;
+  color: #555;
+  transition: background 0.3s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.drop-zone p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+.drop-zone.dragover { background: #e3f2ff; }
+
+input[type=file] { display: none; }
+
+img {
+  max-width: 100%;
+  margin-top: 20px;
+  border-radius: 8px;
+}
+
+input[type=number] {
+  width: 45%;
+  margin: 10px 2%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+button {
+  background: #1e90ff;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  margin-top: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+button:hover { background: #006edc; }
+a {
+  display: inline-block;
+  margin-top: 15px;
+  color: #1e90ff;
+  text-decoration: none;
+  font-weight: 600;
+}
+a:hover { text-decoration: underline; }
+
+#original-size, #resized-size {
+  margin-top: 8px;
+  color: #444;
+  font-size: 0.95rem;
+}
+
+/* ✅ FAQ SECTION */
+.faq-section {
+  max-width: 600px;
+  margin: 20px auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.08);
+}
+.faq-section h2 { text-align: left; margin-bottom: 15px; color: black; }
+.faq-question {
+  width: 100%;
+  background: #f0f7ff;
+  color: #222;
+  border: none;
+  text-align: left;
+  font-size:15px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.faq-question:hover { background: #e2f0ff; }
+.faq-answer {
+  display: none;
+  padding: 10px 16px;
+  background: #f9f9f9;
+  text-align:left;
+  font-size:14px;
+  border-left: 3px solid #1e90ff;
+  border-radius: 0 0 8px 8px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+</style>
+</head>
+<body>
+<header>
+  <h1>📏 IMAGE RESIZER</h1>
+  <a href="index.html"><button>Home</button></a>
+</header>
+
+<!-- Hero -->
+  <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
+<div class="container">
+  <p>Resize images instantly — keep quality and aspect ratio.</p>
+  <label class="drop-zone" id="dropZone">
+    <p>📂 Drag & Drop or Click to Upload Image</p>
+    <input type="file" id="upload" accept="image/*" />
+  </label>
+  <img id="preview" alt="" />
+  <div id="original-size"></div>
+  
+  <div class="input-container" >
+    <div class="item"> Width: <input   type="number" id="width" placeholder="Width (px)" /></div>
+    <div class="item"> Height: <input type="number" id="height" placeholder="Height (px)" /> </div>
+    <div class="item"> <button id="resizeBtn" disabled>Resize Image</button></div>
+  </div>
+ 
+  <div id="resized-size"></div>
+  <a id="downloadLink" style="display:none;" download="resized_image.jpg">Download Resized Image</a>
+</div>
+
+<!-- ✅ FAQs -->
+<section class="faq-section">
+  <h2>📏 FAQs</h2>
+  <div class="faq">
+    <button class="faq-question">What does an image resizer do?</button>
+    <div class="faq-answer">It changes the width and height of images to fit specific dimensions — perfect for social media, web design, or printing.</div>
+    <button class="faq-question">Will resizing affect image quality?</button>
+    <div class="faq-answer">Downsizing keeps quality intact; enlarging beyond the original resolution may cause blurriness.</div>
+    <button class="faq-question">How do I maintain aspect ratio?</button>
+    <div class="faq-answer">Enter only one dimension (width or height) and leave the other blank — the tool auto-calculates the correct aspect ratio.</div>
+    <button class="faq-question">Can I use this on mobile?</button>
+    <div class="faq-answer">Yes, this tool is mobile-friendly and works in any modern browser.</div>
+  </div>
+</section>
+
+<footer style="margin-top:18px;text-align:center;color:var(--muted);font-size:0.9rem; background:black; padding:16px;">
+	    &copy;2025: Web Toolbox
+</footer>
+
+<script>
+const upload = document.getElementById("upload");
+const preview = document.getElementById("preview");
+const resizeBtn = document.getElementById("resizeBtn");
+const resultSize = document.getElementById("resized-size");
+const originalSize = document.getElementById("original-size");
+const downloadLink = document.getElementById("downloadLink");
+const dropZone = document.getElementById("dropZone");
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + " bytes";
+  else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + " KB";
+  else return (bytes / 1048576).toFixed(2) + " MB";
+}
+
+upload.addEventListener("change", handleFile);
+dropZone.addEventListener("dragover", e => {
+  e.preventDefault();
+  dropZone.classList.add("dragover");
+});
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+dropZone.addEventListener("drop", e => {
+  e.preventDefault();
+  dropZone.classList.remove("dragover");
+  upload.files = e.dataTransfer.files;
+  handleFile();
+});
+
+function handleFile() {
+  const file = upload.files[0];
+  if (!file) return;
+  preview.src = URL.createObjectURL(file);
+  originalSize.textContent = "Original size: " + formatBytes(file.size);
+  resizeBtn.disabled = false;
+}
+
+resizeBtn.addEventListener("click", () => {
+  const file = upload.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.src = e.target.result;
+    img.onload = () => {
+      const newWidth = parseInt(document.getElementById("width").value) || img.width;
+      const newHeight = parseInt(document.getElementById("height").value) || (img.height * newWidth / img.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, newWidth, newHeight);
+      canvas.toBlob(blob => {
+        resultSize.textContent = "Resized size: " + formatBytes(blob.size);
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.style.display = "block";
+      }, "image/jpeg", 0.9);
+    };
+  };
+  reader.readAsDataURL(file);
+});
+
+// FAQ accordion
+document.querySelectorAll('.faq-question').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const ans = btn.nextElementSibling;
+    const open = ans.style.display === 'block';
+    document.querySelectorAll('.faq-answer').forEach(a=>a.style.display='none');
+    ans.style.display = open ? 'none' : 'block';
+  });
+});
+</script>
+</body>
+</html>

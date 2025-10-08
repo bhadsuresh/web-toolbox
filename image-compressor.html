@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Free online Image Compressor tool — Compress JPG, PNG, WebP, GIF, and more without quality loss. Adjust compression level easily for perfect balance between size and clarity." />
+<title>Image Compressor - Compress JPG, PNG, WebP, GIF, BMP, TIFF, HEIC, AVIF</title>
+<style>
+
+     :root{
+      --bg:#f8fafc; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --text:#0f1724;
+      --radius:12px; --shadow:0 8px 24px rgba(15,23,36,0.06);
+    }
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: #f8fafc;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+header{background:linear-gradient(90deg,var(--accent),#1e3a8a);color:#fff;padding:16px;border-radius:0px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+    header h1{margin:0;font-size:1.15rem}
+    header p{margin:6px 0 0;font-size:0.9rem;opacity:0.95}
+    header a button{background:#fff;color:var(--accent);border:none;padding:8px 12px;border-radius:px;cursor:pointer;font-weight:600}
+    .hero-placeholder{margin:18px 0;text-align:center}
+    .hero-placeholder img{width:100%;max-height:240px;object-fit:cover;border-radius:0px;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+
+.container {
+  max-width: 600px;
+  margin: 20px auto;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* ✅ FIXED DROP ZONE */
+.drop-zone {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border: 2px dashed #1e90ff;
+  border-radius: 10px;
+  padding: 40px;
+  cursor: pointer;
+  color: #555;
+  transition: background 0.3s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.drop-zone p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+.drop-zone.dragover { background: #e3f2ff; }
+
+input[type=file] { display: none; }
+
+img {
+  max-width: 100%;
+  margin-top: 20px;
+  border-radius: 8px;
+}
+
+#result-size, #original-size {
+  margin-top: 8px;
+  color: #444;
+  font-size: 0.95rem;
+}
+
+.quality-section {
+  margin-top: 20px;
+}
+.quality-section label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+.quality-section input[type=range] {
+  width: 80%;
+}
+
+/* Buttons & Links */
+button {
+  background: #1e90ff;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  margin-top: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+button:hover { background: #006edc; }
+
+a {
+  display: inline-block;
+  margin-top: 15px;
+  color: #1e90ff;
+  text-decoration: none;
+  font-weight: 600;
+}
+a:hover { text-decoration: underline; }
+
+/* ✅ FAQ SECTION */
+.faq-section {
+  max-width: 600px;
+  margin: 20px auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.08);
+}
+.faq-section h2 { text-align: center; margin-bottom: 15px; color: #1e90ff; }
+.faq-question {
+  width: 100%;
+  background: #f0f7ff;
+  color: #222;
+  border: none;
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 1rem;
+  border-radius: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.faq-question:hover { background: #e2f0ff; }
+.faq-answer {
+  display: none;
+  padding: 10px 16px;
+  text-align: left;
+  font-size:14px;
+  background: #f9f9f9;
+  border-left: 3px solid #1e90ff;
+  border-radius: 0 0 8px 8px;
+  margin-bottom: 10px;
+  color: #333;
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>🗜️IMAGE COMPRESSOR</h1>
+  <a href="index.html"><button>Home</button></a>
+</header>
+
+<!-- Hero -->
+  <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
+<div class="container">
+  <p style="float:left; margin-left:0px;">Compress JPG, PNG, WebP, and more...adjust quality to your needs.</p>
+  <label class="drop-zone" id="dropZone">
+    <p>📂 Drag & Drop or Click to Upload Image</p>
+    <input type="file" id="upload" accept="image/*" />
+  </label>
+  <img id="preview" alt="" />
+  <div id="original-size"></div>
+
+  <div class="quality-section">
+    <label for="quality">Compression Quality: <span id="qualityValue">70%</span></label>
+    <input type="range" id="quality" min="10" max="100" value="70" />
+  </div>
+
+  <button id="compressBtn" disabled>Compress Image</button>
+  <div id="result-size"></div>
+  <a id="downloadLink" style="display:none;" download="compressed_image.jpg">Download Compressed Image</a>
+</div>
+
+<!-- ✅ FAQs -->
+<section class="faq-section">
+  <h2 style="float:left; margin-left:0px;">🧠 FAQs</h2>
+  <div class="faq">
+    <button class="faq-question">What is an image compressor?</button>
+    <div class="faq-answer">An image compressor reduces file size without major quality loss, optimizing images for faster loading and smaller storage.</div>
+
+    <button class="faq-question">How does the quality slider work?</button>
+    <div class="faq-answer">The slider adjusts compression strength. A lower value means smaller file size but slightly reduced clarity. 70% is a balanced default.</div>
+
+    <button class="faq-question">Which image formats can I compress?</button>
+    <div class="faq-answer">You can compress JPG, PNG, WebP, GIF, BMP, TIFF, HEIC, and AVIF directly in your browser — no uploads to server.</div>
+
+    <button class="faq-question">Is this tool secure?</button>
+    <div class="faq-answer">Yes. All processing happens locally in your browser, keeping your images private.</div>
+  </div>
+</section>
+
+<footer style="margin-top:18px;text-align:center;color:var(--muted);font-size:0.9rem; background:black; padding:16px;">
+	    &copy;2025: Web Toolbox
+</footer>
+<script>
+const upload = document.getElementById("upload");
+const preview = document.getElementById("preview");
+const compressBtn = document.getElementById("compressBtn");
+const resultSize = document.getElementById("result-size");
+const originalSize = document.getElementById("original-size");
+const downloadLink = document.getElementById("downloadLink");
+const dropZone = document.getElementById("dropZone");
+const qualitySlider = document.getElementById("quality");
+const qualityValue = document.getElementById("qualityValue");
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + " bytes";
+  else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + " KB";
+  else return (bytes / 1048576).toFixed(2) + " MB";
+}
+
+upload.addEventListener("change", handleFile);
+dropZone.addEventListener("dragover", e => {
+  e.preventDefault();
+  dropZone.classList.add("dragover");
+});
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+dropZone.addEventListener("drop", e => {
+  e.preventDefault();
+  dropZone.classList.remove("dragover");
+  upload.files = e.dataTransfer.files;
+  handleFile();
+});
+
+function handleFile() {
+  const file = upload.files[0];
+  if (!file) return;
+  preview.src = URL.createObjectURL(file);
+  originalSize.textContent = "Original size: " + formatBytes(file.size);
+  compressBtn.disabled = false;
+}
+
+qualitySlider.addEventListener("input", () => {
+  qualityValue.textContent = qualitySlider.value + "%";
+});
+
+compressBtn.addEventListener("click", () => {
+  const file = upload.files[0];
+  if (!file) return;
+  const quality = qualitySlider.value / 100;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.src = e.target.result;
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob(blob => {
+        resultSize.textContent = "Compressed size: " + formatBytes(blob.size);
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.style.display = "block";
+      }, "image/jpeg", quality);
+    };
+  };
+  reader.readAsDataURL(file);
+});
+
+// FAQ accordion
+document.querySelectorAll('.faq-question').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const ans = btn.nextElementSibling;
+    const open = ans.style.display === 'block';
+    document.querySelectorAll('.faq-answer').forEach(a=>a.style.display='none');
+    ans.style.display = open ? 'none' : 'block';
+  });
+});
+</script>
+</body>
+</html>

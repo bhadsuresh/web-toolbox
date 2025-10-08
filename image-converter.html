@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Free Image Converter Tool – Convert images between JPG, PNG, WebP, GIF, BMP, TIFF, HEIC, and AVIF formats online instantly." />
+  <title>Image Converter</title>
+  <style>
+    :root{
+      --bg:#f8fafc; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --text:#0f1724;
+      --radius:12px; --shadow:0 8px 24px rgba(15,23,36,0.06);
+    }
+
+  body {
+  font-family: "Segoe UI", sans-serif;
+  background: #f8fafc;
+  margin: 0;
+  text-align: center;
+}
+    
+header{background:linear-gradient(90deg,var(--accent),#1e3a8a);color:#fff;padding:16px;border-radius:0px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+    header h1{margin:0;font-size:1.15rem}
+    header p{margin:6px 0 0;font-size:0.9rem;opacity:0.95}
+    header a button{background:#fff;color:var(--accent);border:none;padding:8px 12px;border-radius:px;cursor:pointer;font-weight:600}
+
+    .hero-placeholder{margin:18px 0;text-align:center}
+    .hero-placeholder img{width:100%;max-height:240px;object-fit:cover;border-radius:0px;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+
+
+    .hero-image {
+      width: 100%;
+      max-width: 600px;
+      height: 250px;
+      background: #dbeafe;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px auto;
+      border-radius: 12px;
+      color: #1e3a8a;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+ .container {
+  max-width: 600px;
+  margin: 20px auto;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+
+    .upload-area {
+      border: 2px dashed #3b82f6;
+      border-radius: 10px;
+      padding: 40px 20px;
+      text-align: center;
+      color: #555;
+      cursor: pointer;
+      transition: background 0.3s, border-color 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .upload-area.dragover {
+      background: #eff6ff;
+      border-color: #2563eb;
+    }
+    .upload-area p { margin: 0; font-size: 1.1rem; }
+
+    input[type="file"] { display: none; }
+    select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover:enabled { background: #1e40af; }
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .format-hint {
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 6px;
+    }
+
+    .output { margin-top: 20px; text-align: center; }
+    img { max-width: 100%; margin-top: 10px; border-radius: 8px; }
+    .size-info { margin-top: 10px; color: #555; font-size: 0.95rem; }
+
+    footer { text-align: center; padding: 20px; color: #777; font-size: 0.9rem; }
+
+    /* FAQ styles (same look as your other tools) */
+    .faq-section {
+      max-width: 600px;
+      margin: 24px auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.09);
+    }
+    .faq-section h2 {
+      text-align: center;
+      margin-bottom: 12px;
+      color: #2563eb;
+    }
+    .faq-question {
+      width: 100%;
+      background: #f0f7ff;
+      color: #222;
+      border: none;
+      text-align: left;
+      padding: 12px 14px;
+      font-size: 1rem;
+      border-radius: 8px;
+      margin-top: 8px;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+    .faq-question:hover { background: #e6f0ff; }
+    .faq-answer {
+      display: none;
+      padding: 10px 14px;
+      text-align:left;
+      font-size:14px;
+      background: #f9f9f9;
+      border-left: 3px solid #2563eb;
+      border-radius: 0 0 8px 8px;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>IMAGE CONVERTER</h1>
+    <a href="index.html"><button>Home</button></a>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
+  <div class="container">
+    <p style="text-align:left;" class="format-hint">Convert your images between JPG, PNG, WebP, GIF, BMP, TIFF, HEIC, and AVIF formats instantly.</p>
+    <div class="upload-area" id="upload-area" role="button" tabindex="0" aria-label="Upload image">
+      <p>Drag & Drop image here or <strong>click to upload</strong></p>
+    </div>
+
+    <input type="file" id="file-input" accept="image/*" />
+
+    <select id="format" aria-label="Select output format">
+      <option value="image/jpeg">Convert to JPG</option>
+      <option value="image/png">Convert to PNG</option>
+      <option value="image/webp">Convert to WebP</option>
+      <option value="image/gif">Convert to GIF</option>
+      <option value="image/bmp">Convert to BMP</option>
+      <option value="image/tiff">Convert to TIFF</option>
+      <option value="image/heic">Convert to HEIC</option>
+      <option value="image/avif">Convert to AVIF</option>
+    </select>
+
+    <p class="format-hint" id="format-hint" style="text-align:left;">💡 Most browsers fully support JPG, PNG, WebP, and GIF. HEIC, AVIF, or TIFF may have limited support.</p>
+
+    <button id="convertBtn" disabled>Convert Image</button>
+
+    <div class="output" id="output" aria-live="polite"></div>
+  </div>
+
+  <div class="container faq-section" aria-labelledby="faqs">
+    <h2 style="text-align:left;"id="faqs">❓ FAQs</h2>
+
+    <button class="faq-question">What is the Image Converter tool?</button>
+    <div class="faq-answer">It’s a free online tool that converts images between various formats such as JPG, PNG, WebP, AVIF, and more — directly in your browser.</div>
+
+    <button class="faq-question">Does conversion reduce quality?</button>
+    <div class="faq-answer">If you convert between lossless formats (PNG → BMP) there is no quality loss. Converting to a lossy format (e.g., JPG, WebP) may slightly reduce quality. The tool uses your browser’s default encoding quality.</div>
+
+    <button class="faq-question">Is my image uploaded to a server?</button>
+    <div class="faq-answer">No. Everything runs locally on your device. Your image never leaves your browser.</div>
+
+    <button class="faq-question">Which formats are supported?</button>
+    <div class="faq-answer">Most major formats: JPG, PNG, WebP, GIF, BMP, TIFF, AVIF, and HEIC. Note: HEIC/TIFF/AVIF support depends on your browser — some browsers may not support them.</div>
+
+    <button class="faq-question">Can I convert multiple images at once?</button>
+    <div class="faq-answer">This version handles one image at a time. Future updates may include batch conversion.</div>
+  </div>
+
+  <footer style="margin-top:18px;text-align:center;color:grey;font-size:0.9rem; background:black; padding:16px;">
+	    &copy;2025: Web Toolbox
+</footer>
+
+  <script>
+    const fileInput = document.getElementById('file-input');
+    const convertBtn = document.getElementById('convertBtn');
+    const output = document.getElementById('output');
+    const formatSelect = document.getElementById('format');
+    const uploadArea = document.getElementById('upload-area');
+    const formatHint = document.getElementById('format-hint');
+
+    // State
+    let uploadedImage = null;
+    let originalFileSize = 0;
+    let lastConvertedUrl = null;
+
+    // Open file dialog (single open)
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        fileInput.click();
+      }
+    });
+
+    // Drag & drop
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    });
+
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) handleFile(file);
+    });
+
+    function handleFile(file) {
+      // revoke previous converted blob URL if exists
+      if (lastConvertedUrl) {
+        try { URL.revokeObjectURL(lastConvertedUrl); } catch (err) {}
+        lastConvertedUrl = null;
+      }
+
+      // reset output and state
+      output.innerHTML = `
+        <div id="original-output"></div>
+        <div id="converted-output"></div>
+      `;
+      uploadedImage = null;
+      originalFileSize = file.size;
+      convertBtn.disabled = false;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        uploadedImage = new Image();
+        uploadedImage.src = e.target.result;
+        uploadedImage.onload = () => {
+          const orig = document.getElementById('original-output');
+          orig.innerHTML = `
+            <p><strong>Original Image:</strong></p>
+            <img src="${uploadedImage.src}" alt="Uploaded image">
+            <p class="size-info">Original Size: ${formatBytes(originalFileSize)}</p>
+          `;
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+
+    convertBtn.addEventListener('click', () => {
+      if (!uploadedImage) {
+        alert('Please upload an image first.');
+        return;
+      }
+
+      // disable button during conversion to prevent double-clicks
+      convertBtn.disabled = true;
+
+      // draw to canvas
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = uploadedImage.width;
+      canvas.height = uploadedImage.height;
+      ctx.drawImage(uploadedImage, 0, 0);
+
+      const format = formatSelect.value;
+
+      canvas.toBlob((blob) => {
+        convertBtn.disabled = false; // re-enable
+
+        if (!blob) {
+          alert('Conversion failed. Your browser may not support the selected format.');
+          return;
+        }
+
+        // revoke previous converted URL to avoid leaks
+        if (lastConvertedUrl) {
+          try { URL.revokeObjectURL(lastConvertedUrl); } catch (err) {}
+          lastConvertedUrl = null;
+        }
+
+        const newUrl = URL.createObjectURL(blob);
+        lastConvertedUrl = newUrl;
+
+        // replace converted-output content (no duplication)
+        const converted = document.getElementById('converted-output');
+        if (converted) {
+          converted.innerHTML = `
+            <p><strong>Converted Image:</strong></p>
+            <img src="${newUrl}" alt="Converted image">
+            <p class="size-info">Converted Size: ${formatBytes(blob.size)}</p>
+            <a href="${newUrl}" download="converted-image.${getExtension(format)}">
+              <button>Download Converted Image</button>
+            </a>
+          `;
+        } else {
+          // fallback: append if converted-output not found
+          output.innerHTML += `
+            <p><strong>Converted Image:</strong></p>
+            <img src="${newUrl}" alt="Converted image">
+            <p class="size-info">Converted Size: ${formatBytes(blob.size)}</p>
+            <a href="${newUrl}" download="converted-image.${getExtension(format)}">
+              <button>Download Converted Image</button>
+            </a>
+          `;
+        }
+      }, format);
+    });
+
+    // Format support hint
+    formatSelect.addEventListener('change', () => {
+      const val = formatSelect.value;
+      if (['image/heic', 'image/avif', 'image/tiff'].includes(val)) {
+        formatHint.textContent = "⚠️ Note: Your browser may not fully support this format (HEIC, AVIF, or TIFF). Conversion might fail.";
+        formatHint.style.color = "#b91c1c";
+      } else {
+        formatHint.textContent = "💡 Most browsers fully support JPG, PNG, WebP, and GIF. HEIC, AVIF, or TIFF may have limited support.";
+        formatHint.style.color = "#555";
+      }
+    });
+
+    function formatBytes(bytes) {
+      if (!bytes) return '0 bytes';
+      const units = ['bytes', 'KB', 'MB', 'GB'];
+      let i = 0;
+      while (bytes >= 1024 && i < units.length - 1) {
+        bytes /= 1024;
+        i++;
+      }
+      return `${bytes.toFixed(2)} ${units[i]}`;
+    }
+
+    function getExtension(format) {
+      switch (format) {
+        case 'image/jpeg': return 'jpg';
+        case 'image/png': return 'png';
+        case 'image/webp': return 'webp';
+        case 'image/gif': return 'gif';
+        case 'image/bmp': return 'bmp';
+        case 'image/tiff': return 'tiff';
+        case 'image/heic': return 'heic';
+        case 'image/avif': return 'avif';
+        default: return 'img';
+      }
+    }
+
+    // FAQ accordion behavior
+    document.querySelectorAll('.faq-question').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const ans = btn.nextElementSibling;
+        const open = ans.style.display === 'block';
+        document.querySelectorAll('.faq-answer').forEach(a => a.style.display = 'none');
+        ans.style.display = open ? 'none' : 'block';
+      });
+    });
+  </script>
+</body>
+</html>

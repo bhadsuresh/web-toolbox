@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free online Finance Calculators with interactive charts: Loan EMI, Compound Interest, and ROI. Plan and visualize your finances easily!">
+  <title>Finance Calculators</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+	:root{
+      --bg:#f8fafc; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --text:#0f1724;
+      --radius:12px; --shadow:0 8px 24px rgba(15,23,36,0.06);
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: #f4f8fb;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    header{background:linear-gradient(90deg,var(--accent),#1e3a8a);color:#fff;padding:16px;border-radius:0px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    header h1{margin:0;font-size:1.15rem}
+    header p{margin:4px 0 0;font-size:0.9rem;opacity:0.95}
+
+    h1 { margin: 0; }
+    .container {
+      max-width: 750px;
+      background: #fff;
+      margin: 2rem auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+    }
+    nav {
+      display: flex;
+      justify-content: space-around;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    nav button {
+      background: none;
+      border: none;
+      padding: 0.75rem 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      color: #007bff;
+      border-radius: 8px 8px 0 0;
+    }
+    nav button.active {
+      background: #007bff;
+      color: #fff;
+    }
+    .calculator {
+      display: none;
+    }
+    .calculator.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    label {
+      display: block;
+      margin: 0.5rem 0 0.25rem;
+    }
+    input {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button.calculate {
+      margin-top: 1rem;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      padding: 0.75rem;
+      width: 100%;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 1rem;
+      background: #eaf6ff;
+      padding: 1rem;
+      border-radius: 6px;
+    }
+    canvas {
+      margin-top: 1rem;
+      width: 100% !important;
+      height: 280px !important;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #555;
+    }
+footer { background:#333; color:white; text-align:center; padding:15px; margin-top:30px; font-size:0.9em; }
+
+.button { padding:10px 15px; font-size:16px; border:none; border-radius:6px; background:#4a90e2; color:#fff; cursor:pointer; margin-top:10px; }
+.button:hover { background:#357ab8; }
+
+.hero-placeholder {
+  margin: 20px 0;
+  text-align: center;
+}
+.hero-placeholder img {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+  
+</style>
+</head>
+<body>
+
+<header>
+  <div> <h1>FINANCE CALCULATORS</h1> </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <a href="index.html"><button class="button">Home</button></a>
+    </div>
+</header>
+<!-- Hero -->
+  <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
+<div class="container">
+<p>Calculate & visualize EMI, Compound Interest, and ROI</p>
+  <nav>
+    <button class="tab active" data-target="emi">Loan EMI</button>
+    <button class="tab" data-target="compound">Compound Interest</button>
+    <button class="tab" data-target="roi">ROI</button>
+  </nav>
+
+  <!-- Loan EMI Calculator -->
+  <div id="emi" class="calculator active">
+    <h2>Loan EMI Calculator</h2>
+    <label>Loan Amount (₹)</label>
+    <input type="number" id="loanAmount" placeholder="e.g. 500000">
+    <label>Annual Interest Rate (%)</label>
+    <input type="number" id="interestRate" placeholder="e.g. 8">
+    <label>Loan Tenure (years)</label>
+    <input type="number" id="loanTenure" placeholder="e.g. 5">
+    <button class="calculate" onclick="calculateEMI()">Calculate EMI</button>
+    <div id="emiResult" class="result"></div>
+    <canvas id="emiChart"></canvas>
+  </div>
+
+  <!-- Compound Interest Calculator -->
+  <div id="compound" class="calculator">
+    <h2>Compound Interest Calculator</h2>
+    <label>Principal Amount (₹)</label>
+    <input type="number" id="principal" placeholder="e.g. 10000">
+    <label>Annual Interest Rate (%)</label>
+    <input type="number" id="rate" placeholder="e.g. 7">
+    <label>Time Period (years)</label>
+    <input type="number" id="time" placeholder="e.g. 10">
+    <label>Compounding per Year</label>
+    <input type="number" id="frequency" placeholder="e.g. 4">
+    <button class="calculate" onclick="calculateCompound()">Calculate</button>
+    <div id="compoundResult" class="result"></div>
+    <canvas id="compoundChart"></canvas>
+  </div>
+
+  <!-- ROI Calculator -->
+  <div id="roi" class="calculator">
+    <h2>Return on Investment (ROI) Calculator</h2>
+    <label>Initial Investment (₹)</label>
+    <input type="number" id="initialInvestment" placeholder="e.g. 50000">
+    <label>Final Value (₹)</label>
+    <input type="number" id="finalValue" placeholder="e.g. 65000">
+    <label>Investment Period (years)</label>
+    <input type="number" id="period" placeholder="e.g. 2">
+    <button class="calculate" onclick="calculateROI()">Calculate ROI</button>
+    <div id="roiResult" class="result"></div>
+    <canvas id="roiChart"></canvas>
+  </div>
+</div>
+
+<footer style="margin-top:18px;text-align:center;color:grey;font-size:0.9rem; background:black; padding:16px;">
+    &copy;2025: Web Toolbox
+  </footer>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.calculator').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.target).classList.add('active');
+    });
+  });
+
+  let emiChartInstance, compoundChartInstance, roiChartInstance;
+
+  // EMI Calculator
+  function calculateEMI() {
+    const P = parseFloat(document.getElementById('loanAmount').value);
+    const annualRate = parseFloat(document.getElementById('interestRate').value);
+    const years = parseFloat(document.getElementById('loanTenure').value);
+
+    if (!P || !annualRate || !years) {
+      document.getElementById('emiResult').innerHTML = "Please fill all fields correctly.";
+      return;
+    }
+
+    const r = annualRate / (12 * 100);
+    const n = years * 12;
+    const emi = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+
+    const totalPayment = emi * n;
+    const totalInterest = totalPayment - P;
+
+    document.getElementById('emiResult').innerHTML = `
+      <strong>Monthly EMI:</strong> ₹${emi.toFixed(2)}<br>
+      <strong>Total Interest:</strong> ₹${totalInterest.toFixed(2)}<br>
+      <strong>Total Payment:</strong> ₹${totalPayment.toFixed(2)}
+    `;
+
+    // Chart
+    if (emiChartInstance) emiChartInstance.destroy();
+    const ctx = document.getElementById('emiChart').getContext('2d');
+    emiChartInstance = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: ['Principal', 'Interest'],
+        datasets: [{
+          data: [P, totalInterest],
+          backgroundColor: ['#007bff', '#ff9800']
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+  }
+
+  // Compound Interest Calculator
+  function calculateCompound() {
+    const principal = parseFloat(document.getElementById('principal').value);
+    const rate = parseFloat(document.getElementById('rate').value);
+    const time = parseFloat(document.getElementById('time').value);
+    const freq = parseFloat(document.getElementById('frequency').value);
+
+    if (!principal || !rate || !time || !freq) {
+      document.getElementById('compoundResult').innerHTML = "Please fill all fields correctly.";
+      return;
+    }
+
+    const A = principal * Math.pow((1 + (rate / (100 * freq))), freq * time);
+    const CI = A - principal;
+
+    document.getElementById('compoundResult').innerHTML = `
+      <strong>Future Value:</strong> ₹${A.toFixed(2)}<br>
+      <strong>Compound Interest:</strong> ₹${CI.toFixed(2)}
+    `;
+
+    // Growth data for each year
+    const labels = [];
+    const values = [];
+    for (let i = 1; i <= time; i++) {
+      const yearValue = principal * Math.pow((1 + (rate / (100 * freq))), freq * i);
+      labels.push("Year " + i);
+      values.push(yearValue.toFixed(2));
+    }
+
+    if (compoundChartInstance) compoundChartInstance.destroy();
+    const ctx = document.getElementById('compoundChart').getContext('2d');
+    compoundChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Investment Growth',
+          data: values,
+          borderColor: '#007bff',
+          fill: false,
+          tension: 0.2
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+  }
+
+  // ROI Calculator
+  function calculateROI() {
+    const initial = parseFloat(document.getElementById('initialInvestment').value);
+    const final = parseFloat(document.getElementById('finalValue').value);
+    const years = parseFloat(document.getElementById('period').value);
+
+    if (!initial || !final || !years) {
+      document.getElementById('roiResult').innerHTML = "Please fill all fields correctly.";
+      return;
+    }
+
+    const roiPercent = ((final - initial) / initial) * 100;
+    const annualizedROI = ((final / initial) ** (1 / years) - 1) * 100;
+
+    document.getElementById('roiResult').innerHTML = `
+      <strong>Total ROI:</strong> ${roiPercent.toFixed(2)}%<br>
+      <strong>Annualized ROI:</strong> ${annualizedROI.toFixed(2)}%
+    `;
+
+    if (roiChartInstance) roiChartInstance.destroy();
+    const ctx = document.getElementById('roiChart').getContext('2d');
+    roiChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Initial Investment', 'Final Value'],
+        datasets: [{
+          data: [initial, final],
+          backgroundColor: ['#007bff', '#00bfa5']
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no" />
+  
+  <title>Water Quality Analyzer — Offline Camera & Strip Test Report</title>
+  <meta name="description" content="Offline Water Quality Analysis app using camera/image upload to detect test strips, analyze color pads, and generate a potability report against WHO/IS standards. No internet required." />
+  
+  <style>
+    /* Global Reset & Typography */
+    :root{
+      --bg:#f8fafc; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --text:#0f1724;
+      --radius:12px; --shadow:0 8px 24px rgba(15,23,36,0.06);
+    }
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: #f8fafc;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+    }
+    
+header{background:linear-gradient(90deg,var(--accent),#1e3a8a);color:#fff;padding:16px;border-radius:0px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+    header h1{margin:0;font-size:1.15rem}
+    header p{margin:6px 0 0;font-size:0.9rem;opacity:0.95}
+    header a button{background:#fff;color:var(--accent);border:none;padding:8px 12px;border-radius:px;cursor:pointer;font-weight:600}
+
+   
+    h2 { /* New: Step headings for better structure/SEO */
+      font-size: 1rem;
+      margin-top: 0;
+      color: #374151;
+      text-align:left;
+    }
+
+    /* Card Styling */
+    .card{
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08); /* Softer shadow */
+      margin-bottom: 20px;
+      border: 1px solid #e5e7eb; /* Subtle border */
+    }
+    
+    /* Media Elements */
+    video, canvas{
+      width: 100%;
+      max-width: 100%;
+      border-radius: 8px;
+      background: #000;
+      object-fit: contain; /* Ensures the video/canvas scales nicely */
+    }
+
+    /* Controls and Buttons */
+    .controls{
+      display: flex;
+      gap: 10px; /* Increased gap */
+      flex-wrap: wrap;
+      margin-top: 10px;
+      justify-content: flex-start; /* Align to the start */
+    }
+    
+    button{
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 0;
+      background: #0b63d6;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s ease;
+      flex-grow: 1; /* Allow buttons to grow in flex container */
+    }
+    
+    button:hover{
+      background: #0950a9;
+    }
+    
+    /* Input and Utility Text */
+    .muted, .small{
+      color: #6b7280;
+      font-size: 0.9rem;
+      text-align:left;
+      padding-left:15px;
+      padding-right:15px;
+    }
+    
+    #filein {
+      padding: 8px 0; /* Padding for better click area */
+    }
+    
+    /* Data Table Styling */
+    table{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    
+    th,td{
+      border: 1px solid #e5e7eb;
+      padding: 12px; /* More padding */
+      text-align: left;
+    }
+    
+    th{
+      background: #f9fafb; /* Lighter header background */
+      font-weight: 600;
+      color: #374151;
+    }
+    
+    /* Status Labels */
+    .ok{ color: #059669; font-weight: 700; } /* Tailwind Green */
+    .bad{ color: #ef4444; font-weight: 700; } /* Tailwind Red */
+    .warn{ color: #f59e0b; font-weight: 700; } /* Tailwind Amber */
+    
+    /* Input Group for Slicing */
+    .slice-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 6px;
+      flex-grow: 1;
+    }
+    
+    .slice-group input {
+      width: 60px !important;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+    }
+
+    /* FIX: Scrollable container for tables on mobile */
+    .table-responsive {
+      overflow-x: auto; /* Enables horizontal scrolling */
+      -webkit-overflow-scrolling: touch; /* Improves scrolling smoothness on iOS */
+      margin-top: 10px; /* Space above the table */
+    }
+    
+    /* Responsive Layout */
+    @media (min-width: 768px) {
+      body {
+        max-width: 900px; /* Center content on larger screens */
+        margin: 0 auto;
+        padding: 24px;
+      }
+      
+      .input-area { /* Flex layout for Capture/Upload section on desktop */
+        display: flex;
+        gap: 20px;
+      }
+
+      .input-area > div {
+        flex: 1;
+        min-width: 0; /* Important for flex child sizing */
+      }
+      
+      .controls button {
+        flex-grow: 0; /* Don't force buttons to fill width on desktop */
+      }
+    }
+    
+    /* How-to Guide Styling */
+    details{
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    summary{
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 12px;
+      cursor: pointer;
+      color: #0b63d6;
+      list-style: none; /* Removes default triangle in some browsers */
+      display: flex;
+      align-items: center;
+    }
+    
+    summary::before { /* Custom triangle indicator */
+      content: '▶';
+      margin-right: 10px;
+      transition: transform 0.2s ease;
+    }
+    
+    details[open] > summary::before {
+      transform: rotate(90deg);
+    }
+
+    details > div {
+      padding: 0 16px 16px 16px;
+    }
+
+    details h3 {
+      font-size: 1rem;
+      color: #374151;
+      margin: 10px 0 5px 0;
+    }
+.hero-placeholder {
+  margin: 20px 0;
+  text-align: center;
+}
+.hero-placeholder img {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+footer { background:#333; color:white; text-align:center; padding:15px; margin-top:30px; font-size:0.9em; }
+
+  </style>
+  <script async src="https://docs.opencv.org/4.x/opencv.js"></script>
+</head>
+<body>
+  <!-- HEADER (Fixed at the top) -->
+    <header>
+  <h1>WATER QUALITY CHECKER </h1>
+       <a href="index.html"><button>Home</button></a>
+  </header>
+
+<!-- HERO IMAGE PLACEHOLDER -->
+        <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
+<main>
+  
+  <details style="margin:15px;">
+    <summary style="font-size:16px;">📖 How to Use this Application</summary>
+    <div style="font-size:12px; text-align:left;">
+      <h3 style="margin-top:0;font-size:14px;">Step 1. Capture or Upload Strip Image</h3>
+      <ul>
+        <li>Use the **Start Camera** and **Capture Photo** buttons, or use **Choose File** to upload an existing image of a water quality test strip.</li>
+        <li>**Tip:** For best results, include a printed **white patch** in the frame (for color calibration) and place the strip on a **neutral background**.</li>
+      </ul>
+
+      <h3 style="font-size:14px;">Step 2. Detect and Slice Pads</h3>
+      <ul>
+        <li>Click **Auto-Detect Strip** to find the strip in the image.</li>
+        <li>Click **Warp to Strip View** to correct the perspective (requires successful detection).</li>
+        <li>Set the correct number of **Pads** and click **Slice Pads** to isolate the color patches for analysis.</li>
+      </ul>
+
+      <h3 style="font-size:14px;">Step 3. Analyze and Report</h3>
+      <ul>
+        <li>Click **Analyze (Color -> Values)** to convert the pad colors into parameter values (using the demo chart or your uploaded calibration).</li>
+        <li>Review the report and click **Export CSV** or **Print/Save Report** to save your results.</li>
+      </ul>
+    </div>
+  </details>
+
+  <p class="muted">All processing runs entirely in your browser. The app auto-detects the strip, warps it, slices pads, converts pad colors to parameter values (based on built-in demo logic), and generates a potability report compared to WHO-like thresholds. **No cloud connection needed.**</p>
+
+  <section class="card">
+    <h2>Step 1. Capture / Upload Image</h2>
+    <div class="input-area">
+      <div style="flex:1;">
+        <video id="video" autoplay playsinline muted style="height:220px;"></video>
+        <div class="controls">
+          <button id="startCam">Start Camera</button>
+          <button id="snap">Capture Photo</button>
+          <button id="stopCam">Stop</button>
+        </div>
+      </div>
+      <div style="flex:1;">
+        <label for="filein" class="small" style="display:block;margin-bottom:4px;">Upload an Image File:</label>
+        <input id="filein" type="file" accept="image/*" aria-label="Upload image file for water quality strip analysis">
+        <div class="small" style="margin-top:12px">Tip: Include a printed white patch for color calibration and place the strip on a neutral background.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Step 2. Detect & Slice Pads</h2>
+    <canvas id="canvasWork" style="height:360px"></canvas>
+    <div class="controls">
+      <button id="detect">Auto-Detect Strip</button>
+      <button id="warpBtn">Warp to Strip View</button>
+      <div class="slice-group">
+        <label for="sliceCount">Pads:</label>
+        <input id="sliceCount" type="number" min="1" max="12" value="3" style="width:60px;">
+      </div>
+      <button id="sliceBtn">Slice Pads</button>
+    </div>
+    <div class="small" id="status" style="margin-top:10px;">No image loaded</div>
+  </section>
+
+  <section class="card">
+    <h2>Step 3. Analyze & Report Results</h2>
+    <div class="controls actions">
+      <button id="analyzeBtn">Analyze (Color -> Values)</button>
+      <button id="exportCSV">Export CSV</button>
+      <button id="printReport">Print/Save Report</button>
+    </div>
+    <div id="reportArea" style="margin-top:15px;"></div>
+  </section>
+
+</main>
+<footer style="margin:0px;">
+&copy; 2025: Web ToolBox
+</footer>
+
+  <script>
+  // --- Utility & state ---
+  const video = document.getElementById('video');
+  const filein = document.getElementById('filein');
+  const startCam = document.getElementById('startCam');
+  const stopCam = document.getElementById('stopCam');
+  const snap = document.getElementById('snap');
+  const canvasWork = document.getElementById('canvasWork');
+  const ctx = canvasWork.getContext('2d');
+  const detectBtn = document.getElementById('detect');
+  const warpBtn = document.getElementById('warpBtn');
+  const sliceBtn = document.getElementById('sliceBtn');
+  const sliceCountInput = document.getElementById('sliceCount');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const status = document.getElementById('status');
+  const reportArea = document.getElementById('reportArea');
+  const exportCSVBtn = document.getElementById('exportCSV');
+  const printBtn = document.getElementById('printReport');
+
+  let stream = null; let currentImg = null; let detectedQuad = null; let warpedCanvas = null; let padCanvases = [];
+
+  startCam.onclick = async ()=>{
+    try{ stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}); video.srcObject = stream; status.textContent = 'Camera started'; }catch(e){ alert('Camera start failed: '+e.message); }
+  }
+  stopCam.onclick = ()=>{ if(stream){ stream.getTracks().forEach(t=>t.stop()); video.srcObject=null; stream=null; status.textContent='Camera stopped'; } }
+
+  snap.onclick = ()=>{
+    if(!stream) return alert('Start camera first');
+    const tmp = document.createElement('canvas'); tmp.width = video.videoWidth; tmp.height = video.videoHeight; tmp.getContext('2d').drawImage(video,0,0);
+    const img = new Image(); img.onload=()=>{ loadImageToWork(img); }; img.src = tmp.toDataURL('image/jpeg');
+  }
+  filein.onchange = (e)=>{ const f = e.target.files[0]; if(!f) return; const url = URL.createObjectURL(f); const img = new Image(); img.onload = ()=>{ loadImageToWork(img); URL.revokeObjectURL(url); }; img.src = url; }
+
+  function loadImageToWork(img){ currentImg = img; const maxW=1000; const w = Math.min(img.width, maxW); const scale = w / img.width; canvasWork.width = w; canvasWork.height = Math.round(img.height * scale); ctx.clearRect(0,0,canvasWork.width,canvasWork.height); ctx.drawImage(img,0,0,canvasWork.width,canvasWork.height); status.textContent = 'Image loaded'; detectedQuad=null; warpedCanvas=null; padCanvases=[]; reportArea.innerHTML=''; }
+
+  // Detection using OpenCV.js - find largest quad-like contour
+  detectBtn.onclick = ()=>{
+    if(!currentImg) return alert('Load an image first');
+    try{ detectStrip(); }catch(e){ console.error(e); alert('Detection error: '+e.message); }
+  }
+
+  function detectStrip(){ if(typeof cv === 'undefined') return alert('OpenCV.js not yet loaded — detection requires OpenCV. You can still slice manually by warping later.');
+    const src = cv.imread(canvasWork);
+    let gray = new cv.Mat(); cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+    cv.GaussianBlur(gray, gray, new cv.Size(5,5), 0);
+    cv.Canny(gray, gray, 50, 150);
+    let contours = new cv.MatVector(); let hierarchy = new cv.Mat();
+    cv.findContours(gray, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
+
+    let best = null; let bestArea = 0;
+    for(let i=0;i<contours.size();i++){
+      const cnt = contours.get(i);
+      const area = cv.contourArea(cnt);
+      if(area < 500) { cnt.delete(); continue; }
+      const peri = cv.arcLength(cnt, true);
+      let approx = new cv.Mat(); cv.approxPolyDP(cnt, approx, 0.02*peri, true);
+      if(approx.rows === 4){ if(area > bestArea){ bestArea = area; let pts = []; for(let r=0;r<4;r++){ pts.push({x: approx.intPtr(r,0)[0], y: approx.intPtr(r,0)[1]}); } best = orderQuadPoints(pts); } }
+      approx.delete(); cnt.delete();
+    }
+    cv.imshow(canvasWork, src); if(best){ detectedQuad = best; drawQuad(best); status.textContent='Detected strip (green quad)'; } else { status.textContent='No strip-like rectangle found'; }
+    src.delete(); gray.delete(); contours.delete(); hierarchy.delete();
+  }
+
+  function orderQuadPoints(pts){ pts.sort((a,b)=>a.x - b.x); const left = pts.slice(0,2).sort((a,b)=>a.y-b.y); const right = pts.slice(2,4).sort((a,b)=>a.y-b.y); return [left[0], right[0], right[1], left[1]]; }
+  function drawQuad(q){ ctx.lineWidth=3; ctx.strokeStyle='lime'; ctx.beginPath(); ctx.moveTo(q[0].x,q[0].y); for(let i=1;i<4;i++) ctx.lineTo(q[i].x,q[i].y); ctx.closePath(); ctx.stroke(); }
+
+  warpBtn.onclick = ()=>{ if(!detectedQuad) return alert('Detect a strip first'); warpToStrip(); }
+
+  function warpToStrip(){ // perspective warp to top-down
+    const srcQuad = detectedQuad;
+    function dist(a,b){ return Math.hypot(a.x-b.x,a.y-b.y); }
+    const wA = dist(srcQuad[0], srcQuad[1]); const wB = dist(srcQuad[3], srcQuad[2]); const maxW = Math.max(wA,wB);
+    const hA = dist(srcQuad[0], srcQuad[3]); const hB = dist(srcQuad[1], srcQuad[2]); const maxH=Math.max(hA,hB);
+    const dstW = Math.max(120, Math.round(maxW)); const dstH = Math.max(40, Math.round(maxH));
+    // perform manual warp using canvas transform trick
+    // create source canvas full-res
+    const full = document.createElement('canvas'); full.width = currentImg.width; full.height = currentImg.height; full.getContext('2d').drawImage(currentImg,0,0);
+    // map detected quad from displayed coords to original coords
+    const scaleX = currentImg.width / canvasWork.width; const scaleY = currentImg.height / canvasWork.height;
+    const s0 = {x: Math.round(srcQuad[0].x * scaleX), y: Math.round(srcQuad[0].y * scaleY)};
+    const s1 = {x: Math.round(srcQuad[1].x * scaleX), y: Math.round(srcQuad[1].y * scaleY)};
+    const s2 = {x: Math.round(srcQuad[2].x * scaleX), y: Math.round(srcQuad[2].y * scaleY)};
+    const s3 = {x: Math.round(srcQuad[3].x * scaleX), y: Math.round(srcQuad[3].y * scaleY)};
+    // use cv if available for accurate warp, else fallback to simple drawImage (may be skewed)
+    if(typeof cv !== 'undefined'){
+      const srcMat = cv.imread(full);
+      const dstMat = new cv.Mat();
+      const srcTri = cv.matFromArray(4,1,cv.CV_32FC2,[s0.x,s0.y, s1.x,s1.y, s2.x,s2.y, s3.x,s3.y]);
+      const dstTri = cv.matFromArray(4,1,cv.CV_32FC2,[0,0, dstW-1,0, dstW-1,dstH-1, 0,dstH-1]);
+      const M = cv.getPerspectiveTransform(srcTri, dstTri);
+      cv.warpPerspective(srcMat, dstMat, M, new cv.Size(dstW, dstH));
+      const tmp = document.createElement('canvas'); tmp.width = dstMat.cols; tmp.height = dstMat.rows; cv.imshow(tmp, dstMat);
+      warpedCanvas = tmp;
+      srcMat.delete(); dstMat.delete(); srcTri.delete(); dstTri.delete(); M.delete();
+    } else {
+      // fallback: crop bounding box
+      const minX = Math.min(s0.x,s1.x,s2.x,s3.x); const minY = Math.min(s0.y,s1.y,s2.y,s3.y);
+      const maxX = Math.max(s0.x,s1.x,s2.x,s3.x); const maxY = Math.max(s0.y,s1.y,s2.y,s3.y);
+      const w = maxX-minX, h = maxY-minY;
+      const tmp = document.createElement('canvas'); tmp.width = w; tmp.height = h; tmp.getContext('2d').drawImage(full, minX,minY,w,h, 0,0,w,h);
+      warpedCanvas = tmp;
+    }
+    // draw warped scaled to work canvas width
+    const scale = canvasWork.width / warpedCanvas.width;
+    canvasWork.height = Math.round(warpedCanvas.height * scale);
+    ctx.clearRect(0,0,canvasWork.width,canvasWork.height); ctx.drawImage(warpedCanvas,0,0,canvasWork.width,canvasWork.height);
+    status.textContent = 'Warp complete — ready to slice pads.';
+  }
+
+  sliceBtn.onclick = ()=>{ if(!warpedCanvas) return alert('Warp first'); const count = Number(sliceCountInput.value) || 3; slicePadsEqual(warpedCanvas, count); }
+
+  function slicePadsEqual(canvasIn, count){ padCanvases = []; const w = canvasIn.width, h = canvasIn.height; const padW = Math.floor(w / count);
+    for(let i=0;i<count;i++){ const sx = i*padW; const tmp = document.createElement('canvas'); tmp.width = padW; tmp.height = h; tmp.getContext('2d').drawImage(canvasIn, sx,0,padW,h, 0,0,padW,h); padCanvases.push(tmp); }
+    // render overlay on work canvas
+    ctx.clearRect(0,0,canvasWork.width,canvasWork.height); ctx.drawImage(warpedCanvas,0,0,canvasWork.width,canvasWork.height); ctx.lineWidth=2; ctx.strokeStyle='cyan'; for(let i=0;i<count;i++){ const boxW = Math.round((padCanvases[i].width / warpedCanvas.width) * canvasWork.width); const x = Math.round(i * boxW); ctx.strokeRect(x+2,4, boxW-4, canvasWork.height-8); }
+    // show pad colors
+    let txt = 'Pads: ' + padCanvases.map((c,i)=>{ const col = avgColorOfCanvas(c); return `P${i+1}: rgb(${col.r},${col.g},${col.b})`; }).join(' | ');
+    status.textContent = txt;
+  }
+
+  function avgColorOfCanvas(c){ const ctx=c.getContext('2d'); const data = ctx.getImageData(0,0,c.width,c.height).data; let r=0,g=0,b=0, n=0; for(let i=0;i<data.length;i+=4){ r+=data[i]; g+=data[i+1]; b+=data[i+2]; n++; } return {r:Math.round(r/n), g:Math.round(g/n), b:Math.round(b/n)}; }
+
+  // --- Mapping (demo) pad -> parameter and sample color->value mapping ---
+  // Map pad index to parameter name and threshold ranges (WHO-like). Replace with your strip brand mapping.
+  // FIX: Added Total Hardness and Total Alkalinity (as index 3 and 4)
+  const padParamMap = [
+    { name: 'pH', unit: '', idealLow:6.5, idealHigh:8.5 },
+    { name: 'Free Chlorine (mg/L)', unit:'mg/L', idealLow:0.0, idealHigh:0.5 },
+    { name: 'Nitrate (ppm)', unit:'ppm', idealLow:0, idealHigh:10 }, // Renamed example Hardness for clarity
+    { name: 'Total Hardness', unit:'ppm', idealLow:0, idealHigh:300 }, // New: Param 4
+    { name: 'Total Alkalinity', unit:'ppm', idealLow:80, idealHigh:200 } // New: Param 5
+  ];
+
+  // Example demo palettes for mapping colors to values. Replace these entries with real manufacturer color charts (rgb->value).
+  // I've added two placeholder charts for the new parameters to ensure the code doesn't crash.
+  const demoColorCharts = [
+    // pH pad: approximate RGB -> pH value (this is illustrative only)
+    [ {rgb:[230,240,200], value:8.5}, {rgb:[200,230,140], value:7.5}, {rgb:[220,170,100], value:6.5}, {rgb:[190,120,80], value:5.5} ],
+    // Free chlorine pad: rgb -> ppm
+    [ {rgb:[250,250,250], value:0.0}, {rgb:[255,220,50], value:0.5}, {rgb:[230,120,40], value:2.0} ],
+    // Nitrate pad: rgb -> ppm (Placeholder)
+    [ {rgb:[250,250,250], value:0}, {rgb:[230,180,180], value:10}, {rgb:[150,100,100], value:50} ],
+    // Total Hardness pad: rgb -> ppm (Placeholder)
+    [ {rgb:[250,250,250], value:0}, {rgb:[200,200,100], value:120}, {rgb:[100,100,50], value:400} ],
+    // Total Alkalinity pad: rgb -> ppm (Placeholder)
+    [ {rgb:[250,250,250], value:0}, {rgb:[180,240,100], value:150}, {rgb:[100,180,50], value:300} ]
+  ];
+
+  function colorDist(a,b){ return Math.sqrt((a.r-b[0])**2 + (a.g-b[1])**2 + (a.b-b[2])**2); }
+  function mapColorToValue(observed, chart){ // nearest neighbor linear interpolation
+    const scored = chart.map(entry=>({d: colorDist(observed, entry.rgb), v: entry.value})).sort((a,b)=>a.d-b.d);
+    if(scored.length===0) return null; if(scored.length===1) return scored[0].v; const a1=scored[0], a2=scored[1]; const w1=1/(a1.d+1e-6), w2=1/(a2.d+1e-6); return (a1.v*w1 + a2.v*w2)/(w1+w2);
+  }
+
+  // color calibration using optional white patch: look for a small bright patch in the corners automatically
+  function estimateWhitePatchScale(){ // crude: search for brightest square region, compute per-channel scale to 255
+    const imageData = ctx.getImageData(0,0,canvasWork.width,canvasWork.height).data; let best = {avg:0, x:0, y:0}; const step = 8; const block = 30; for(let y=0;y<canvasWork.height-block;y+=step){ for(let x=0;x<canvasWork.width-block;x+=step){ let r=0,g=0,b=0,n=0; for(let yy=0;yy<block;yy+=6){ for(let xx=0;xx<block;xx+=6){ const idx = ((y+yy)*canvasWork.width + (x+xx))*4; r+=imageData[idx]; g+=imageData[idx+1]; b+=imageData[idx+2]; n++; } } const avg = (r+g+b)/(3*n); if(avg>best.avg){ best = {avg, x, y}; } } }
+    // sample block average at best and return scale
+    const bx = Math.max(0,best.x); const by = Math.max(0,best.y); let r=0,g=0,b=0,n=0; for(let yy=0;yy<30;yy+=3){ for(let xx=0;xx<30;xx+=3){ const idx = ((by+yy)*canvasWork.width + (bx+xx))*4; r+=imageData[idx]; g+=imageData[idx+1]; b+=imageData[idx+2]; n++; } }
+    if(n===0) return {sr:1,sg:1,sb:1}; const or={r:Math.max(1,Math.round(r/n)), g:Math.max(1,Math.round(g/n)), b:Math.max(1,Math.round(b/n))}; return {sr:255/or.r, sg:255/or.g, sb:255/or.b};
+  }
+
+  function applyScaleToColor(col, scale){ return { r:Math.max(0,Math.min(255, Math.round(col.r*scale.sr))), g:Math.max(0,Math.min(255, Math.round(col.g*scale.sg))), b:Math.max(0,Math.min(255, Math.round(col.b*scale.sb))) }; }
+
+  analyzeBtn.onclick = ()=>{
+    if(!padCanvases || padCanvases.length===0) return alert('Slice pads first');
+    // compute white patch scaling
+    const scale = estimateWhitePatchScale();
+    const paramResults = [];
+    padCanvases.forEach((pc, idx)=>{
+      const avg = avgColorOfCanvas(pc); const corr = applyScaleToColor(avg, scale);
+      
+      // Determine which chart/param to use
+      const param = padParamMap[idx] || {name:'Param '+(idx+1), unit:'', idealLow:null, idealHigh:null};
+      const chart = demoColorCharts[idx] || demoColorCharts[demoColorCharts.length-1];
+
+      const val = mapColorToValue(corr, chart);
+      
+      // decide status
+      let statusText='Unknown', statusClass='warn';
+      if(val===null){ statusText='No mapping'; statusClass='warn'; } else if(param.idealLow!==null && param.idealHigh!==null){ if(val >= param.idealLow && val <= param.idealHigh) { statusText='Safe'; statusClass='ok'; } else { statusText='Unsafe'; statusClass='bad'; } } else { statusText='Measured'; statusClass='warn'; }
+      paramResults.push({ index: idx+1, name: param.name, unit: param.unit, value: val===null?null: Number(val.toFixed(2)), idealLow: param.idealLow, idealHigh: param.idealHigh, status: statusText, statusClass });
+    });
+    // turbidity approximate: measure mean brightness of warped canvas
+    let turb = null; if(warpedCanvas){ const avg = avgColorOfCanvas(warpedCanvas); const brightness = (avg.r+avg.g+avg.b)/3; turb = Math.round(Math.exp(6.0 - (brightness/40.0))); }
+
+    // overall decision: if any required param unsafe or turb > 5 -> Not safe
+    const criticalUnsafe = paramResults.some(p=>p.status==='Unsafe'); const turbUnsafe = turb !== null && turb > 5;
+    const overall = (criticalUnsafe || turbUnsafe) ? {safe:false, reason: (turbUnsafe? 'High turbidity':'Parameter out of range')} : {safe:true, reason:'Parameters within demo thresholds'};
+
+    renderReport(paramResults, turb, overall);
+  }
+
+  function renderReport(params, turb, overall){
+    let html = '<h3>Water Quality Report</h3>';
+    // FIX: Wrap the table in the scrollable div
+    html += '<div class="table-responsive">'; 
+    html += '<table><thead><tr><th>Parameter</th><th>Detected Value</th><th>Reference Range</th><th>Status</th></tr></thead><tbody>';
+    params.forEach(p=>{
+      const ref = (p.idealLow!==null && p.idealHigh!==null) ? `${p.idealLow} - ${p.idealHigh} ${p.unit}` : '—';
+      // Ensure unit is displayed even for manually named parameters
+      const value = p.value===null? '—' : `${p.value} ${p.unit}`; 
+      html += `<tr><td>${p.name}</td><td>${value}</td><td>${ref}</td><td class='${p.statusClass}'>${p.status}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    html += '</div>'; // Close .table-responsive
+
+    html += `<div style="margin-top:15px"><strong>Turbidity (approx):</strong> ${turb===null?'—': turb+' NTU'}</div>`;
+    html += `<div style="margin-top:8px; padding:10px; border-radius:6px; background:${overall.safe?'#ecfdf5':'#fef2f2'}; border:1px solid ${overall.safe?'#a7f3d0':'#fecaca'};"><strong>Overall Result:</strong> <span class='${overall.safe? 'ok':'bad'}'>${overall.safe? 'POTABLE (demo thresholds)': 'NOT POTABLE'}</span> — ${overall.reason}</div>`;
+    html += '<div style="margin-top:15px" class="small">Note: This is a demo mapping. Replace color charts with your strip manufacturer data and WHO/IS limits for more accurate results.</div>';
+    reportArea.innerHTML = html;
+  }
+
+  exportCSVBtn.onclick = ()=>{
+    if(!reportArea.innerHTML) return alert('No report to export');
+    // build CSV from last report table
+    const rows = [];
+    // Target the table inside the reportArea (it's wrapped in .table-responsive)
+    const table = reportArea.querySelector('table'); 
+    if(!table) return alert('No tabular data');
+    const trs = table.querySelectorAll('tbody tr'); trs.forEach(tr=>{ const tds = tr.querySelectorAll('td'); const row = [tds[0].textContent.trim(), tds[1].textContent.trim(), tds[2].textContent.trim(), tds[3].textContent.trim()]; rows.push(row.join(',')); });
+    let csv = 'Parameter,Detected,Reference,Status\n' + rows.join('\n');
+    // turb and overall
+    const turbDiv = reportArea.querySelector('div strong');
+    const turbValue = turbDiv ? turbDiv.nextSibling.textContent.trim() : '—';
+    csv += `\nTurbidity,${turbValue}\n`;
+    
+    // Attempt to extract overall result from the second div
+    const overallDiv = reportArea.querySelectorAll('div')[1];
+    if (overallDiv) {
+        const overallStatusSpan = overallDiv.querySelector('span');
+        const overallReason = overallDiv.textContent.split('—')[1] ? overallDiv.textContent.split('—')[1].trim() : '';
+        const overallStatus = overallStatusSpan ? overallStatusSpan.textContent.trim() : '';
+        csv += `Overall Status,${overallStatus},,${overallReason}`;
+    }
+
+    const blob = new Blob([csv], {type:'text/csv'}); const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='wq_report_'+new Date().toISOString().slice(0,19).replace(/[:T-]/g,'')+'.csv'; a.click(); URL.revokeObjectURL(url);
+  }
+
+  printBtn.onclick = ()=>{ 
+    if(!reportArea.innerHTML) return alert('No report to print'); 
+    const w = window.open('','_blank'); 
+    // Simplified print CSS
+    w.document.write('<html><head><title>Water Quality Report</title><style>body{font-family:Arial,sans-serif;color:#111;padding:16px}h3{color:#0b63d6}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f1f5f9}.ok{color:green}.bad{color:red}.warn{color:orange}</style></head><body>');
+    w.document.write('<h1>Water Quality Analyzer Report</h1>');
+    w.document.write(reportArea.innerHTML);
+    w.document.write('</body></html>'); 
+    w.document.close(); 
+    w.print(); 
+  };
+
+  // helper to compute avg color of canvas used above - kept for completeness
+  function avgColorOfCanvas(c){ const ctx=c.getContext('2d'); const data = ctx.getImageData(0,0,c.width,c.height).data; let r=0,g=0,b=0,n=0; for(let i=0;i<data.length;i+=4){ r+=data[i]; g+=data[i+1]; b+=data[i+2]; n++; } return {r:Math.round(r/n), g:Math.round(g/n), b:Math.round(b/n)}; }
+
+  </script>
+</body>
+</html>

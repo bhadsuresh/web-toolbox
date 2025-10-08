@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Health Calculators with BMI, BMR, and Calorie Needs charts and health improvement tips. Track your health easily!" />
+  <title>Health Calculators with health Tips</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+	:root{
+      --bg:#f8fafc; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --text:#0f1724;
+      --radius:12px; --shadow:0 8px 24px rgba(15,23,36,0.06);
+    }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #f5f8fa;
+      margin: 0;
+      color: #333;
+    }
+    header{background:linear-gradient(90deg,var(--accent),#1e3a8a);color:#fff;padding:16px;border-radius:0px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    header h1{margin:0;font-size:1.15rem}
+    header p{margin:4px 0 0;font-size:0.9rem;opacity:0.95}
+
+    h1 { margin: 0; }
+    .container {
+      max-width: 720px;
+      margin: 2rem auto;
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    nav {
+      display: flex;
+      justify-content: space-around;
+      border-bottom: 1px solid #ddd;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    nav button {
+      border: none;
+      background: none;
+      font-weight: 600;
+      padding: 0.8rem 1.2rem;
+      cursor: pointer;
+      color: #007bff;
+      border-radius: 8px 8px 0 0;
+    }
+    nav button.active {
+      background: #007bff;
+      color: #fff;
+    }
+    .calculator { display: none; }
+    .calculator.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    label {
+      display: block;
+      margin: 0.6rem 0 0.3rem;
+      font-weight: 500;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button.calculate {
+      margin-top: 1rem;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      padding: 0.8rem;
+      width: 100%;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 1rem;
+      background: #e8f7ff;
+      padding: 1rem;
+      border-radius: 6px;
+    }
+    canvas {
+      margin-top: 1rem;
+      width: 100% !important;
+      height: 240px !important;
+    }
+    .tips {
+      margin-top: 1rem;
+      background: #f1fdf2;
+      border-left: 5px solid #28a745;
+      border-radius: 6px;
+      padding: 1rem;
+      display: none;
+    }
+    .tips.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    .tips h3 {
+      margin-top: 0;
+      color: #28a745;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    footer { background:#333; color:white; text-align:center; padding:15px; margin-top:30px; font-size:0.9em; }
+
+.button { padding:10px 15px; font-size:16px; border:none; border-radius:6px; background:#4a90e2; color:#fff; cursor:pointer; margin-top:10px; }
+.button:hover { background:#357ab8; }
+
+.hero-placeholder {
+  margin: 20px 0;
+  text-align: center;
+}
+.hero-placeholder img {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>HEALTH CALCULATORS</h1>
+	<div style="display:flex;gap:8px;align-items:center">
+           <a href="index.html"><button class="button">Home</button></a>
+        </div>
+  </header>
+<!-- Hero -->
+  <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
+  <div class="container">
+	<p>Calculate your BMI, BMR, and daily calorie needs — plus get personalized tips!</p>
+    <nav>
+      <button class="tab active" data-target="bmi">BMI</button>
+      <button class="tab" data-target="bmr">BMR</button>
+      <button class="tab" data-target="tdee">Calorie Needs</button>
+    </nav>
+
+    <!-- BMI Calculator -->
+    <div id="bmi" class="calculator active">
+      <h2>Body Mass Index (BMI)</h2>
+      <label>Weight (kg)</label>
+      <input type="number" id="bmiWeight" placeholder="e.g. 70">
+      <label>Height (cm)</label>
+      <input type="number" id="bmiHeight" placeholder="e.g. 175">
+      <button class="calculate" onclick="calculateBMI()">Calculate BMI</button>
+      <div id="bmiResult" class="result"></div>
+      <canvas id="bmiChart"></canvas>
+      <div id="bmiTips" class="tips"></div>
+    </div>
+
+    <!-- BMR Calculator -->
+    <div id="bmr" class="calculator">
+      <h2>Basal Metabolic Rate (BMR)</h2>
+      <label>Gender</label>
+      <select id="bmrGender">
+        <option value="">Select</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+      <label>Age (years)</label>
+      <input type="number" id="bmrAge">
+      <label>Weight (kg)</label>
+      <input type="number" id="bmrWeight">
+      <label>Height (cm)</label>
+      <input type="number" id="bmrHeight">
+      <button class="calculate" onclick="calculateBMR()">Calculate BMR</button>
+      <div id="bmrResult" class="result"></div>
+    </div>
+
+    <!-- Calorie Needs Calculator -->
+    <div id="tdee" class="calculator">
+      <h2>Daily Calorie Needs (TDEE)</h2>
+      <label>Gender</label>
+      <select id="tdeeGender">
+        <option value="">Select</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+      <label>Age (years)</label>
+      <input type="number" id="tdeeAge">
+      <label>Weight (kg)</label>
+      <input type="number" id="tdeeWeight">
+      <label>Height (cm)</label>
+      <input type="number" id="tdeeHeight">
+      <label>Activity Level</label>
+      <select id="activityLevel">
+        <option value="1.2">Sedentary</option>
+        <option value="1.375">Lightly Active</option>
+        <option value="1.55">Moderately Active</option>
+        <option value="1.725">Very Active</option>
+        <option value="1.9">Super Active</option>
+      </select>
+      <button class="calculate" onclick="calculateTDEE()">Calculate Calories</button>
+      <div id="tdeeResult" class="result"></div>
+      <canvas id="calorieChart"></canvas>
+      <div id="tdeeTips" class="tips"></div>
+    </div>
+  </div>
+
+  <footer style="margin-top:18px;text-align:center;color:grey;font-size:0.9rem; background:black; padding:16px;">
+    &copy;2025: Web Toolbox
+  </footer>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.calculator').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.target).classList.add('active');
+      });
+    });
+
+    // BMI with Chart + Tips
+    let bmiChart;
+    function calculateBMI() {
+      const weight = parseFloat(document.getElementById('bmiWeight').value);
+      const height = parseFloat(document.getElementById('bmiHeight').value);
+      const tipsDiv = document.getElementById('bmiTips');
+      tipsDiv.classList.remove('show');
+
+      if (!weight || !height) {
+        document.getElementById('bmiResult').innerHTML = "Please enter valid inputs.";
+        return;
+      }
+      const hMeters = height / 100;
+      const bmi = weight / (hMeters * hMeters);
+      let category = '', color = '#007bff', tips = '';
+
+      if (bmi < 18.5) {
+        category = 'Underweight';
+        color = '#f0ad4e';
+        tips = "<h3>Health Tips for Underweight</h3><ul><li>Increase calorie intake with healthy foods.</li><li>Add protein-rich snacks like nuts and dairy.</li><li>Do light strength training to build muscle mass.</li></ul>";
+      } else if (bmi < 25) {
+        category = 'Normal';
+        color = '#28a745';
+        tips = "<h3>Stay Fit Tips</h3><ul><li>Maintain a balanced diet with fruits and vegetables.</li><li>Keep exercising 3–5 times per week.</li><li>Stay hydrated and sleep 7–8 hours daily.</li></ul>";
+      } else if (bmi < 30) {
+        category = 'Overweight';
+        color = '#ffc107';
+        tips = "<h3>Health Tips for Overweight</h3><ul><li>Reduce sugar and processed food intake.</li><li>Increase physical activity gradually.</li><li>Include more fiber and lean proteins.</li></ul>";
+      } else {
+        category = 'Obese';
+        color = '#dc3545';
+        tips = "<h3>Health Tips for Obesity</h3><ul><li>Consult a healthcare professional for a personalized plan.</li><li>Focus on portion control and whole foods.</li><li>Walk or exercise daily for at least 30 minutes.</li></ul>";
+      }
+
+      document.getElementById('bmiResult').innerHTML =
+        `<strong>BMI:</strong> ${bmi.toFixed(1)}<br><strong>Status:</strong> ${category}`;
+      tipsDiv.innerHTML = tips;
+      tipsDiv.classList.add('show');
+
+      const ctx = document.getElementById('bmiChart').getContext('2d');
+      if (bmiChart) bmiChart.destroy();
+      bmiChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Underweight', 'Normal', 'Overweight', 'Obese'],
+          datasets: [{
+            label: 'BMI',
+            data: [18.4, 24.9, 29.9, bmi],
+            backgroundColor: ['#f0ad4e', '#28a745', '#ffc107', color]
+          }]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, suggestedMax: 40 } }
+        }
+      });
+    }
+
+    // BMR
+    function calculateBMR() {
+      const gender = document.getElementById('bmrGender').value;
+      const age = parseFloat(document.getElementById('bmrAge').value);
+      const weight = parseFloat(document.getElementById('bmrWeight').value);
+      const height = parseFloat(document.getElementById('bmrHeight').value);
+      if (!gender || !age || !weight || !height) {
+        document.getElementById('bmrResult').innerHTML = "Please fill all fields.";
+        return;
+      }
+      let bmr;
+      if (gender === 'male')
+        bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+      else
+        bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+      document.getElementById('bmrResult').innerHTML =
+        `<strong>BMR:</strong> ${bmr.toFixed(2)} kcal/day`;
+    }
+
+    // TDEE with Chart + Tips
+    let calorieChart;
+    function calculateTDEE() {
+      const gender = document.getElementById('tdeeGender').value;
+      const age = parseFloat(document.getElementById('tdeeAge').value);
+      const weight = parseFloat(document.getElementById('tdeeWeight').value);
+      const height = parseFloat(document.getElementById('tdeeHeight').value);
+      const activity = parseFloat(document.getElementById('activityLevel').value);
+      const tipsDiv = document.getElementById('tdeeTips');
+      tipsDiv.classList.remove('show');
+
+      if (!gender || !age || !weight || !height || !activity) {
+        document.getElementById('tdeeResult').innerHTML = "Please fill all fields.";
+        return;
+      }
+
+      let bmr;
+      if (gender === 'male')
+        bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+      else
+        bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+
+      const tdee = bmr * activity;
+      document.getElementById('tdeeResult').innerHTML =
+        `<strong>BMR:</strong> ${bmr.toFixed(2)} kcal/day<br><strong>TDEE:</strong> ${tdee.toFixed(2)} kcal/day`;
+
+      // Personalized tips
+      let tips = "";
+      if (activity <= 1.375)
+        tips = "<h3>Calorie Tips for Low Activity</h3><ul><li>Try short walks every hour.</li><li>Add light workouts to your routine.</li><li>Eat smaller, nutrient-rich meals.</li></ul>";
+      else if (activity <= 1.55)
+        tips = "<h3>Calorie Tips for Moderate Activity</h3><ul><li>Keep a balance between protein and carbs.</li><li>Hydrate well during workouts.</li><li>Focus on consistency.</li></ul>";
+      else
+        tips = "<h3>Calorie Tips for High Activity</h3><ul><li>Ensure enough protein for recovery.</li><li>Don’t skip meals.</li><li>Rest properly between intense workouts.</li></ul>";
+      
+      tipsDiv.innerHTML = tips;
+      tipsDiv.classList.add('show');
+
+      const ctx = document.getElementById('calorieChart').getContext('2d');
+      if (calorieChart) calorieChart.destroy();
+      calorieChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['BMR (Base)', 'Extra Calories (Activity)'],
+          datasets: [{
+            data: [bmr, tdee - bmr],
+            backgroundColor: ['#007bff', '#ffc107']
+          }]
+        },
+        options: { plugins: { legend: { position: 'bottom' } } }
+      });
+    }
+  </script>
+</body>
+</html>
