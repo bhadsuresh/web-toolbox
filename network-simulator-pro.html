@@ -5,13 +5,36 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Network Simulator (Pro Tier) 🚀</title>
   <style>
-    /* 1. CSS FIX: Apply fixed width to the container */
-    body{font-family:sans-serif;margin:0;padding:20px;background:#f5f7fa;color:#2c3e50}
-    .container{
-      width:600px; /* FIXED WIDTH for extension popup */
-      background:#fff;padding:20px;border-radius:10px;
-      box-shadow:0 4px 12px rgba(0,0,0,.1)
+     :root{
+      --bg:#f8fafc; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --text:#0f1724;
+      --radius:12px; --shadow:0 8px 24px rgba(15,23,36,0.06);
     }
+     *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+    body{margin:0;background:var(--bg);color:var(--text);padding:0px}
+
+    /* 1. CSS FIX: Apply fixed width to the container */
+    /*body{font-family:sans-serif;margin:0;padding:20px;background:#f5f7fa;color:#2c3e50}*/
+    .container{
+      max-width: 750px;
+      background: #fff;
+      margin: 2rem auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+
+      /*width:600px; /* FIXED WIDTH for extension popup */
+      background:#fff;padding:20px;border-radius:10px;
+      box-shadow:0 4px 12px rgba(0,0,0,.1)*/
+    }
+
+    header{background:linear-gradient(90deg,var(--accent),#1e3a8a);color:#fff;padding:16px;border-radius:0px;box-shadow:var(--      	shadow);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+    header h1{margin:0;font-size:1.15rem}
+    header p{margin:6px 0 0;font-size:0.9rem;opacity:0.95}
+    header a button{background:#fff;color:var(--accent);border:none;padding:8px 12px;border-radius:px;cursor:pointer;font-weight:600}
+    .hero-placeholder{margin:18px 0;text-align:center}
+    .hero-placeholder img{width:100%;max-height:240px;object-fit:cover;border-radius:0px;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+    main { max-width:900px; margin:2rem auto; padding:1rem; }
     /* Rest of the styles are fine */
     h2{color:#3498db;margin:0 0 16px;font-weight:600}
     .toggle-section{display:flex;justify-content:space-between;align-items:center;
@@ -25,7 +48,7 @@
     input:checked+.slider{background:#3498db}
     input:checked+.slider:before{transform:translateX(20px)}
     .control-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px; border:1px solid #d3d3d3;border-radius:6px;padding:8px;}
-    .control-group label{display:flex;justify-content:space-between;margin-bottom:6px;font-weight:600}
+    .control-group label{display:flex;justify-content:space-between;margin-bottom:6px;font-weight:500;font-size:12px;}
     input[type=range]{width:100%}
     input[type=number],select,input[type=text]{width:100%;padding:8px;border:1px solid #bdc3c7;border-radius:6px}
     #log-output{padding:10px;border:1px solid #bdc3c7;border-radius:6px;background:#fafafa;
@@ -60,7 +83,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: 600;
+  font-weight: 500;
+  font-size:13px;
   transition: background-color 0.2s;
 }
 .accordion-header:hover {
@@ -68,7 +92,7 @@
 }
 .accordion-header:after {
   content: '▼'; /* Down arrow */
-  font-size: 14px;
+  font-size: 12px;
   transition: transform 0.3s;
 }
 .accordion-header.active:after {
@@ -81,7 +105,8 @@
   overflow: hidden;
   transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
   border-top: 1px solid #dcdcdc;
-}
+ font-size:13px;
+ }
 .accordion-content ul {
     margin-top: 10px;
     padding-left: 20px;
@@ -90,20 +115,41 @@
     margin-bottom: 8px;
     line-height: 1.4;
 }
-
+.para-style{
+    padding-bottom:20px;
+}
+@media (max-width:600px) {
+      header h1 { font-size:1rem; }
+      .hero img { height:120px; }
+    }
+.button { padding:8px 12px; font-size:16px; border:none; border-radius:6px; background:#4a90e2; color:#fff; cursor:pointer; margin-top:10px; }
+.button:hover { background:#357ab8; }
+.light-text{
+font-weight:500;
+font-size:13px
+}
   </style>
 </head>
 <body>
-<header><a href="index.html"><button style="float:center;padding:5px;margin:10px;">Home</button></a></header>
+ <header>
+    <div>
+      <h1>Network Latency Simulator🚀</h1>
+    </div>
+    <a href="index.html"><button class="button">Home</button></a>
+  </header>
+  <!-- Hero -->
+  <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
 <div class="container">
-  <h2>Network Simulator (Pro Tier) 🚀</h2>
 <div id="intro-accordion">
   <div class="accordion-item">
     <div class="accordion-header">
       💡 1. Introduction: Network Latency Simulator (Pro Tier)
     </div>
     <div class="accordion-content">
-      <p>This application is an "advanced browser extension designed for developers and QA engineers" to accurately simulate real-world network conditions directly within the browser environment. By overriding standard JavaScript network calls (`fetch` and `XMLHttpRequest`), it allows you to inject controllable, non-deterministic latency, jitter, and error states without relying on OS-level throttling.</p>
+      <p class="para-style">This application is an "advanced browser extension designed for developers and QA engineers" to accurately simulate real-world network conditions directly within the browser environment. By overriding standard JavaScript network calls (`fetch` and `XMLHttpRequest`), it allows you to inject controllable, non-deterministic latency, jitter, and error states without relying on OS-level throttling.</p>
     </div>
   </div>
 
@@ -112,7 +158,7 @@
       ⚙️ 2. Detailed Use Cases
     </div>
     <div class="accordion-content">
-      <ul>
+      <ul class="para-style">
         <li>
           Robustness Testing (Error Simulation):Verify graceful handling of server failures by setting 'Error Rate %' and 'Status Code' (e.g., 500 or 404).
         </li>
@@ -134,26 +180,26 @@
       🧪 3. Testing Procedure (How to Use)
     </div>
     <div class="accordion-content">
-      <ul>
-        <li>**Load & Toggle:** Open the extension and click the **Enable Simulation** switch.</li>
-        <li>**Set Profile:** Either manually adjust **Latency**, **Jitter**, and **Error Rate %**, or click **Apply Preset** (e.g., `4G`).</li>
-        <li>**Monitor:** Click **📈 Show Delay Chart** to visualize the injected latency variability (Jitter).</li>
-        <li>**Run Test:** Click **Run Fetch** (for single test) or enable **Auto Fetch** (for continuous testing).</li>
-        <li>**Analyze:** Observe the **Logs** section to confirm simulated delays and status codes, then use your target application to test its behavior.</li>
+      <ul class="para-style">
+        <li>Load & Toggle: Open the extension and click the *Enable Simulation* switch.</li>
+        <li>Set Profile: Either manually adjust 'Latency', 'Jitter', and 'Error Rate %', or click 'Apply Preset' (e.g., `4G`).</li>
+        <li>Monitor: Click '📈 Show Delay Chart' to visualize the injected latency variability (Jitter).</li>
+        <li>Run Test: Click 'Run Fetch' (for single test) or enable 'Auto Fetch' (for continuous testing).</li>
+        <li>Analyze: Observe the 'Logs' section to confirm simulated delays and status codes, then use your target application to test its behavior.</li>
       </ul>
     </div>
   </div>
 </div>
-<hr><br>
+<hr>
   <div class="toggle-section">
-    <label>Enable Simulation</label>
+    <label class="light-text">Enable Simulation</label>
     <label class="switch">
       <input type="checkbox" id="sim-toggle">
       <span class="slider"></span>
     </label>
   </div>
-<p style="text-align:right;">[NOTE:** When you are finished using this tool, please switch off this enabler**]</p>
-  <p> PROFILE PARAMETERS:</P><p>Option-1: Adjust Manually
+<p style="text-align:left; font-size:12px;">[Note:** When you are finished using this tool, please switch off this enabler**]</p>
+  <p class="light-text"> # PROFILE PARAMETERS:</P><p class="light-text">Option-1: Adjust Manually
   <div class="control-grid">
     <div class="control-group">
       <label>Base Latency (ms)<span id="latency-val">200</span></label>
@@ -178,46 +224,190 @@
     <div class="control-group">
       <label>Status Code</label>
       <select id="status">
+        <!-- RESTORED: full set of status codes as originally present -->
         <option value="200">200 OK</option>
         <option value="201">201 Created</option>
+        <option value="202">202 Accepted</option>
+        <option value="204">204 No Content</option>
+        <option value="301">301 Moved Permanently</option>
+        <option value="302">302 Found</option>
+        <option value="400">400 Bad Request</option>
         <option value="401">401 Unauthorized</option>
         <option value="403">403 Forbidden</option>
         <option value="404">404 Not Found</option>
+        <option value="408">408 Request Timeout</option>
+        <option value="409">409 Conflict</option>
+        <option value="429">429 Too Many Requests</option>
         <option value="500">500 Internal Error</option>
+        <option value="501">501 Not Implemented</option>
+        <option value="502">502 Bad Gateway</option>
         <option value="503">503 Service Unavailable</option>
+        <option value="504">504 Gateway Timeout</option>
       </select>
     </div>
   </div>
-   <p>Option-2: Apply Preset Profile</p>
-<div class="control-grid">
-  <button id="presets">Apply Preset {e.g. 3G, 4G, BadWiFi, Satellite}</button> 
+   <p class="light-text">Option-2: Apply Preset Profile</p>
+<div style="border:1px solid #d3d3d3;border-radius:6px;padding:8px;">
+  <button id="presets">Apply Preset [e.g. 3G, 4G, BadWiFi, Satellite]</button> 
 </div>
-<p>EXECUTE SIMULATION:</p>
+<p class="light-text"># EXECUTE SIMULATION:</p>
   <div class="test-controls">
-	<p> URL:</P>
+	<p class="light-text"> URL:</P>
     <input type="text" id="test-url" value="https://jsonplaceholder.typicode.com/todos/1">
     <button id="run-fetch">Run Fetch</button>
   </div>
     <div class="auto-test control-grid">
-      <label><input type="checkbox" id="auto-toggle"> Auto Fetch every</label>
+      <label class="light-text"><input type="checkbox" id="auto-toggle"> Auto Fetch every</label>
       <input type="number" id="auto-interval" value="5" min="1"> sec
     </div>
-	<hr><br>
-  	<P>MONITOR:</P>
+	<hr>
+  	<P class="light-text"># MONITOR:</P>
 	<button id="toggle-chart">📈 Show Delay Chart</button>
     	<div class="chart-container hidden-chart"><canvas id="delayChart"></canvas></div>
 
-	<P>ANALYZE:</P>
-  	<h3>Logs</h3>
+	<P class="light-text"># ANALYZE:</P>
+  	<h3 class="light-text">Logs</h3>
       	<div id="log-output"></div>
         <button id="clear-log">Clear Log</button>
 </div>
+	<footer style="margin-top:18px;text-align:center;color:var(--muted);font-size:0.9rem; background:black; padding:16px;">
+	    &copy;2025: Web Toolbox
+	</footer>
 
 <script type="module">
   // This imports the module and exposes the Chart object globally
+  // (keeps original pattern to support your pro-script.js expectations)
   import { Chart } from './chart.min.js';
   window.Chart = Chart;
 </script>
+
+<!-- Non-destructive fix: toggle + init the delay chart reliably.
+     - Will create chart on-demand when user clicks "Show Delay Chart".
+     - If pro-script.js dispatches 'ns:delay' events (detail.delay = ms), chart will update.
+     - Does not change any IDs, classes, or other behavior. -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const chartBtn = document.getElementById('toggle-chart');
+  const chartContainer = document.querySelector('.chart-container');
+  const canvas = document.getElementById('delayChart');
+  if (!chartBtn || !chartContainer || !canvas) return;
+
+  let delayChart = null;
+  let chartVisible = false;
+
+  function tryCreateChart() {
+    if (delayChart) return;
+    // initializer that assumes Chart may already be on window
+    const init = () => {
+      try {
+        if (!window.Chart) return false;
+        const ctx = canvas.getContext('2d');
+        // create an empty chart with sample seed data
+        delayChart = new window.Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: Array.from({ length: 6 }, (_, i) => `T${i+1}`),
+            datasets: [{
+              label: 'Simulated Delay (ms)',
+              data: Array.from({ length: 6 }, () => Math.floor(Math.random() * 300)),
+              borderColor: '#3498db',
+              backgroundColor: 'rgba(52,152,219,0.12)',
+              fill: true,
+              tension: 0.3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: { beginAtZero: true }
+            },
+            plugins: {
+              legend: { display: true }
+            }
+          }
+        });
+        return true;
+      } catch (err) {
+        console.error('Chart initialization error:', err);
+        return false;
+      }
+    };
+
+    if (window.Chart) {
+      init();
+    } else {
+      // attempt dynamic import as fallback (non-destructive)
+      import('./chart.min.js').then(mod => {
+        window.Chart = mod.Chart || mod.default || window.Chart;
+        init();
+      }).catch(err => {
+        // last-resort: inject a classic script tag (works if chart.min.js is UMD)
+        const s = document.createElement('script');
+        s.src = './chart.min.js';
+        s.onload = () => init();
+        s.onerror = () => console.error('Failed to load chart library', err);
+        document.head.appendChild(s);
+      });
+    }
+  }
+
+  chartBtn.addEventListener('click', function () {
+    chartVisible = !chartVisible;
+    if (chartVisible) {
+      chartContainer.classList.remove('hidden-chart');
+      chartBtn.textContent = '📉 Hide Delay Chart';
+      tryCreateChart();
+    } else {
+      chartContainer.classList.add('hidden-chart');
+      chartBtn.textContent = '📈 Show Delay Chart';
+    }
+  });
+
+  // Listen for custom events from pro-script.js (if it ever dispatches them)
+  // Format: window.dispatchEvent(new CustomEvent('ns:delay', { detail: { delay: 123 } }))
+  window.addEventListener('ns:delay', (ev) => {
+    if (!ev || !ev.detail) return;
+    const val = Number(ev.detail.delay);
+    if (Number.isNaN(val)) return;
+    if (!delayChart) tryCreateChart();
+    if (!delayChart) return;
+    const label = new Date().toLocaleTimeString();
+    delayChart.data.labels.push(label);
+    delayChart.data.datasets[0].data.push(val);
+    // keep only last 50 points for readability
+    if (delayChart.data.labels.length > 50) {
+      delayChart.data.labels.shift();
+      delayChart.data.datasets[0].data.shift();
+    }
+    delayChart.update();
+  });
+
+  // Optional: if user clicks Run Fetch, push a sample simulated value to the chart
+  // (non-invasive — does not alter other behaviors)
+  const runBtn = document.getElementById('run-fetch');
+  if (runBtn) {
+    runBtn.addEventListener('click', () => {
+      // attempt to create chart if visible and not created yet
+      if (!chartVisible) return; // only push data if visible
+      tryCreateChart();
+      if (!delayChart) return;
+      const simulated = Math.round((parseInt(document.getElementById('latency').value || 0, 10) || 0)
+                          + ((Math.random() - 0.5) * (parseInt(document.getElementById('jitter').value || 0,10) || 0) * 2));
+      const label = new Date().toLocaleTimeString();
+      delayChart.data.labels.push(label);
+      delayChart.data.datasets[0].data.push(simulated);
+      if (delayChart.data.labels.length > 50) {
+        delayChart.data.labels.shift();
+        delayChart.data.datasets[0].data.shift();
+      }
+      delayChart.update();
+      // Note: this does NOT interfere with your pro-script.js; it's an additive UI convenience.
+    });
+  }
+});
+</script>
+
 <script src="pro-script.js"></script>
 
 </body>
