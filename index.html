@@ -71,7 +71,7 @@ nav a:hover { text-decoration:underline; }
 .badge { position:absolute; top:10px; left:10px; background:#FF5722; color:white; padding:3px 7px; font-size:0.8em; border-radius:3px; }
 .favorite-btn { position:absolute; top:10px; right:10px; background:transparent; border:none; cursor:pointer; font-size:1.2em; color:#f44336; }
 .dark-mode-toggle { position:absolute; top:15px; right:15px; background:#fff; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-weight:bold; }
-.ad-banner { width:100%; background:#D4D4D4; color: grey; text-align:center; padding:4px; margin:20px 0; border-radius:0px; font-size:1.5em; }
+.ad-banner { width:100%; background:#D4D4D4; color: grey; text-align:center; padding:4px; margin:10px 0; border-radius:0px; font-size:1.5em; }
 .affiliate-label { display:block; font-size:0.8em; color:#FF5722; margin-top:5px; }
 .premium-section { text-align:center; padding:20px; background:#D4D4D4; color:grey;margin:20px; border-radius:0px; }
 section { padding:20px; text-align:center; }
@@ -180,6 +180,31 @@ color:black;
 font-size:12px;
 color:yellow;
 }
+
+/*formatting for Table of Contents */
+
+nav {
+      background-color: #D4D4D4;
+      padding: 15px;
+      border-radius: 0px;
+      margin-bottom: 25px;
+    }
+    nav ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    nav li {
+      margin: 8px 0;
+    }
+    nav a {
+      text-decoration: none;
+      color: grey;
+      font-weight: 600;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+
 </style>
 </head>
 <body>
@@ -197,6 +222,41 @@ color:yellow;
 	</div>
 </section>
 
+<!--Table of Contents-->
+
+<section id="content-table" style="margin-left:0px;margin-right:0px;">
+<nav>
+    <h2 style="color:grey;">Table of Contents</h2>
+    	<ul >
+		<p>General Utility Tools:</p>
+        	<li><a href="#URL-Shortener">URL Shortener</a></li>
+		<li><a href="#QRcodes">QR Code (Static)</a></li>
+		<li><a href="#QRcoded">QR Code (Dynamic)</a></li>
+		<li><a href="#barcode">Barcode Generator</a></li>
+		<p>Web Developer Tools:</p>
+		<li><a href="#json-formatter">JSON Formatter</a></li>
+		<li><a href="#BulkUTM">Bulk UTM Builder</a></li>
+		<li><a href="#hash">Hash Generator</a></li>
+		<li><a href="#markdown">Markdown Previewer</a></li>
+		<li><a href="#robots">Robots.txt Generator</a></li>
+		<li><a href="#sitemap">XML Sitemap Generator</a></li>
+		<li><a href="#latency">Network Latency Simulator</a></li>
+		<li><a href="#regex">Regex Tester/Builder</a></li>
+		<li><a href="#creditcard">Credit Card Number Generator</a></li>
+		<p>Image Processing & Color Tools:</p>
+		<li><a href="#colorpicker">Color Picker and Pallette Generator </a></li>
+		<li><a href="#imgcompressor">Image Compressor</a></li>
+		<li><a href="#imgresizer">Image Resizer</a></li>
+		<li><a href="#imgconverter">Image Converter</a></li>
+		<p> Health & Finance Tools:</p>
+		<li><a href="#Fincal">Finance Calculator</a></li>
+		<li><a href="#healcal">Health Calculator</a></li>
+		<li><a href="#waterqual">Water Quality Checker</a></li>
+    	</ul>
+
+</nav>
+</section>
+
 <!--General Utility Tools here!-->
 <div class="ad-banner">
 <h2 class="h2-style">General Utility Tools</h2>              
@@ -204,7 +264,7 @@ color:yellow;
 <div style="margin:10px;">
 <div class="grid-container">
 <!--1.URL SHORTENER-->
-	<div class="free-card">
+	<div class="free-card" id="URL-Shortener">
   	  <img src="images/url-shortener.png" alt="url-shortener" >
     	  <h3 class="h3-style"><b>URL Shortener</b></h3>
     	  <p class="p-style">Shorten long URLs easily. 100% client-side.</p>
@@ -213,7 +273,7 @@ color:yellow;
 	</div>
 
 <!--2.Static QR CODE GENERATOR-->
-	<div class="free-card">
+	<div class="free-card" id="QRcodes">
   	  <img src="images/qr-code.png" alt="QR Code" >
     	  <h3 class="h3-style"><b>QR Code [Static]</b></h3>
     	  <p class="p-style">Create QR codes for links, and more. 100% client-side.</p>
@@ -221,7 +281,7 @@ color:yellow;
     	  <a href="qr-code-generator-tool.html"><button class="free-button" type="button"> TRY NOW</button></a>
 	</div>
 <!--3.Dynamic QR Code Generator-->
-	<div class="free-card">
+	<div class="free-card" id="QRcoded">
   	  <img src="images/qr-code.png" alt="Dynamic QR Code" >
     	  <h3 class="h3-style"><b>QR Code [Dynamic]</b></h3>
     	  <p class="p-style">Build Dynamic QR Code. It's 100% Client-side!</p>
@@ -229,7 +289,7 @@ color:yellow;
     	  <a href="dynamic-qr-code-generator-tool.html"><button class="free-button" type="button">TRY NOW</button> </a>
 	</div>
 <!--4.Barcode Generator Tool-->
-	<div class="free-card">
+	<div class="free-card" id="barcode">
   	  <img src="images/barcode-generator.png" alt="Barcode generator" >
     	  <h3 class="h3-style"><b>Barcode Generator</b></h3>
     	  <p class="p-style">Create barcodes for links, text, and more.</p>
@@ -246,7 +306,7 @@ color:yellow;
 <div style="margin:10px;">
 <div class="grid-container">
 <!--5.JSON Formatter-->
-	<div class="free-card">
+	<div class="free-card" id="json-formatter">
   	  <img src="images/json-formatter.png" alt="JSON Formatter" >
     	  <h3 class="h3-style"><b>JSON Formatter</b></h3>
     	  <p class="p-style">Beautify, validate, minify, and edit JSON. 100% client-side.</p>
@@ -254,7 +314,7 @@ color:yellow;
     	  <a href="json-formatter-tool.html"><button class="free-button" type="button">TRY NOW</button></a>
 	</div>
 <!--6.Bulk UTM Builder-->
-	<div class="free-card">
+	<div class="free-card" id="BulkUTM">
   	  <img src="images/utm-builder.png" alt="Bulk UTM Builder" >
     	  <h3 class="h3-style"><b>Bulk UTM Builder</b></h3>
     	  <p class="p-style">Build UTM and Track Campaign Performance..</p>
@@ -262,7 +322,7 @@ color:yellow;
     	  <a href="bulk-utm-generator-tool.html"><button class="free-button" type="button">TRY NOW</button> </a>
 	</div>
 <!--7.Hash Generator Tool-->
-	<div class="free-card">
+	<div class="free-card" id="hash">
   	  <img src="images/hash-generator.png" alt="Hash generator" >
     	  <h3 class="h3-style"><b>Hash  Generator</b></h3>
     	  <p class="p-style">Create Hash code formats like MD5, SHA 1, SHA 256 and more.</p>
@@ -270,7 +330,7 @@ color:yellow;
     	  <a href="hash-generator-tool.html"><button class="free-button" type="button">TRY NOW</button> </a>
 	</div>
 <!--8.Markdown Previewer Tool-->
-	<div class="free-card">
+	<div class="free-card" id="markdown">
   	  <img src="images/markdown-preview.png" alt="markdown-previewer" >
     	  <h3 class="h3-style"><b>Markdown Previewer</b></h3>
     	  <p class="p-style">Generate Markdown Previews and more.</p>
@@ -278,7 +338,7 @@ color:yellow;
     	  <a href="markdown-previewer-tool.html"><button class="free-button" type="button">TRY NOW</button> </a>
 	</div>
 <!--9.Robots Generator Tool-->
-	<div class="free-card">
+	<div class="free-card" id="robots">
   	  <img src="images/robots-generator.png" alt="robots-generator" >
     	  <h3 class="h3-style"><b>Robots.txt Generator</b></h3>
     	  <p class="p-style">Generate Robots.txt file for SEO and more.</p>
@@ -286,7 +346,7 @@ color:yellow;
     	  <a href="robots-generator.html"><button class="free-button" type="button">TRY NOW</button> </a>
 	</div>
 <!--10.xml-sitemap-generator Tool-->
-	<div class="free-card">
+	<div class="free-card" id="sitemap">
   	  <img src="images/xml-generator.png" alt="xml-sitemap-generator" >
     	  <h3 class="h3-style"><b>XML Sitemap Generator</b></h3>
     	  <p class="p-style">Generate sitemap.xml file for SEO and more.</p>
@@ -294,7 +354,7 @@ color:yellow;
     	  <a href="xml-sitemap-generator.html"><button class="free-button" type="button">TRY NOW</button> </a>
 	</div>
 <!--11.Network Latency Simulator Tool-->
-	<div class="free-card">
+	<div class="free-card" id="latency">
   	  <img src="images/network-latency.png" alt="Network Latency Simulator" >
     	  <h3 class="h3-style"><b>Latency Simulator</b></h3>
     	  <p class="p-style">Simulate real-world network conditions directly within the browser environment. Designed for developers and QA engineers..</p>
@@ -303,7 +363,7 @@ color:yellow;
 	</div>
 
 <!--12.Regex Tester Tool-->
-	<div class="free-card">
+	<div class="free-card" id="regex">
   	  <img src="images/regex.png" alt="Regex Tester" >
     	  <h3 class="h3-style"><b>Regex Tester/Builder</b></h3>
     	  <p class="p-style">Email validation, Phone number format check, Hash Check, URL Check..</p>
@@ -311,7 +371,7 @@ color:yellow;
     	  <a href="regex-tester-tool.html"><button class="free-button" type="button">TRY NOW</button> </a>
 	</div>
 <!--13.Credit Card Number Generator-->
-	<div class="free-card">
+	<div class="free-card" id="creditcard">
   	  <img src="images/credit-card.png" alt="credit card number" >
     	  <h3 class="h3-style"><b>Credit Card Number Generator</b></h3>
     	  <p class="p-style">Generate Credit Card Number and Validate..</p>
@@ -329,7 +389,7 @@ color:yellow;
 <div style="margin:10px;">
 <div class="grid-container">
 <!--14.Color Picker Tool-->
-	<div class="free-card">
+	<div class="free-card" id="colorpicker">
   	  <img src="images/color-picker.png" alt="Color Picker" >
     	  <h3 class="h3-style"><b>COLOR Picker</b></h3>
     	  <p class="p-style">Pick a base color, generate palettes, extract from images and more..</p>
@@ -337,7 +397,7 @@ color:yellow;
     	  <a href="color-picker-tool.html"><button class="free-button" type="button">TRY NOW</button> </a>
 	</div>
 <!--15.Image Compressor Tool-->
-	<div class="free-card">
+	<div class="free-card" id="imgcompressor">
   	  <img src="images/image-compressor.png" alt="image compressor" >
     	  <h3 class="h3-style"><b>Image Compressor</b></h3>
     	  <p class="p-style">Compress image to minimize it's size..</p>
@@ -345,7 +405,7 @@ color:yellow;
     	  <a href="image-compressor.html"><button class="free-button" type="button">TRY NOW</button> </a>
 	</div>
 <!--16.Image Resizer Tool-->
-	<div class="free-card">
+	<div class="free-card" id="imgresizer">
   	  <img src="images/image-resizer.png" alt="Color Picker" >
     	  <h3 class="h3-style"><b>Image Resizer</b></h3>
     	  <p class="p-style">Change image width & height to resize it..</p>
@@ -353,7 +413,7 @@ color:yellow;
     	  <a href="image-resizer.html"><button class="free-button" type="button">TRY NOW</button> </a>
 	</div>
 <!--17.Image Converter Tool-->
-	<div class="free-card">
+	<div class="free-card" id="imgconverter">
   	  <img src="images/image-converter.png" alt="Color Picker" >
     	  <h3 class="h3-style"><b>Image Converter</b></h3>
     	  <p class="p-style">Convert your image to PNG, GIF, JPG, and more..</p>
@@ -370,7 +430,7 @@ color:yellow;
 <div style="margin:10px;">
 <div class="grid-container">
 <!--18.Finance Calculators-->
-	<div class="free-card">
+	<div class="free-card" id="Fincal">
   	  <img src="images/finance-calculators.png" alt="Color Picker" >
     	  <h3 class="h3-style"><b>Finance Calculators</b></h3>
     	  <p class="p-style">Calculate EMI, ROI and Compound interest.. </p>
@@ -379,7 +439,7 @@ color:yellow;
 	</div>
 
 <!--19.Health Calculators-->
-	<div class="free-card">
+	<div class="free-card" id="healcal">
   	  <img src="images/health-calculators.png" alt="Color Picker" >
     	  <h3 class="h3-style"><b>Health Calculators</b></h3>
     	  <p class="p-style">Calculate BMI, BMR and Calorie needs.. </p>
@@ -387,7 +447,7 @@ color:yellow;
     	  <a href="health-calculators.html"><button class="free-button" type="button">TRY NOW</button> </a>
 	</div>
 <!--20.Water Quality Checker-->
-	<div class="free-card">
+	<div class="free-card" id="waterqual">
   	  <img src="images/water-quality-checker.png" alt="water quality checker" >
     	  <h3 class="h3-style"><b>Water Quality Analyser</b></h3>
     	  <p class="p-style">Check whether your water is worth drinking.. </p>
