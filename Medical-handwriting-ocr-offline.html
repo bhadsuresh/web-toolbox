@@ -5,6 +5,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Handwriting OCR for Doctors — Secure & Private (Offline)</title>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.2.0/dist/tesseract.min.js"></script>
 <style>
 body{font-family:Segoe UI,Arial,sans-serif;background:#f4f7f4;margin:0;padding:10px;color:#0f172a}
 body {background-image: repeating-linear-gradient(45deg,#ccc,#ccc 1px,transparent 1px,transparent 10px);} 
@@ -120,10 +121,6 @@ const PRO_DAYS = 30;
 const SECRET_KEY = 'MySuperSecretLicensingKey!';
 const dpr = window.devicePixelRatio || 1;
 
-// Base path for Tesseract assets
-const TESSERACT_CDN_PATH = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.2.0';
-let workerBlobURL = null; // New state variable for the worker's blob URL
-
 // ======= UI refs =======
 const fileInput = document.getElementById('imgfile');
 const runFull = document.getElementById('runFull');
@@ -144,6 +141,7 @@ const uniqueUserIdSpan = document.getElementById('uniqueUserId');
 const licenseInfoDiv = document.getElementById('licenseInfo');
 const licenseInput = document.getElementById('licenseInput');
 const activateLicenseBtn = document.getElementById('activateLicenseBtn');
+const copySnipped = document.getElementById('copySnipped');
 
 // ======= State =======
 let fileBlob = null;
@@ -160,44 +158,7 @@ overlay.style.touchAction = 'none';
 overlay.style.zIndex = 5;
 canvas.style.zIndex = 4;
 
-// ======= Utility: Tesseract loader with BLOB Worker URL bypass (The Fix) =======
-async function loadTesseract() {
-  if (window.Tesseract && workerBlobURL) return window.Tesseract;
-  
-  // 1. Dynamic load of tesseract.min.js (main library)
-  if (!window.Tesseract) {
-    out.value = 'Loading OCR Engine (1/2)...';
-    try {
-        const response = await fetch(`${TESSERACT_CDN_PATH}/dist/tesseract.min.js`);
-        if (!response.ok) throw new Error(`Failed to fetch main script: ${response.statusText}`);
-        const scriptText = await response.text();
-        // Execute the script, which defines window.Tesseract. This bypasses the security restriction of the <script src=""> tag.
-        eval(scriptText); 
-    } catch(e) {
-        throw new Error('Failed to load main Tesseract script from CDN. Check connection.');
-    }
-  }
-
-  // 2. Create BLOB URL for the worker script (The essential bypass)
-  if (!workerBlobURL) {
-    out.value = 'Loading OCR Engine (2/2)...';
-    try {
-        const workerResponse = await fetch(`${TESSERACT_CDN_PATH}/dist/worker.min.js`);
-        if (!workerResponse.ok) throw new Error(`Failed to fetch worker script: ${workerResponse.statusText}`);
-        const workerBlob = await workerResponse.blob();
-        // Create a blob URL, which is a safe, in-memory URL the browser accepts from the file:// protocol.
-        workerBlobURL = URL.createObjectURL(workerBlob); 
-    } catch(e) {
-        throw new Error('Failed to create Worker Blob URL. Check connection.');
-    }
-  }
-  
-  out.value = 'OCR Engine ready. Please load an image.';
-  return window.Tesseract;
-}
-
-
-// ======= Licensing & Trial (Logic is unchanged) =======
+// ======= Utility: Licensing & Trial =======
 function getOrCreateUniqueUserId() {
   let userId = localStorage.getItem('uniqueUserId');
   if (!userId) {
@@ -302,7 +263,7 @@ activateLicenseBtn.onclick = async () => {
   }
 };
 
-// ======= Image loading & preview (Unchanged) =======
+// ======= Image loading & preview =======
 logoFile.addEventListener('change', e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => logoData = r.result; r.readAsDataURL(f); });
 
 fileInput.addEventListener('change', async e => {
@@ -342,19 +303,23 @@ function drawPreview() {
 rotateLeft.onclick = () => { rotation -= 90; drawPreview(); };
 rotateRight.onclick = () => { rotation += 90; drawPreview(); };
 
-// ======= OCR (Updated to use Blob URL) =======
+// ======= OCR (Simplified for hosted environment) =======
 async function runOCROnBlob(blob) {
   out.value = 'Running OCR... Please wait.';
+  // Ensure Tesseract is loaded before proceeding
+  if (typeof window.Tesseract === 'undefined') {
+      out.value = 'OCR Engine failed to load Tesseract.js. Please check your internet connection.';
+      return;
+  }
+  
   try {
-    // Await the new dynamic loader which also creates the workerBlobURL
-    const Tesseract = await loadTesseract(); 
+    // Tesseract is available globally from the <script> tag.
+    const Tesseract = window.Tesseract; 
     const lang = langSel.value || 'eng';
     
+    // Use Tesseract.createWorker() without specifying custom paths.
     const worker = Tesseract.createWorker({ 
         logger: m => { /* progress can be shown */ },
-        workerPath: workerBlobURL, // *** KEY FIX: Use the pre-fetched blob URL here ***
-        corePath: `${TESSERACT_CDN_PATH}/dist/tesseract-core-simd.wasm.js`,
-        langPath: `${TESSERACT_CDN_PATH}/dist/`,
     });
     
     await worker.load();
@@ -369,31 +334,31 @@ async function runOCROnBlob(blob) {
     out.value = cleanText;
   } catch (err) {
     console.error('OCR failure', err);
-    out.value = 'OCR error: ' + (err.message || String(err));
-    if (String(err).toLowerCase().includes('tesseract')) {
-      licenseInfoDiv.innerHTML = '<div style="color:orange;font-weight:bold;">Tesseract failed to load. Check your internet connection or retry. <button id="retryTess">Retry Loading OCR Engine</button></div>';
-      document.getElementById('retryTess').onclick = async () => { licenseInfoDiv.innerHTML = ''; try { await loadTesseract(); alert('Tesseract loaded — try Run OCR again'); } catch(e) { alert('Retry failed: ' + e); } };
-    }
+    out.value = 'OCR error: ' + (err.message || String(err)) + '. If hosted, check the Tesseract CDN links in the HTML head.';
   }
 }
 
 runFull.onclick = () => { if (!fileBlob) return alert('Please load an image first.'); checkLicenseStatus(); if (fileInput.disabled) return alert('Your trial/subscription does not permit OCR.'); runOCROnBlob(fileBlob); };
 
-// ======= Snipping (Unchanged) =======
+// ======= Snipping (CORRECTED for proper scaling) =======
 function getCanvasCoords(e) {
   const wrapRect = document.getElementById('canvasWrap').getBoundingClientRect();
   const relX = e.clientX - wrapRect.left - canvasDisplay.x;
   const relY = e.clientY - wrapRect.top - canvasDisplay.y;
+  
+  // FIX: The coordinates must be scaled by the device pixel ratio (dpr)
+  // to map from screen pixels (relX/relY) to canvas pixels.
   return { x: relX * dpr, y: relY * dpr };
 }
 
 overlay.addEventListener('pointerdown', e => {
   if (!imgElement) return;
-  overlay.setPointerCapture(e.pointerId);
+  overlay.setPointerCapture(e.pointerId); 
   start = getCanvasCoords(e);
   selection = { x: start.x, y: start.y, w: 0, h: 0 };
   drawSel();
 });
+
 overlay.addEventListener('pointermove', e => {
   if (!start) return;
   const pt = getCanvasCoords(e);
@@ -403,21 +368,40 @@ overlay.addEventListener('pointermove', e => {
   selection.h = Math.abs(pt.y - start.y);
   drawSel();
 });
+
 overlay.addEventListener('pointerup', async e => {
   if (!start) return;
   overlay.releasePointerCapture(e.pointerId);
   start = null;
-  if (!selection || selection.w < 5 || selection.h < 5) { selection = null; drawSel(); return; }
+  
+  // Check for a minimum selection size (scaled by dpr)
+  if (!selection || selection.w < 5 * dpr || selection.h < 5 * dpr) { 
+    selection = null; 
+    drawSel(); 
+    return; 
+  }
+  
   const cropBlob = await cropFromOriginal(selection);
   await runOCROnBlob(cropBlob);
-  selection = null; drawSel();
+  selection = null; 
+  drawSel();
 });
 
 function drawSel() {
   let s = document.querySelector('.selection');
-  if (!selection) { if (s) s.remove(); return; }
-  if (!s) { s = document.createElement('div'); s.className = 'selection'; document.getElementById('canvasWrap').appendChild(s); }
-  const scale = 1 / dpr;
+  if (!selection) { 
+    if (s) s.remove(); 
+    return; 
+  }
+  
+  if (!s) { 
+    s = document.createElement('div'); 
+    s.className = 'selection'; 
+    document.getElementById('canvasWrap').appendChild(s); 
+  }
+  
+  // Display properties must be scaled DOWN by the dpr to match the CSS pixels
+  const scale = 1 / dpr; 
   s.style.left = (canvasDisplay.x + selection.x * scale) + 'px';
   s.style.top = (canvasDisplay.y + selection.y * scale) + 'px';
   s.style.width = (selection.w * scale) + 'px';
@@ -426,13 +410,24 @@ function drawSel() {
 
 async function cropFromOriginal(sel) {
   const dispW = canvasDisplay.width * dpr, dispH = canvasDisplay.height * dpr;
+  // Calculate the ratio between the ORIGINAL image size and the CANVAS size
   const scaleX = imgElement.naturalWidth / dispW, scaleY = imgElement.naturalHeight / dispH;
+  
+  // Scale selection coordinates to the ORIGINAL image size
   const sx = sel.x * scaleX, sy = sel.y * scaleY, sw = sel.w * scaleX, sh = sel.h * scaleY;
-  const off = document.createElement('canvas'); off.width = sw; off.height = sh; const c2 = off.getContext('2d'); c2.drawImage(imgElement, sx, sy, sw, sh, 0, 0, sw, sh);
+  
+  const off = document.createElement('canvas'); 
+  off.width = sw; 
+  off.height = sh; 
+  const c2 = off.getContext('2d'); 
+  
+  // Draw the cropped portion of the original image onto the new canvas
+  c2.drawImage(imgElement, sx, sy, sw, sh, 0, 0, sw, sh);
+  
   return await new Promise(r => off.toBlob(r, 'image/png'));
 }
 
-// ======= Helpers: spellcheck + export (Unchanged) =======
+// ======= Helpers: spellcheck + export =======
 function medicalSpellcheck(text) {
   const dict = { "haemoglobin": "hemoglobin", "leucocytes": "leukocytes", "oesophagus": "esophagus", "paediatrics": "pediatrics", "tumour": "tumor", "anaemia": "anemia", "diarrhoea": "diarrhea", "haematology": "hematology", "faeces": "feces", "haemorrhage": "hemorrhage" };
   for (const [k, v] of Object.entries(dict)) { const re = new RegExp('\\b' + k + '\\b', 'gi'); text = text.replace(re, v); }
@@ -442,7 +437,6 @@ function medicalSpellcheck(text) {
 function getPatientName(text) { const m = text.match(/Patient\s*Name\s*[:\-]\s*([A-Za-z\s]+)/i); return m && m[1] ? m[1].trim().replace(/\s+/g, '_') : 'ocr_output'; }
 function splitTextSections(text) { const lines = text.split(/\n+/).filter(l => l.trim() !== ''); const half = Math.ceil(lines.length / 2); return { left: lines.slice(0, half).join('\n'), right: lines.slice(half).join('\n') }; }
 
-// saveDoc / savePdf (Unchanged)
 saveDoc.onclick = async () => {
   const text = out.value.trim(); if (!text) return alert('No text to export.');
   const hospital = hospitalNameInput.value.trim() || 'CityCare General Hospital';
@@ -498,8 +492,6 @@ savePdf.onclick = () => {
   pdf.save(`${name}.pdf`);
 };
 
-// Copy snipped (Unchanged)
-const copySnipped = document.getElementById('copySnipped');
 copySnipped.onclick = () => {
   if (out.value.trim() === '') { alert('The output box is empty.'); return; }
   navigator.clipboard.writeText(out.value).then(() => {
@@ -512,11 +504,6 @@ copySnipped.onclick = () => {
 // Boot
 window.addEventListener('DOMContentLoaded', () => {
   checkLicenseStatus();
-  // Attempt to preload Tesseract using the new Blob URL method
-  loadTesseract().catch(e => {
-    console.error('Initial Tesseract load failed:', e);
-    licenseInfoDiv.innerHTML = '<div style="color:red;font-weight:bold;">OCR Engine failed to load. Please check your internet connection and try running the file on a local web server if this persists.</div>';
-  });
 });
 </script>
 </body>
