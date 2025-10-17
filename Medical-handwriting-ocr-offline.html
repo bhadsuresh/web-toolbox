@@ -303,22 +303,34 @@ function drawPreview() {
 rotateLeft.onclick = () => { rotation -= 90; drawPreview(); };
 rotateRight.onclick = () => { rotation += 90; drawPreview(); };
 
-// ======= OCR (Simplified for hosted environment) =======
+// ======= OCR (FINAL FIX: Explicitly specify Tesseract paths) =======
 async function runOCROnBlob(blob) {
   out.value = 'Running OCR... Please wait.';
-  // Ensure Tesseract is loaded before proceeding
+  
   if (typeof window.Tesseract === 'undefined') {
       out.value = 'OCR Engine failed to load Tesseract.js. Please check your internet connection.';
       return;
   }
   
   try {
-    // Tesseract is available globally from the <script> tag.
     const Tesseract = window.Tesseract; 
     const lang = langSel.value || 'eng';
     
-    // Use Tesseract.createWorker() without specifying custom paths.
+    // Define the base CDN path for Tesseract assets (Worker, Core, Lang data)
+    const TESSERACT_BASE_PATH = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.2.0';
+    
+    // *** FIX: Explicitly defining all paths ensures Tesseract finds its assets ***
     const worker = Tesseract.createWorker({ 
+        // 1. Specify the path to the worker script
+        workerPath: `${TESSERACT_BASE_PATH}/dist/tesseract-worker.min.js`,
+        
+        // 2. Specify the path to the core script (which includes the WebAssembly file)
+        // Note: The tesseract-core.wasm.js file will automatically fetch tesseract-core.wasm
+        corePath: `${TESSERACT_BASE_PATH}/dist/tesseract-core.wasm.js`,
+        
+        // 3. Optional, but good practice: specify language data path
+        langPath: `${TESSERACT_BASE_PATH}/dist/lang/`, 
+
         logger: m => { /* progress can be shown */ },
     });
     
@@ -332,12 +344,12 @@ async function runOCROnBlob(blob) {
     cleanText = medicalSpellcheck(cleanText);
     if (translateChk.checked && lang !== 'eng') cleanText += '\n\n(Translation to English is not available offline in this build.)';
     out.value = cleanText;
+    
   } catch (err) {
     console.error('OCR failure', err);
-    out.value = 'OCR error: ' + (err.message || String(err)) + '. If hosted, check the Tesseract CDN links in the HTML head.';
+    out.value = 'OCR error: ' + (err.message || String(err)) + '. The engine failed to start the worker. This is often a pathing or network issue.';
   }
 }
-
 runFull.onclick = () => { if (!fileBlob) return alert('Please load an image first.'); checkLicenseStatus(); if (fileInput.disabled) return alert('Your trial/subscription does not permit OCR.'); runOCROnBlob(fileBlob); };
 
 // ======= Snipping (CORRECTED for proper scaling) =======
