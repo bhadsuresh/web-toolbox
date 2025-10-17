@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Handwriting OCR for Doctors — Secure & Private (Offline)</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;background:#f4f7f4;margin:0;padding:10px;color:#0f172a}
+body {background-image: repeating-linear-gradient(45deg,#ccc,#ccc 1px,transparent 1px,transparent 10px);} 
+.app{max-width:1000px;margin:auto}
+.panel{background:#fff;border-radius:0px;box-shadow:0 4px 12px rgba(0,0,0,.08);padding:12px;margin-top:12px}
+button{background:#6BADCE;color:#fff;border:0;border-radius:6px;padding:8px 12px;cursor:pointer}
+button:disabled{background:#9ca3af;cursor:not-allowed}
+#canvasWrap{position:relative;border:1px solid #ccc;height:460px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#eee}
+canvas{background:#fff;display:block}
+.overlay{position:absolute;inset:0;cursor:crosshair;z-index:5;touch-action:none}
+.selection{position:absolute;border:2px dashed #0b9b4a;background:rgba(16,185,129,.15);pointer-events:none;z-index:6}
+textarea{width:100%;height:200px;padding:8px;border:1px solid #ccc;border-radius:6px;margin-top:10px;resize:vertical}
+label{font-size:13px;color:#374151;margin-left:10px}
+select{margin-left:10px;padding:4px 6px;border-radius:6px;border:1px solid #ccc}
+#trialStatus{float:right;font-size:14px;font-weight:bold;padding:5px;border-radius:4px}
+#trialStatus.free{color:#008000;background:#e6ffe6}
+#trialStatus.expired{color:#d32f2f;background:#ffe6e6}
+#trialStatus.pro{color:#0000ff;background:#e6e6ff}
+#licenseManagement{font-size:13px;padding:15px;margin-top:12px;border:1px solid #ccc;border-radius:0px;background:#FFD1DC}
+#licenseManagement div{margin-bottom:10px}
+#licenseInput{width:calc(100% - 150px);padding:3px}
+.parent-container {display: flex;justify-content: left;align-items: center;margin:0px;background:#F5F5F5}
+.parent-container-top {display: grid;grid-template-columns: 1.25fr 1.15fr 1.15fr 1.25fr 1fr 1.35fr;align-items: center;gap: 5px;background:#F5F5F5}
+.child-element-one, .child-element-two, .child-element-three, .child-element-four, .child-element-five, .child-element-six {padding-left: 10px;border: 0px solid #ccc;margin-left: 0px;margin-top: 5px;margin-bottom: 5px}
+.hr-style{height:1px;background-color:#E5E5E5; border: none}
+.element-style{border:1px solid grey; border-radius:5px;padding:8px}
+.notice{font-size:13px;color:#444;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="app">
+  <h2 style="display:inline-block;">Handwriting OCR for Doctors — Secure & Private (Offline)</h2>
+  <div id="trialStatus" class="free">Checking...</div>
+  <div class="panel">
+    <div class="parent-container-top">
+      <div class="child-element-one">
+        <input id="imgfile" type="file" accept="image/*"> 
+      </div>
+      <div class="child-element-two">
+        <button id="runFull"  disabled>🔎 Run OCR</button>
+      </div>
+      <div class="child-element-three">
+        <button id="rotateLeft">↩️ Rotate Left</button>
+      </div>
+      <div class="child-element-four">
+        <button id="rotateRight">↪️ Rotate Right</button>
+      </div>
+      <div class="child-element-five">
+        <label>Language 
+          <select id="langSel">
+            <option value="eng">English</option>
+            <option value="fra">French</option>
+            <option value="deu">German</option>
+            <option value="spa">Spanish</option>
+            <option value="ita">Italian</option>
+          </select>
+        </label>
+      </div>
+      <div class="child-element-six">
+        <label><input type="checkbox" id="translateChk"> Translate to English (OFFLINE not available)</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div id="canvasWrap"><canvas id="canvas"></canvas><div id="overlay" class="overlay"></div></div>
+    <div class="notice">Tip: Drag a rectangle on the image to OCR that region only. The whole-image OCR is also available.</div>
+
+    <div class="parent-container" style="margin-top:10px;">
+      <div class="child-element-one">
+        <label> Hospital Name: <input id="hospitalName" type="text" placeholder="Enter Hospital Name" class="element-style"></label>
+      </div>
+      <div class="child-element-two">
+        <label> Hospital Logo: <input id="logoFile" type="file" accept="image/png"></label>
+      </div>
+    </div>
+
+    <div class="parent-container" style="margin-top:10px; margin-bottom:10px;">
+      <textarea style="border-radius:0px;" id="out" placeholder="OCR text appears here..."></textarea>
+    </div>
+
+    <div class="parent-container">
+      <div class="child-element-one">
+        <button id="saveDoc">💾 Save as Word (.docx)</button>
+      </div>
+      <div class="child-element-two">
+        <button id="savePdf">💾 Save as PDF</button>
+      </div>
+      <div class="child-element-three">
+        <button id="copySnipped">📄 Copy Snipped Text</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="licenseManagement" class="panel">
+    <h3>License Management</h3>
+    <div id="userIdDisplay">Unique User ID: <strong id="uniqueUserId">...</strong></div>
+    <div id="licenseInfo"></div>
+    <input type="text" id="licenseInput" placeholder="Enter License Key here">
+    <button id="activateLicenseBtn" style="margin-top:8px;">Activate Subscription</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-sha256@0.9.0/src/sha256.min.js"></script>
+
+<script>
+// ======= Configuration =======
+const TRIAL_DAYS = 3;
+const PRO_DAYS = 30;
+const SECRET_KEY = 'MySuperSecretLicensingKey!';
+const dpr = window.devicePixelRatio || 1;
+
+// Base path for Tesseract assets
+const TESSERACT_CDN_PATH = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.2.0';
+let workerBlobURL = null; // New state variable for the worker's blob URL
+
+// ======= UI refs =======
+const fileInput = document.getElementById('imgfile');
+const runFull = document.getElementById('runFull');
+const out = document.getElementById('out');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d', { willReadFrequently: true });
+const overlay = document.getElementById('overlay');
+const langSel = document.getElementById('langSel');
+const saveDoc = document.getElementById('saveDoc');
+const savePdf = document.getElementById('savePdf');
+const logoFile = document.getElementById('logoFile');
+const hospitalNameInput = document.getElementById('hospitalName');
+const translateChk = document.getElementById('translateChk');
+const rotateLeft = document.getElementById('rotateLeft');
+const rotateRight = document.getElementById('rotateRight');
+const trialStatusDiv = document.getElementById('trialStatus');
+const uniqueUserIdSpan = document.getElementById('uniqueUserId');
+const licenseInfoDiv = document.getElementById('licenseInfo');
+const licenseInput = document.getElementById('licenseInput');
+const activateLicenseBtn = document.getElementById('activateLicenseBtn');
+
+// ======= State =======
+let fileBlob = null;
+let imageBitmap = null;
+let imgElement = null;
+let logoData = null;
+let rotation = 0;
+let selection = null;
+let start = null;
+let canvasDisplay = { x: 0, y: 0, width: 0, height: 0 };
+
+// Ensure overlay receives pointer events
+overlay.style.touchAction = 'none';
+overlay.style.zIndex = 5;
+canvas.style.zIndex = 4;
+
+// ======= Utility: Tesseract loader with BLOB Worker URL bypass (The Fix) =======
+async function loadTesseract() {
+  if (window.Tesseract && workerBlobURL) return window.Tesseract;
+  
+  // 1. Dynamic load of tesseract.min.js (main library)
+  if (!window.Tesseract) {
+    out.value = 'Loading OCR Engine (1/2)...';
+    try {
+        const response = await fetch(`${TESSERACT_CDN_PATH}/dist/tesseract.min.js`);
+        if (!response.ok) throw new Error(`Failed to fetch main script: ${response.statusText}`);
+        const scriptText = await response.text();
+        // Execute the script, which defines window.Tesseract. This bypasses the security restriction of the <script src=""> tag.
+        eval(scriptText); 
+    } catch(e) {
+        throw new Error('Failed to load main Tesseract script from CDN. Check connection.');
+    }
+  }
+
+  // 2. Create BLOB URL for the worker script (The essential bypass)
+  if (!workerBlobURL) {
+    out.value = 'Loading OCR Engine (2/2)...';
+    try {
+        const workerResponse = await fetch(`${TESSERACT_CDN_PATH}/dist/worker.min.js`);
+        if (!workerResponse.ok) throw new Error(`Failed to fetch worker script: ${workerResponse.statusText}`);
+        const workerBlob = await workerResponse.blob();
+        // Create a blob URL, which is a safe, in-memory URL the browser accepts from the file:// protocol.
+        workerBlobURL = URL.createObjectURL(workerBlob); 
+    } catch(e) {
+        throw new Error('Failed to create Worker Blob URL. Check connection.');
+    }
+  }
+  
+  out.value = 'OCR Engine ready. Please load an image.';
+  return window.Tesseract;
+}
+
+
+// ======= Licensing & Trial (Logic is unchanged) =======
+function getOrCreateUniqueUserId() {
+  let userId = localStorage.getItem('uniqueUserId');
+  if (!userId) {
+    userId = 'USER-' + Array.from({ length: 8 }, () => Math.floor(Math.random() * 16).toString(16).toUpperCase()).join('');
+    localStorage.setItem('uniqueUserId', userId);
+  }
+  uniqueUserIdSpan.textContent = userId;
+  return userId;
+}
+function getTrialStartTime() {
+  let t = localStorage.getItem('trialStartTime');
+  if (!t) {
+    t = Date.now();
+    localStorage.setItem('trialStartTime', t);
+  }
+  return parseInt(t, 10);
+}
+function getLicenseExpiry() { const e = localStorage.getItem('licenseExpiry'); return e ? parseInt(e, 10) : 0; }
+function setLicenseExpiry(ts) { localStorage.setItem('licenseExpiry', ts); }
+
+function updateRunButtonState() {
+  runFull.disabled = !fileBlob || fileInput.disabled;
+}
+
+function checkLicenseStatus() {
+  const userId = getOrCreateUniqueUserId();
+  const now = Date.now();
+  const trialStart = getTrialStartTime();
+  const licenseExpiry = getLicenseExpiry();
+
+  if (licenseExpiry > now) {
+    const daysLeft = Math.ceil((licenseExpiry - now) / (1000 * 60 * 60 * 24));
+    fileInput.disabled = false;
+    licenseInput.disabled = true;
+    activateLicenseBtn.disabled = true;
+    trialStatusDiv.className = 'pro';
+    trialStatusDiv.textContent = `PRO Tier: ${daysLeft} Days Left`;
+    licenseInfoDiv.innerHTML = `<strong>Active Pro License.</strong> Expires in ${daysLeft} days.`;
+    updateRunButtonState();
+    return;
+  }
+
+  if (licenseExpiry > 0 && licenseExpiry <= now) {
+    fileInput.disabled = true;
+    licenseInput.disabled = false;
+    activateLicenseBtn.disabled = false;
+    trialStatusDiv.className = 'expired';
+    trialStatusDiv.textContent = `Subscription Expired`;
+    licenseInfoDiv.innerHTML = `<strong>Please Renew your subscription.</strong> Enter a new license key below.`;
+    updateRunButtonState();
+    return;
+  }
+
+  const trialEnd = trialStart + TRIAL_DAYS * 24 * 60 * 60 * 1000;
+  const daysLeft = Math.ceil((trialEnd - now) / (1000 * 60 * 60 * 24));
+  if (daysLeft > 0) {
+    fileInput.disabled = false;
+    licenseInput.disabled = false;
+    activateLicenseBtn.disabled = false;
+    trialStatusDiv.className = 'free';
+    trialStatusDiv.textContent = `Free Trial: ${daysLeft} Days Left`;
+    licenseInfoDiv.innerHTML = `Trial active. ${daysLeft} days remaining.`;
+    updateRunButtonState();
+  } else {
+    fileInput.disabled = true;
+    trialStatusDiv.className = 'expired';
+    trialStatusDiv.textContent = `Trial Expired`;
+    licenseInfoDiv.innerHTML = `
+      <p style="color:red;font-weight:bold;">Your Free Trial period is Over! Please subscribe for Pro Tier at just $19/month.</p>
+      <p>After paying, please email us the payment receipt and your Unique User ID (<strong id="uniqueUserId">${userId}</strong>).</p>
+    `;
+    updateRunButtonState();
+  }
+}
+
+activateLicenseBtn.onclick = async () => {
+  const licenseKey = licenseInput.value.trim();
+  if (!licenseKey) { alert('Please enter a license key.'); return; }
+  const parts = licenseKey.split('|');
+  if (parts.length !== 2) { alert('Invalid License Key format (Missing \"|\" separator).'); return; }
+  const userId = getOrCreateUniqueUserId();
+  if (parts[0] !== userId) { alert('Activation failed. License Key User ID does not match your Unique User ID.'); return; }
+  const licenseDataParts = parts[1].split('.');
+  if (licenseDataParts.length !== 2) { alert('Invalid License Key format (Missing \".\" separator for signature).'); return; }
+  const licenseDateStr = licenseDataParts[0];
+  const expectedSignature = licenseDataParts[1];
+  const dataToSign = `${userId}|${licenseDateStr}`;
+
+  const calculatedHex = sha256.hmac(SECRET_KEY, dataToSign);
+  const calculatedBinary = sha256.hmac.arrayBuffer(SECRET_KEY, dataToSign);
+  const calculatedBytes = new Uint8Array(calculatedBinary);
+  const calculatedBase64 = btoa(String.fromCharCode(...calculatedBytes));
+  const calculatedBase64Url = calculatedBase64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+
+  if ([calculatedHex, calculatedBase64, calculatedBase64Url].includes(expectedSignature)) {
+    const newExpiry = Date.now() + PRO_DAYS * 24 * 60 * 60 * 1000;
+    setLicenseExpiry(newExpiry);
+    alert('Subscription Activated! Pro Tier access granted for 30 days.');
+    checkLicenseStatus();
+  } else {
+    alert('Activation failed. Invalid License Key or signature mismatch.');
+  }
+};
+
+// ======= Image loading & preview (Unchanged) =======
+logoFile.addEventListener('change', e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => logoData = r.result; r.readAsDataURL(f); });
+
+fileInput.addEventListener('change', async e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  fileBlob = f;
+  try {
+    imageBitmap = await createImageBitmap(f);
+  } catch (err) {
+    const img = new Image(); img.src = URL.createObjectURL(f); await img.decode(); imageBitmap = img;
+  }
+  imgElement = new Image(); imgElement.src = URL.createObjectURL(f); await imgElement.decode();
+  drawPreview();
+  checkLicenseStatus();
+  updateRunButtonState();
+});
+
+function drawPreview() {
+  if (!imageBitmap) return;
+  const wrap = document.getElementById('canvasWrap');
+  const wrapW = wrap.clientWidth, wrapH = wrap.clientHeight;
+  const iw = imageBitmap.width || imageBitmap.naturalWidth, ih = imageBitmap.height || imageBitmap.naturalHeight;
+  const scale = Math.min(wrapW / iw, wrapH / ih);
+  const dispW = iw * scale, dispH = ih * scale;
+  const offsetX = (wrapW - dispW) / 2, offsetY = (wrapH - dispH) / 2;
+  canvasDisplay = { x: offsetX, y: offsetY, width: dispW, height: dispH };
+  canvas.width = dispW * dpr; canvas.height = dispH * dpr;
+  Object.assign(canvas.style, { width: dispW + 'px', height: dispH + 'px', left: offsetX + 'px', top: offsetY + 'px', position: 'absolute' });
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, dispW, dispH);
+  ctx.save();
+  ctx.translate(dispW / 2, dispH / 2);
+  ctx.rotate(rotation * Math.PI / 180);
+  ctx.drawImage(imageBitmap, -dispW / 2, -dispH / 2, dispW, dispD = dispH);
+  ctx.restore();
+}
+rotateLeft.onclick = () => { rotation -= 90; drawPreview(); };
+rotateRight.onclick = () => { rotation += 90; drawPreview(); };
+
+// ======= OCR (Updated to use Blob URL) =======
+async function runOCROnBlob(blob) {
+  out.value = 'Running OCR... Please wait.';
+  try {
+    // Await the new dynamic loader which also creates the workerBlobURL
+    const Tesseract = await loadTesseract(); 
+    const lang = langSel.value || 'eng';
+    
+    const worker = Tesseract.createWorker({ 
+        logger: m => { /* progress can be shown */ },
+        workerPath: workerBlobURL, // *** KEY FIX: Use the pre-fetched blob URL here ***
+        corePath: `${TESSERACT_CDN_PATH}/dist/tesseract-core-simd.wasm.js`,
+        langPath: `${TESSERACT_CDN_PATH}/dist/`,
+    });
+    
+    await worker.load();
+    await worker.loadLanguage(lang);
+    await worker.initialize(lang);
+    const { data: { text } } = await worker.recognize(blob);
+    await worker.terminate();
+
+    let cleanText = (text || '').trim() || '(No text detected)';
+    cleanText = medicalSpellcheck(cleanText);
+    if (translateChk.checked && lang !== 'eng') cleanText += '\n\n(Translation to English is not available offline in this build.)';
+    out.value = cleanText;
+  } catch (err) {
+    console.error('OCR failure', err);
+    out.value = 'OCR error: ' + (err.message || String(err));
+    if (String(err).toLowerCase().includes('tesseract')) {
+      licenseInfoDiv.innerHTML = '<div style="color:orange;font-weight:bold;">Tesseract failed to load. Check your internet connection or retry. <button id="retryTess">Retry Loading OCR Engine</button></div>';
+      document.getElementById('retryTess').onclick = async () => { licenseInfoDiv.innerHTML = ''; try { await loadTesseract(); alert('Tesseract loaded — try Run OCR again'); } catch(e) { alert('Retry failed: ' + e); } };
+    }
+  }
+}
+
+runFull.onclick = () => { if (!fileBlob) return alert('Please load an image first.'); checkLicenseStatus(); if (fileInput.disabled) return alert('Your trial/subscription does not permit OCR.'); runOCROnBlob(fileBlob); };
+
+// ======= Snipping (Unchanged) =======
+function getCanvasCoords(e) {
+  const wrapRect = document.getElementById('canvasWrap').getBoundingClientRect();
+  const relX = e.clientX - wrapRect.left - canvasDisplay.x;
+  const relY = e.clientY - wrapRect.top - canvasDisplay.y;
+  return { x: relX * dpr, y: relY * dpr };
+}
+
+overlay.addEventListener('pointerdown', e => {
+  if (!imgElement) return;
+  overlay.setPointerCapture(e.pointerId);
+  start = getCanvasCoords(e);
+  selection = { x: start.x, y: start.y, w: 0, h: 0 };
+  drawSel();
+});
+overlay.addEventListener('pointermove', e => {
+  if (!start) return;
+  const pt = getCanvasCoords(e);
+  selection.x = Math.min(pt.x, start.x);
+  selection.y = Math.min(pt.y, start.y);
+  selection.w = Math.abs(pt.x - start.x);
+  selection.h = Math.abs(pt.y - start.y);
+  drawSel();
+});
+overlay.addEventListener('pointerup', async e => {
+  if (!start) return;
+  overlay.releasePointerCapture(e.pointerId);
+  start = null;
+  if (!selection || selection.w < 5 || selection.h < 5) { selection = null; drawSel(); return; }
+  const cropBlob = await cropFromOriginal(selection);
+  await runOCROnBlob(cropBlob);
+  selection = null; drawSel();
+});
+
+function drawSel() {
+  let s = document.querySelector('.selection');
+  if (!selection) { if (s) s.remove(); return; }
+  if (!s) { s = document.createElement('div'); s.className = 'selection'; document.getElementById('canvasWrap').appendChild(s); }
+  const scale = 1 / dpr;
+  s.style.left = (canvasDisplay.x + selection.x * scale) + 'px';
+  s.style.top = (canvasDisplay.y + selection.y * scale) + 'px';
+  s.style.width = (selection.w * scale) + 'px';
+  s.style.height = (selection.h * scale) + 'px';
+}
+
+async function cropFromOriginal(sel) {
+  const dispW = canvasDisplay.width * dpr, dispH = canvasDisplay.height * dpr;
+  const scaleX = imgElement.naturalWidth / dispW, scaleY = imgElement.naturalHeight / dispH;
+  const sx = sel.x * scaleX, sy = sel.y * scaleY, sw = sel.w * scaleX, sh = sel.h * scaleY;
+  const off = document.createElement('canvas'); off.width = sw; off.height = sh; const c2 = off.getContext('2d'); c2.drawImage(imgElement, sx, sy, sw, sh, 0, 0, sw, sh);
+  return await new Promise(r => off.toBlob(r, 'image/png'));
+}
+
+// ======= Helpers: spellcheck + export (Unchanged) =======
+function medicalSpellcheck(text) {
+  const dict = { "haemoglobin": "hemoglobin", "leucocytes": "leukocytes", "oesophagus": "esophagus", "paediatrics": "pediatrics", "tumour": "tumor", "anaemia": "anemia", "diarrhoea": "diarrhea", "haematology": "hematology", "faeces": "feces", "haemorrhage": "hemorrhage" };
+  for (const [k, v] of Object.entries(dict)) { const re = new RegExp('\\b' + k + '\\b', 'gi'); text = text.replace(re, v); }
+  return text;
+}
+
+function getPatientName(text) { const m = text.match(/Patient\s*Name\s*[:\-]\s*([A-Za-z\s]+)/i); return m && m[1] ? m[1].trim().replace(/\s+/g, '_') : 'ocr_output'; }
+function splitTextSections(text) { const lines = text.split(/\n+/).filter(l => l.trim() !== ''); const half = Math.ceil(lines.length / 2); return { left: lines.slice(0, half).join('\n'), right: lines.slice(half).join('\n') }; }
+
+// saveDoc / savePdf (Unchanged)
+saveDoc.onclick = async () => {
+  const text = out.value.trim(); if (!text) return alert('No text to export.');
+  const hospital = hospitalNameInput.value.trim() || 'CityCare General Hospital';
+  const name = getPatientName(text);
+  const { Document, Packer, Paragraph, TextRun, Header, Footer, ImageRun, AlignmentType, Table, TableRow, TableCell, WidthType, ShadingType } = window.docx;
+  const dateStr = new Date().toLocaleDateString();
+  const { left, right } = splitTextSections(text);
+  const headParas = [];
+  if (logoData) { headParas.push(new Paragraph({ alignment: AlignmentType.CENTER, children: [new ImageRun({ data: logoData, transformation: { width: 60, height: 60 } })] })); }
+  headParas.push(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: hospital, bold: true, size: 28 })] }));
+  headParas.push(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'Date: ' + dateStr, size: 20 })] }));
+  const table = new Table({ rows: [new TableRow({ children: [new TableCell({ width: { size: 50, type: WidthType.PERCENTAGE }, shading: { fill: "4A90E2", type: ShadingType.CLEAR, color: "auto" }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Patient Information", bold: true, color: "FFFFFF", size: 26 })] })] }), new TableCell({ width: { size: 50, type: WidthType.PERCENTAGE }, shading: { fill: "4A90E2", type: ShadingType.CLEAR, color: "auto" }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Diagnosis Details", bold: true, color: "FFFFFF", size: 26 })] })] })] }), new TableRow({ children: [new TableCell({ width: { size: 50, type: WidthType.PERCENTAGE }, children: left.split(/\n+/).map(t => new Paragraph({ children: [new TextRun({ text: t, size: 22 })] })) }), new TableCell({ width: { size: 50, type: WidthType.PERCENTAGE }, children: right.split(/\n+/).map(t => new Paragraph({ children: [new TextRun({ text: t, size: 22 })] })) })] })] });
+  const footer = new Footer({ children: [new Paragraph({ children: [new TextRun({ text: "Doctor's Signature: __________________", size: 22 })] }), new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: '© ' + hospital + ' — Confidential Patient Report', size: 18 })] })] });
+  const doc = new Document({ sections: [{ headers: { default: new Header({ children: headParas }) }, footers: { default: footer }, properties: { page: { margin: { top: 100, right: 720, bottom: 720, left: 720 } } }, children: [table] }] });
+  const blob = await Packer.toBlob(doc);
+  saveAs(blob, `${name}.docx`);
+};
+
+savePdf.onclick = () => {
+  const text = out.value.trim(); if (!text) return alert('No text to export.');
+  const hospital = hospitalNameInput.value.trim() || 'CityCare General Hospital';
+  const name = getPatientName(text);
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ unit: "pt", format: "a4" });
+  const pageW = 595.28, pageH = 841.89, margin = 40, maxWidth = (pageW - 3 * margin) / 2, lineHeight = 14;
+  const dateStr = new Date().toLocaleDateString();
+  const { left, right } = splitTextSections(text);
+  if (logoData) pdf.addImage(logoData, "PNG", margin, 30, 60, 60);
+  pdf.setFont("times", "bold"); pdf.setFontSize(16);
+  pdf.text(hospital, pageW / 2, 60, { align: "center" });
+  pdf.setFont("times", "normal"); pdf.setFontSize(10);
+  pdf.text("Date: " + dateStr, pageW - 100, 75);
+  pdf.line(margin, 85, pageW - margin, 85);
+  pdf.setFillColor(74, 144, 226);
+  pdf.rect(margin, 95, maxWidth, 20, "F");
+  pdf.rect(margin + maxWidth + margin, 95, maxWidth, 20, "F");
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(12); pdf.setFont("times", "bold");
+  pdf.text("Patient Information", margin + 4, 110);
+  pdf.text("Diagnosis Details", margin + maxWidth + margin + 4, 110);
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFont("times", "normal"); pdf.setFontSize(11);
+  const leftLines = pdf.splitTextToSize(left, maxWidth);
+  const rightLines = pdf.splitTextToSize(right, maxWidth);
+  let yL = 125, yR = 125;
+  leftLines.forEach(l => { if (yL > pageH - 100) return; pdf.text(l, margin, yL); yL += lineHeight; });
+  rightLines.forEach(l => { if (yR > pageH - 100) return; pdf.text(l, margin + maxWidth + margin, yR); yR += lineHeight; });
+  pdf.line(margin, pageH - 80, pageW - margin, pageH - 80);
+  pdf.setFontSize(11);
+  pdf.text("Doctor's Signature: __________________", margin, pageH - 60);
+  pdf.setFontSize(9);
+  pdf.text(`© ${hospital} — Confidential Patient Report`, pageW / 2, pageH - 30, { align: "center" });
+  pdf.save(`${name}.pdf`);
+};
+
+// Copy snipped (Unchanged)
+const copySnipped = document.getElementById('copySnipped');
+copySnipped.onclick = () => {
+  if (out.value.trim() === '') { alert('The output box is empty.'); return; }
+  navigator.clipboard.writeText(out.value).then(() => {
+    const originalText = copySnipped.textContent;
+    copySnipped.textContent = '✅ Copied!';
+    setTimeout(() => { copySnipped.textContent = originalText; }, 1500);
+  }).catch(err => { alert('Failed to copy text. Please copy manually from the output box.'); console.error('Copy failed:', err); });
+};
+
+// Boot
+window.addEventListener('DOMContentLoaded', () => {
+  checkLicenseStatus();
+  // Attempt to preload Tesseract using the new Blob URL method
+  loadTesseract().catch(e => {
+    console.error('Initial Tesseract load failed:', e);
+    licenseInfoDiv.innerHTML = '<div style="color:red;font-weight:bold;">OCR Engine failed to load. Please check your internet connection and try running the file on a local web server if this persists.</div>';
+  });
+});
+</script>
+</body>
+</html>
