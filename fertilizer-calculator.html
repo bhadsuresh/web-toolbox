@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Fertilizer Calculator helps farmers estimate NPK fertilizer needs by crop type, area, and soil conditions for better yield and efficiency.">
+  <meta name="keywords" content="fertilizer calculator, npk, crop nutrients, irrigation, agriculture tools, smart farming, soil health">
+  <title>Fertilizer Calculator | Smart Irrigation App</title>
+
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f6f9fc;
+      margin: 0;
+      color: #333;
+    }
+    
+    header{background:linear-gradient(90deg, #43a047, #66bb6a);color:#fff;padding:16px;border-radius:0px;box-shadow:var(--      	shadow);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+    header h1{margin:0;font-size:1.15rem}
+    header p{margin:6px 0 0;font-size:0.9rem;opacity:0.95}
+    header a button{background:#228B22;color:white;border:none;padding:8px 12px;border-radius:px;cursor:pointer;font-weight:600}
+    .hero-placeholder{margin:18px 0;text-align:center}
+    .hero-placeholder img{width:100%;max-height:240px;object-fit:cover;border-radius:0px;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+
+    .container {
+      max-width: 900px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #2e7d32;
+    }
+    label {
+      font-weight: 600;
+      margin-top: 10px;
+      display: block;
+    }
+    select, input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    .button { padding:8px 12px; font-size:16px; border:none; border-radius:6px; background:#228B22; color:#fff; cursor:pointer; margin-top:10px; }
+
+    button:hover {
+      background: #2e7d32;
+    }
+    .pdf-btn {
+      background: #0288d1;
+    }
+    #result {
+      background: #e8f5e9;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    .tips {
+      background: #f1f8e9;
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    @media(max-width:600px){
+      .container { padding: 15px; }
+    }
+    .label-style{
+     font-size:12px;
+     color:grey;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Fertilizer Qty Calculator</h1>
+    <a href="index.html"><button class="button">Home</button></a>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
+  <div class="container">
+    <h2 style="font-size:15px;">Fertilizer Requirement Calculator (N-P-K)</h2>
+
+    <label for="crop" class="label-style">Select Crop:</label>
+    <select id="crop">
+      <option value="">--Select Crop--</option>
+      <optgroup label="Leafy Greens">
+        <option value="spinach">Spinach</option>
+        <option value="lettuce">Lettuce</option>
+        <option value="parsley">Parsley</option>
+        <option value="oregano">Oregano</option>
+      </optgroup>
+      <optgroup label="Root Vegetables">
+        <option value="carrot">Carrot</option>
+        <option value="beetroot">Beetroot</option>
+        <option value="onion">Onion</option>
+        <option value="garlic">Garlic</option>
+        <option value="sweet_potato">Sweet Potato</option>
+      </optgroup>
+      <optgroup label="Fruiting Crops">
+        <option value="tomato">Tomato</option>
+        <option value="capsicum">Capsicum</option>
+        <option value="pumpkin">Pumpkin</option>
+        <option value="butternut">Butternut</option>
+        <option value="okra">Okra</option>
+      </optgroup>
+      <optgroup label="Bulb & Tuber Crops">
+        <option value="potato">Potato</option>
+        <option value="ginger">Ginger</option>
+      </optgroup>
+      <optgroup label="Perennial Fruits">
+        <option value="apple">Apple</option>
+        <option value="grapes">Grapes</option>
+        <option value="oranges">Oranges</option>
+      </optgroup>
+      <optgroup label="Cruciferous Crops">
+        <option value="cabbage">Cabbage</option>
+        <option value="cauliflower">Cauliflower</option>
+      </optgroup>
+    </select>
+
+    <label for="soilType" class="label-style">Soil Type:</label>
+    <select id="soilType">
+      <option value="loamy">Loamy</option>
+      <option value="sandy">Sandy</option>
+      <option value="clay">Clay</option>
+      <option value="sandy_loam">Sandy Loam</option>
+    </select>
+    
+    <label for="area" class="label-style" >Enter Crop Area:</label>
+    <input type="number" id="area" placeholder="Enter area value" />
+    
+    <label for="areaUnit" class="label-style">Select Area Unit:</label>
+    <select id="areaUnit">
+      <option value="acre">Acre</option>
+      <option value="sqm">Square Meter</option>
+    </select>
+    
+    <button id="calculateBtn" class="button">Calculate Fertilizer</button>
+    <button id="pdfBtn" class="pdf-btn button">Export as PDF</button>
+
+    <div id="result" style="display:none;">
+      <h3>Recommended Fertilizer Requirement:</h3>
+      <p><strong>Total Nitrogen (N):</strong> <span id="nValue"></span> kg</p>
+      <p><strong>Total Phosphorus (P):</strong> <span id="pValue"></span> kg</p>
+      <p><strong>Total Potassium (K):</strong> <span id="kValue"></span> kg</p>
+
+      <h4>Per Acre Equivalent:</h4>
+      <ul>
+        <li>Nitrogen (N): <span id="nAcre"></span> kg/acre</li>
+        <li>Phosphorus (P): <span id="pAcre"></span> kg/acre</li>
+        <li>Potassium (K): <span id="kAcre"></span> kg/acre</li>
+      </ul>
+    </div>
+
+    <div class="tips" id="tips" style="display:none;">
+      <h3>Fertilization Tips:</h3>
+      <p id="tipText"></p>
+    </div>
+
+    <!-- Hidden export container for clean PDF -->
+    <div id="pdfExport" style="display:none;"></div>
+  </div>
+
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+  const fertilizerData = {
+    spinach: { N: 60, P: 40, K: 50, tip: "Apply N in 2 splits, keep soil moist for uniform growth." },
+    carrot: { N: 80, P: 60, K: 100, tip: "Avoid fresh manure; ensure balanced K for better root size." },
+    beetroot: { N: 90, P: 50, K: 80, tip: "Split N applications promote healthy root color." },
+    onion: { N: 100, P: 50, K: 50, tip: "Avoid excess N after bulb formation." },
+    garlic: { N: 90, P: 50, K: 60, tip: "High N early; reduce before bulb maturity." },
+    lettuce: { N: 90, P: 50, K: 60, tip: "Use nitrogen for lush leaves; avoid overuse." },
+    potato: { N: 180, P: 100, K: 120, tip: "1/3 N & K at planting, rest after 45 days." },
+    sweet_potato: { N: 80, P: 70, K: 100, tip: "K promotes root development and starch content." },
+    tomato: { N: 120, P: 80, K: 100, tip: "High K enhances fruit quality; apply in 3 splits." },
+    capsicum: { N: 100, P: 60, K: 90, tip: "Apply balanced NPK every 15 days during flowering." },
+    pumpkin: { N: 80, P: 50, K: 80, tip: "Top dress with N during vine growth." },
+    butternut: { N: 90, P: 50, K: 80, tip: "Requires well-drained loamy soil and high K." },
+    parsley: { N: 80, P: 40, K: 60, tip: "Apply N biweekly for better foliage." },
+    oregano: { N: 60, P: 40, K: 60, tip: "Moderate fertilization; avoid overwatering." },
+    okra: { N: 90, P: 60, K: 80, tip: "Apply N in two doses; maintain moisture for better yield." },
+    ginger: { N: 75, P: 50, K: 100, tip: "Add compost and split N into 3 applications." },
+    apple: { N: 70, P: 50, K: 80, tip: "Apply before flowering and after fruit set." },
+    grapes: { N: 100, P: 80, K: 150, tip: "K important for fruit set; avoid late N." },
+    oranges: { N: 120, P: 80, K: 120, tip: "Fertilize in early spring; mulch to retain moisture." },
+    cabbage: { N: 150, P: 60, K: 80, tip: "N deficiency causes small heads; water regularly." },
+    cauliflower: { N: 140, P: 60, K: 80, tip: "Apply N in 3 splits; P crucial for curd formation." }
+  };
+
+  const SQM_PER_ACRE = 4046.86;
+
+  document.getElementById("calculateBtn").addEventListener("click", () => {
+    const crop = document.getElementById("crop").value;
+    const area = parseFloat(document.getElementById("area").value);
+    const unit = document.getElementById("areaUnit") ? document.getElementById("areaUnit").value : "acre";
+
+    if (!crop || !area) {
+      alert("Please select a crop and enter the area.");
+      return;
+    }
+
+    const data = fertilizerData[crop];
+    const areaAcre = unit === "sqm" ? area / SQM_PER_ACRE : area;
+
+    const nTotal = data.N * areaAcre;
+    const pTotal = data.P * areaAcre;
+    const kTotal = data.K * areaAcre;
+
+    document.getElementById("result").style.display = "block";
+    document.getElementById("tips").style.display = "block";
+
+    document.getElementById("nValue").textContent = nTotal.toFixed(1);
+    document.getElementById("pValue").textContent = pTotal.toFixed(1);
+    document.getElementById("kValue").textContent = kTotal.toFixed(1);
+
+    document.getElementById("nAcre").textContent = data.N;
+    document.getElementById("pAcre").textContent = data.P;
+    document.getElementById("kAcre").textContent = data.K;
+
+    document.getElementById("tipText").textContent = data.tip;
+  });
+
+  // ✅ Center-aligned, properly formatted PDF export
+  document.getElementById("pdfBtn").addEventListener("click", async () => {
+    const resultSection = document.getElementById("result");
+    const tipsSection = document.getElementById("tips");
+
+    if (resultSection.style.display === "none") {
+      alert("Please calculate fertilizer requirement first.");
+      return;
+    }
+
+    const pdfContainer = document.createElement("div");
+    pdfContainer.style.width = "800px";
+    pdfContainer.style.margin = "0 auto";
+    pdfContainer.style.padding = "30px";
+    pdfContainer.style.textAlign = "center";
+    pdfContainer.style.background = "#ffffff";
+    pdfContainer.style.border = "2px solid #2e7d32";
+    pdfContainer.style.borderRadius = "12px";
+    pdfContainer.style.fontFamily = "'Poppins', sans-serif";
+    pdfContainer.innerHTML = `
+      <h2 style="color:#2e7d32;margin-bottom:20px;">Fertilizer Recommendation Report</h2>
+      <div style="margin:auto;display:inline-block;text-align:left;">
+        ${resultSection.innerHTML}
+        ${tipsSection.innerHTML}
+      </div>
+      <p style="font-size:0.8rem;color:#555;text-align:center;margin-top:15px;">
+        Generated by Smart Irrigation App
+      </p>
+    `;
+
+    document.body.appendChild(pdfContainer);
+
+    const canvas = await html2canvas(pdfContainer, { scale: 2, useCORS: true });
+    const imgData = canvas.toDataURL("image/png");
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p", "pt", "a4");
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const imgWidth = pageWidth - 40;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    // Center the image horizontally
+    const x = (pageWidth - imgWidth) / 2;
+    pdf.addImage(imgData, "PNG", x, 20, imgWidth, imgHeight);
+    pdf.save("fertilizer-report.pdf");
+
+    pdfContainer.remove();
+  });
+</script>
+
+<footer style="margin-top:18px;text-align:center;color:grey;font-size:0.9rem; background:black; padding:16px;">
+	    &copy;2025: Web Toolbox
+	</footer>
+
+
+
+</body>
+</html>

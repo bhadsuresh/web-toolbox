@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Smart Irrigation Scheduler helps farmers optimize water, fuel, and cost savings. Calculate irrigation needs by crop, soil, temperature, and area." />
+  <meta name="keywords" content="irrigation scheduler, smart irrigation, crop water calculator, agriculture, farming tools, water saving, pdf export" />
+  <title>Smart Irrigation Scheduler | Optimize Water Use</title>
+  <style>
+    
+    :root{
+      --bg:#f8fafc; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --text:#0f1724;
+      --radius:12px; --shadow:0 8px 24px rgba(15,23,36,0.06);
+    }
+     *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+    body{margin:0;background:var(--bg);color:var(--text);padding:0px}
+
+   /* body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8fcf9;
+      margin: 0;
+      color: #2c3e50;
+    }*/
+    header {
+      background: linear-gradient(90deg, #43a047, #66bb6a);
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+
+
+    header h1{margin:0;font-size:1.15rem}
+    header p{margin:6px 0 0;font-size:0.9rem;opacity:0.95}
+    header a button{background:#fff;color:var(--accent);border:none;padding:8px 12px;border-radius:px;cursor:pointer;font-weight:600}
+
+    main {
+      max-width: 900px;
+      margin: 1.5rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
+    h1, h2 { color: #2e7d32; }
+    label { font-weight: 600; display: block; margin-top: 1rem; }
+    select, input { width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 5px; margin-top: 0.4rem; }
+    button { background: #2e7d32; color: white; border: none; padding: 0.8rem 1.2rem; font-size: 1rem; margin-top: 1rem; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #1b5e20; }
+    .result { margin-top: 2rem; padding: 1rem; background: #e8f5e9; border-radius: 8px; line-height: 1.6; }
+    .tips { background: #f1f8e9; padding: 1rem; border-left: 4px solid #66bb6a; margin-top: 1.5rem; border-radius: 5px; }
+    .adsense-placeholder { text-align: center; margin: 2rem 0; padding: 1rem; background: #f9f9f9; border: 2px dashed #ccc; color: #777; border-radius: 8px; }
+    .table-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 1rem; border-radius: 0.5rem; background: #f9fdf9; }
+    .table-container table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    .table-container th, .table-container td { text-align: left; padding: 0.6rem; border-bottom: 1px solid #dce7de; word-wrap: break-word; font-size: 0.95rem; }
+    .table-container th { background-color: #e6f2e9; font-weight: 600; }
+    @media (max-width: 600px) {
+      main { padding: 1rem; }
+      .table-container table { min-width: 100%; font-size: 0.85rem; }
+       header h1 { font-size:1rem; }
+      .hero img { height:120px; }
+    }
+
+    /* Ensure printed PDF background visibility */
+    #result, #result * { background-color: transparent !important; }
+   
+    .button { padding:8px 12px; font-size:14px; border:none; border-radius:6px; background:#228B22; color:#fff; cursor:pointer; margin-    		top:10px; }
+.button:hover { background:#357ab8; }
+.light-text{
+font-weight:500;
+font-size:13px
+}
+.hero-placeholder{margin:18px 0;text-align:center}
+.hero-placeholder img{width:100%;max-height:240px;object-fit:cover;border-radius:0px;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+.label-style{font-size:13px;color:grey;}
+
+</style>
+</head>
+<body>
+  <header>
+    <h1>🌾 Smart Irrigation Scheduler</h1>
+    <a href="index.html"><button class="button">Home</button></a>
+  </header>
+ 
+  <!-- Hero -->
+  <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
+  <main>
+    <h2 style="font-size:17px;">Calculate Your Crop’s Daily Water Requirement</h2>
+    <p>Save water, reduce fuel use, and grow healthier crops.</p>
+    <label for="crop" class="label-style">Select Crop Type:</label>
+    <select id="crop">
+      <option value="">--Select Crop--</option>
+      <optgroup label="Leafy Greens">
+        <option>Lettuce</option><option>Spinach</option><option>Parsley</option><option>Oregano</option>
+      </optgroup>
+      <optgroup label="Root Vegetables">
+        <option>Carrot</option><option>Beet-root</option><option>Potato</option><option>Sweet Potato</option><option>Garlic</option><option>Onion</option><option>Ginger</option>
+      </optgroup>
+      <optgroup label="Fruiting Crops">
+        <option>Tomato</option><option>Cucumber</option><option>Capsicum</option><option>Okra</option><option>Pumpkin</option><option>Butter Nut</option>
+      </optgroup>
+      <optgroup label="Perennial Fruits">
+        <option>Apple</option><option>Grapes</option><option>Oranges</option>
+      </optgroup>
+      <optgroup label="Others">
+        <option>Cauliflower</option><option>Cabbage</option>
+      </optgroup>
+    </select>
+
+    <div id="ideal-conditions" class="tips" style="display:none;"></div>
+
+    <label for="soil" class="label-style"> Your Soil Type:</label>
+    <select id="soil">
+      <option value="Loamy">Loamy</option>
+      <option value="Sandy">Sandy</option>
+      <option value="Sandy Loamy">Sandy Loamy</option>
+      <option value="Clay">Clay</option>
+    </select>
+
+    <label for="temp" class="label-style">Average Temperature (°C):</label>
+    <input type="number" id="temp" placeholder="e.g., 28" />
+
+    <label for="areaAcre" class="label-style">Crop Area (Acre): OR </label>
+    <input type="number" id="areaAcre" placeholder="e.g., 2" />
+
+    <label for="areaSqm" class="label-style">Crop Area (Sq. m):</label>
+    <input type="number" id="areaSqm" placeholder="e.g., 8000" />
+
+    <button onclick="calculateIrrigation()" class="button" style="float:right; margin-right:0px;">Calculate</button>
+
+    <div id="result" class="result" aria-live="polite"></div>
+
+    <div id="pdf-button" style="display:none; text-align:right; margin-top:0.75rem;">
+      <button onclick="exportPDF()">📄 Export as PDF</button>
+    </div>
+
+    <div class="adsense-placeholder" style="color:grey; font-size:8px;">[Ad]</div>
+  </main>
+
+  <footer style="margin-top:18px;text-align:center;color:var(--muted);font-size:0.9rem; background:black; padding:16px;">
+	    &copy;2025: Web Toolbox
+  </footer>
+
+  <!-- html2canvas and jsPDF (UMD) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script>
+    const cropData = {
+      "Lettuce": { soil: "Loamy", maturation: 60, condition: "Cool climate, well-drained fertile soil, avoid heat stress." },
+      "Spinach": { soil: "Loamy", maturation: 45, condition: "Cool weather crop, consistent moisture, partial shade ok." },
+      "Carrot": { soil: "Sandy Loamy", maturation: 75, condition: "Deep loose soil, avoid rocky ground, good drainage." },
+      "Beet-root": { soil: "Loamy", maturation: 70, condition: "Well-drained, slightly alkaline soil preferred." },
+      "Potato": { soil: "Sandy Loamy", maturation: 90, condition: "Cool climate, well-drained soil, avoid waterlogging." },
+      "Sweet Potato": { soil: "Sandy", maturation: 100, condition: "Warm climate, sandy fertile soil, full sunlight." },
+      "Garlic": { soil: "Loamy", maturation: 150, condition: "Cool temperature, fertile soil rich in organic matter." },
+      "Onion": { soil: "Loamy", maturation: 120, condition: "Warm sunny conditions, well-drained soil." },
+      "Parsley": { soil: "Loamy", maturation: 80, condition: "Moderate water, moist soil, partial shade tolerant." },
+      "Oregano": { soil: "Sandy Loamy", maturation: 90, condition: "Dry conditions, well-drained soil, full sun." },
+      "Tomato": { soil: "Loamy", maturation: 100, condition: "Warm, sunny, fertile soil, avoid standing water." },
+      "Cucumber": { soil: "Sandy Loamy", maturation: 60, condition: "Warm humid conditions, mulch recommended." },
+      "Capsicum": { soil: "Loamy", maturation: 90, condition: "Warm climate, consistent moisture, good aeration." },
+      "Pumpkin": { soil: "Loamy", maturation: 120, condition: "Full sun, fertile soil, needs space for vines." },
+      "Okra": { soil: "Sandy Loamy", maturation: 60, condition: "Hot climate, well-drained soil, drought tolerant." },
+      "Cauliflower": { soil: "Loamy", maturation: 85, condition: "Cool temperature, rich soil, avoid heat stress." },
+      "Cabbage": { soil: "Loamy", maturation: 90, condition: "Cool moist conditions, fertile soil." },
+      "Butter Nut": { soil: "Sandy Loamy", maturation: 110, condition: "Warm climate, well-drained, nutrient-rich soil." },
+      "Ginger": { soil: "Loamy", maturation: 200, condition: "Warm humid climate, rich organic soil." },
+      "Apple": { soil: "Loamy", maturation: 180, condition: "Cool temperate region, fertile soil, good drainage." },
+      "Grapes": { soil: "Sandy Loamy", maturation: 150, condition: "Warm, dry climate, deep soil, avoid waterlogging." },
+      "Oranges": { soil: "Loamy", maturation: 200, condition: "Subtropical climate, deep soil, regular irrigation." }
+    };
+
+    document.getElementById('crop').addEventListener('change', () => {
+      const crop = document.getElementById('crop').value;
+      const info = cropData[crop];
+      const el = document.getElementById('ideal-conditions');
+      if (info) {
+        el.style.display = "block";
+        el.innerHTML = `<b>Ideal Soil Type:</b> ${info.soil}<br>
+                        <b>Maturation Period:</b> ${info.maturation} days<br>
+                        <b>Ideal Conditions:</b> ${info.condition}`;
+      } else {
+        el.style.display = "none";
+      }
+    });
+
+    function calculateIrrigation() {
+      const crop = document.getElementById('crop').value;
+      const soil = document.getElementById('soil').value;
+      const temp = parseFloat(document.getElementById('temp').value);
+      const areaAcre = parseFloat(document.getElementById('areaAcre').value) || 0;
+      const areaSqm = parseFloat(document.getElementById('areaSqm').value) || 0;
+      const data = cropData[crop];
+      if (!crop || !soil || !temp || !data || (areaAcre === 0 && areaSqm === 0)) {
+        document.getElementById('result').innerHTML = `<b style="color:red;">Please fill all fields correctly (crop, soil, temp and area).</b>`;
+        document.getElementById('pdf-button').style.display = "none";
+        return;
+      }
+
+      // area normalization: if areaSqm provided and areaAcre not, compute acres
+      const areaInAcre = areaAcre || (areaSqm / 4046.86);
+      const areaInSqm = areaSqm || (areaAcre * 4046.86);
+
+      // Baseline (example) liters/acre/day — you can tune with real data
+      let baseWater = 4500;
+      if (soil === "Sandy") baseWater *= 1.25;
+      if (soil === "Clay") baseWater *= 0.85;
+      if (temp > 30) baseWater *= 1.15;
+      if (temp < 20) baseWater *= 0.9;
+
+      const litersAcre = baseWater;
+      const litersM2 = litersAcre / 4046.86;
+      const gallonsM2 = litersM2 * 0.264172;
+      const gallonsSqft = litersAcre * 0.000247105; // approx
+
+      const totalLiters = litersAcre * areaInAcre;
+      const totalGallons = totalLiters * 0.264172;
+
+      const phases = [
+        { name: "Germination", percent: 20, freq: "Daily or alternate days", tip: "Keep topsoil moist; shallow watering." },
+        { name: "Vegetative Growth", percent: 40, freq: "Every 2–3 days", tip: "Encourage deep roots; moderate irrigation." },
+        { name: "Flowering/Fruiting", percent: 30, freq: "Every 3–4 days", tip: "Avoid water stress to prevent yield loss." },
+        { name: "Maturation/Harvest", percent: 10, freq: "Every 4–5 days", tip: "Reduce water to enhance flavor and storage life." }
+      ];
+
+      let phaseHTML = `<h3>🌱 Growth Phase Breakdown & Watering Guidance</h3>
+        <div class="table-container"><table><thead><tr><th>Phase</th><th>Days</th><th>Frequency</th><th>Tips</th></tr></thead><tbody>`;
+      phases.forEach(p => {
+        const days = Math.max(1, Math.round((data.maturation * p.percent) / 100));
+        phaseHTML += `<tr><td>${p.name}</td><td>${days}</td><td>${p.freq}</td><td>${p.tip}</td></tr>`;
+      });
+      phaseHTML += `</tbody></table></div>`;
+
+      document.getElementById('result').innerHTML = `
+        <h3>💧 Irrigation Schedule for ${crop}</h3>
+        <p><b>Water Requirement (per day):</b><br>
+        ${litersAcre.toFixed(0)} Liters/Acre/Day<br>
+        ${litersM2.toFixed(2)} Liters/m²/Day<br>
+        ${gallonsM2.toFixed(3)} Gallons/m²/Day<br>
+        ${gallonsSqft.toFixed(4)} Gallons/Sq.Ft/Day</p>
+
+        <p><b>Crop Area:</b> ${areaInAcre.toFixed(4)} acres (${areaInSqm.toFixed(0)} m²)</p>
+
+        <p><b>Total Water Required (per day):</b><br>
+        ${totalLiters.toFixed(0)} Liters / day (${totalGallons.toFixed(0)} Gallons / day)</p>
+
+        ${phaseHTML}
+      `;
+
+      // show PDF button
+      document.getElementById('pdf-button').style.display = "block";
+
+      // Scroll results into view on mobile
+      document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Robust PDF export using html2canvas + jsPDF, handles long content by slicing
+    async function exportPDF() {
+      const resultEl = document.getElementById('result');
+      if (!resultEl || resultEl.innerHTML.trim() === "") {
+        alert("No results to export. Please calculate first.");
+        return;
+      }
+
+      // clone element to avoid any dynamic elements interfering
+      const clone = resultEl.cloneNode(true);
+      // ensure clone has white background for PDF clarity
+      clone.style.background = "#ffffff";
+      clone.style.padding = "20px";
+
+      // create an offscreen container to render clone (improves reliability)
+      const wrapper = document.createElement('div');
+      wrapper.style.position = 'fixed';
+      wrapper.style.left = '-9999px';
+      wrapper.style.top = '0';
+      wrapper.appendChild(clone);
+      document.body.appendChild(wrapper);
+
+      try {
+        // render to canvas at high resolution
+        const canvas = await html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+
+        // prepare jsPDF
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const margin = 10; // mm
+
+        // compute image dims in mm
+        const imgWidthMM = pageWidth - margin * 2;
+        const imgHeightMM = (canvas.height * imgWidthMM) / canvas.width;
+
+        // convert canvas to image and slice if taller than page
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+        if (imgHeightMM <= (pageHeight - margin * 2)) {
+          // single page
+          pdf.addImage(imgData, 'JPEG', margin, margin, imgWidthMM, imgHeightMM);
+        } else {
+          // multi-page: slice canvas vertically
+          const pxPerMm = canvas.height / imgHeightMM;
+          const sliceHeightPx = Math.floor((pageHeight - margin * 2) * pxPerMm);
+
+          let y = 0;
+          while (y < canvas.height) {
+            // create temp canvas for slice
+            const sliceCanvas = document.createElement('canvas');
+            sliceCanvas.width = canvas.width;
+            sliceCanvas.height = Math.min(sliceHeightPx, canvas.height - y);
+            const ctx = sliceCanvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+            ctx.drawImage(canvas, 0, y, canvas.width, sliceCanvas.height, 0, 0, sliceCanvas.width, sliceCanvas.height);
+
+            const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.95);
+            const sliceHeightMM = (sliceCanvas.height * imgWidthMM) / sliceCanvas.width;
+
+            pdf.addImage(sliceData, 'JPEG', margin, margin, imgWidthMM, sliceHeightMM);
+            y += sliceHeightPx;
+            if (y < canvas.height) pdf.addPage();
+          }
+        }
+
+        pdf.save('Irrigation-Schedule.pdf');
+      } catch (err) {
+        console.error('PDF export error:', err);
+        alert('Failed to export PDF — please try again. If the problem persists, try a different browser.');
+      } finally {
+        // clean up
+        document.body.removeChild(wrapper);
+      }
+    }
+  </script>
+</body>
+</html>

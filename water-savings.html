@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="Calculate how much water and fuel you can save with smart irrigation compared to traditional methods.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Water Savings Calculator | Smart Irrigation App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+     <div class="logo">🌾 Smart Irrigation</div>
+     <a href="index.html"><button class="button">Home</button></a>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero-placeholder">
+    <img src="images/webtools-hero-image4.png" alt="Hero image placeholder">
+  </section>
+
+  <main class="tool-container">
+    <h1 style="font-size:16px;">Water Savings Calculator</h1>
+    <p style="font-size:13px;">Compare your traditional irrigation method with smart irrigation and estimate your savings.</p>
+
+    <form id="savingsForm">
+      <label style="font-size:12px;">Area (in m²):</label>
+      <input style="border:1px solid grey; border-radius:4px; padding:6px; max-width:95%;" type="number" id="area" placeholder="e.g. 1000">
+
+      <label style="font-size:12px;">Water Used Traditionally (liters/m²):</label>
+      <input style="border:1px solid grey; border-radius:4px; padding:6px; max-width:95%;" type="number" id="traditional" placeholder="e.g. 6">
+
+      <label style="font-size:12px;">Smart Irrigation Water Use (liters/m²):</label>
+      <input style="border:1px solid grey; border-radius:4px; padding:6px; max-width:95%;" type="number" id="smart" placeholder="e.g. 4">
+
+      <button type="button" class="button" onclick="calculateSavings()" style="float:right;margin-right:0px;">Calculate Savings</button>
+    </form>
+
+    <div style="margin-top:70px;" id="savingsResult" class="result-box"></div>
+
+    <section class="ads">
+      <div class="ad-box" style="font-size:6px; color:grey;" >Ad</div>
+    </section>
+  </main>
+
+  <footer style="margin-top:18px;text-align:center;color:grey;font-size:0.9rem; background:black; padding:16px;">
+	    &copy;2025: Web Toolbox
+  </footer>
+
+ <!-- <script src="../assets/js/main.js"></script>-->
+  <script src="main.js"></script>
+
+</body>
+</html>
