@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Image Downloader</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load PapaParse for robust CSV handling -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Load JSZip for creating a single downloadable ZIP file -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <!-- Load FileSaver.js for reliably triggering the download of the generated ZIP file -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
+    <style>
+        /* Custom scrollbar for better visual */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; /* Slate-300 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; /* Slate-400 */
+        }
+        /* Ensure the body and HTML take full height */
+        html, body {
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+        }
+        .license-status-badge {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .input-disabled-overlay {
+            cursor: not-allowed;
+            opacity: 0.5;
+            pointer-events: none;
+            position: relative;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            max-width: 90%;
+            width: 450px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen antialiased flex items-start justify-center p-4 sm:p-8">
+
+    <!-- License Status Badge -->
+    <button id="open-license-modal-btn" class="license-status-badge bg-gray-200 text-gray-700 transition-all" aria-label="Open License Management">
+        Loading...
+    </button>
+
+    <div id="app" class="w-full max-w-2xl bg-white shadow-xl rounded-2xl p-6 md:p-10 border border-gray-100">
+        <header class="mb-8 border-b pb-4">
+            <h1 class="text-3xl font-extrabold text-slate-800">Bulk Images Downloader</h1>
+            <p class="text-slate-500 mt-1">Upload a CSV, select the URL column, and download all images in a single ZIP file.</p>
+            
+            <!-- Call to Action Box (Shown when trial/subscription is over) -->
+            <div id="cta-box" class="hidden mt-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+                <p class="font-bold" id="cta-title">License Required</p>
+                <p id="cta-message" class="mt-1 text-sm"></p>
+                <button onclick="document.getElementById('license-modal').classList.remove('hidden')" class="mt-3 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition duration-150">
+                    Go to License Management
+                </button>
+            </div>
+        </header>
+
+        <!-- Step 1: File Upload -->
+        <section class="mb-6">
+            <h2 class="text-xl font-semibold text-slate-700 mb-3">1. Upload CSV File</h2>
+            <div id="file-input-container">
+                <label for="csvFileInput" class="block w-full cursor-pointer bg-indigo-50 hover:bg-indigo-100 border-2 border-dashed border-indigo-300 rounded-lg p-6 text-center transition duration-200">
+                    <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleFileSelect(event)">
+                    <svg class="mx-auto h-12 w-12 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <p class="mt-2 text-sm font-medium text-indigo-700">Click to upload or drag and drop</p>
+                    <p class="text-xs text-indigo-500">Only .CSV files are accepted.</p>
+                </label>
+            </div>
+        </section>
+
+        <!-- Step 2: Column Selection -->
+        <section class="mb-6" id="columnSelectionContainer" style="display:none;">
+            <h2 class="text-xl font-semibold text-slate-700 mb-3">2. Select Columns</h2>
+            
+            <div class="space-y-4">
+                <!-- URL Column Selector -->
+                <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                    <label for="urlColumnSelect" class="text-sm font-medium text-slate-600 w-full sm:w-1/3">Image URL Column:</label>
+                    <select id="urlColumnSelect" class="flex-grow p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-slate-700 bg-white">
+                        <option value="" disabled selected>Select the URL column...</option>
+                    </select>
+                </div>
+
+                <!-- Filename Column Selector -->
+                <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                    <label for="filenameColumnSelect" class="text-sm font-medium text-slate-600 w-full sm:w-1/3">Filename Column Name (Optional):</label>
+                    <select id="filenameColumnSelect" class="flex-grow p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-slate-700 bg-white" aria-label="Column name to use for file renaming">
+                        <!-- Options populated by JS after CSV upload -->
+                        <option value="">No Custom Renaming (Upload a CSV first)</option>
+                    </select>
+                </div>
+                <p class="text-xs text-gray-500 pt-1">
+                    Select a column (like an ID or Name) to use for renaming files.
+                </p>
+            </div>
+        </section>
+
+        <!-- Step 3: Fetch, ZIP, & Download Action -->
+        <section class="mb-8" id="downloadActionContainer" style="display:none;">
+            <h2 class="text-xl font-semibold text-slate-700 mb-3">3. Fetch, ZIP, & Download Images</h2>
+            <button id="downloadButton" onclick="startDownload()" class="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg shadow-md hover:bg-indigo-700 transition duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50" disabled>
+                <span id="buttonText">Fetch & ZIP Images</span>
+            </button>
+            
+            <!-- Progress Bar Element -->
+            <div id="progressBarContainer" class="mt-4 hidden">
+                <div class="text-sm font-medium text-slate-600 mb-1" id="progressText">0% Complete</div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progressBar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <p class="text-sm text-gray-500 mt-2">Images will be fetched one by one, then compressed into a single .zip file for download.</p>
+        </section>
+
+        <!-- Status & Logs -->
+        <section>
+            <h2 class="text-xl font-semibold text-slate-700 mb-3">Logs & Status</h2>
+            <div id="statusLog" class="bg-gray-100 p-4 rounded-lg h-40 overflow-y-auto text-sm text-gray-700 space-y-1">
+                <p class="text-indigo-600 font-medium">Ready. Please upload a CSV file.</p>
+            </div>
+        </section>
+
+        <!-- Download Report -->
+        <section id="reportContainer" class="mt-8 hidden">
+            <h2 class="text-xl font-semibold text-slate-700 mb-3">4. Download Report</h2>
+            <div id="downloadReport" class="bg-red-50 p-4 rounded-lg border border-red-200 text-sm text-red-800">
+                <!-- Report content goes here -->
+            </div>
+        </section>
+
+    </div>
+    
+    <!-- License Management Modal -->
+    <div id="license-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="text-xl font-semibold text-gray-900">License Management</h3>
+                <button onclick="document.getElementById('license-modal').classList.add('hidden')" type="button" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="bg-indigo-50 p-3 rounded-lg mb-4">
+                <label class="block text-xs font-medium text-gray-500">Your Unique User ID</label>
+                <p id="unique-user-id-display" class="text-lg font-mono font-bold text-indigo-700 break-all">Loading...</p>
+            </div>
+
+            <!-- NEW: Instructions and PayPal Payment Section -->
+            <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 mb-4">
+                <p class="text-sm text-gray-700 font-bold mb-3">How to Buy & Activate Pro Tier ($10/month):</p>
+                <ol class="list-decimal list-inside text-xs text-gray-600 space-y-1 pl-1">
+                    <li>Click the **PayPal button** below to purchase the Pro Tier Plan ($10/month).</li>
+                    <li>After successful payment, email us the payment receipt and your **Unique User ID** (displayed above).</li>
+                    <li>We (the admin) will generate your License Key and email it back to you (max 8 hours).</li>
+                    <li>Enter the License Key below and click **Activate Subscription**.</li>
+                </ol>
+                
+                <div class="flex justify-center mt-4">
+                    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+                        <input type="hidden" name="cmd" value="_xclick">
+                        <input type="hidden" name="business" value="bhadsuresh@gmail.com">
+                        <input type="hidden" name="item_name" value="Pro Tier - Batch Image Downloader">
+                        <input type="hidden" name="amount" value="10.00">
+                        <input type="hidden" name="currency_code" value="USD">
+                        <input type="hidden" name="return" value="https://ocrapplications.com/success">
+                        <input type="hidden" name="cancel_return" value="https://ocrapplications.com/cancel">
+                        <button type="submit" class="bg-yellow-400 text-blue-800 font-extrabold py-2 px-6 rounded-lg uppercase text-sm shadow-md hover:bg-yellow-500 transition duration-150">
+                            Buy Pro Tier Plan with PayPal
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <!-- END NEW SECTION -->
+
+            <div class="mb-4">
+                <label for="license-key-input" class="block text-sm font-medium text-gray-700">Enter License Key</label>
+                <input type="text" id="license-key-input" placeholder="USER-7AE0630F|2025-11-15.oBEEVjX2cjJfL..." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <p id="validation-message" class="text-sm text-gray-500 mb-4"></p>
+            
+            <button id="activate-subscription-btn" type="button" class="w-full bg-green-600 text-white py-2 rounded-md font-semibold hover:bg-green-700 disabled:bg-green-400">Activate Subscription</button>
+        </div>
+    </div>
+
+
+    <script>
+        // --- GLOBAL STATE & CONSTANTS ---
+        const DOWNLOADER_LICENSE_KEY = 'downloaderLicenseData';
+        const DAYS_FREE_TRIAL = 1; // 1 day free trial
+        const DAYS_PRO_TIER = 30; // 30 day pro tier
+        const SECRET_KEY = "MySuperSecretLicensingKey!"; // Embedded secret key
+        
+        let parsedData = [];
+        let fetchedFiles = []; 
+        let downloadFailures = [];
+        let isDownloading = false;
+        
+        // License status object
+        let licenseStatus = {
+            uniqueUserId: null,
+            trialEnd: null,
+            proEnd: null,
+            currentDaysLeft: 0,
+            isPro: false,
+            isTrial: false,
+            status: 'LOADING'
+        };
+
+        // Firebase placeholders (kept for environment compatibility)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+
+
+        // --- LICENSING UTILITIES ---
+
+        /** Converts ArrayBuffer to base64url for HMAC hashing. */
+        function arrayBufferToBase64Url(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) binary += String.fromCharCode(bytes[i]);
+            let base64 = btoa(binary);
+            return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        /** Generates HMAC-SHA256 hash. */
+        async function generateHash(data, secret) {
+            const encoder = new TextEncoder();
+            // Note: Key derivation (salting) is done by combining the UUID with the SECRET_KEY in the data structure
+            const key = await crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+            const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(data));
+            return arrayBufferToBase64Url(signature);
+        }
+
+        /** Validates the HMAC-SHA256 license key. */
+        const validateLicenseKey = async (licenseKey, uniqueUserId, secretKey) => {
+            try {
+                // Key format: USER-ID|YYYY-MM-DD.HMAC_HASH
+                const [payloadAndDatePart, userHashBase64Url] = licenseKey.split('.');
+                if (!payloadAndDatePart || !userHashBase64Url) return null;
+                
+                const [licenseUserId, expiryDateStr] = payloadAndDatePart.split('|');
+                if (licenseUserId !== uniqueUserId) return null; // UUID mismatch
+                
+                const expiryDate = new Date(expiryDateStr);
+                if (isNaN(expiryDate.getTime())) return null; // Invalid date format
+                
+                const today = new Date(); today.setHours(0,0,0,0);
+                if (expiryDate.getTime() < today.getTime()) return null; // Already expired
+
+                // The data signed by the admin/server: combines UUID, date, and includes the SECRET_KEY for salting via HMAC
+                const dataToSignStr = `${licenseUserId}|${expiryDateStr}`; 
+                const generatedHashBase64Url = await generateHash(dataToSignStr, secretKey);
+
+                if (generatedHashBase64Url === userHashBase64Url) {
+                    // Successful match, license is valid and unexpired
+                    return expiryDate; 
+                }
+                return null;
+            } catch (e) {
+                console.error("License validation error:", e);
+                return null;
+            }
+        };
+
+        /** Retrieves license data from localStorage. */
+        const getLicenseData = () => {
+            const data = localStorage.getItem(DOWNLOADER_LICENSE_KEY);
+            if (data) {
+                try {
+                    const parsed = JSON.parse(data);
+                    // Convert stored date strings back to Date objects
+                    parsed.trialEnd = parsed.trialEnd ? new Date(parsed.trialEnd) : null;
+                    parsed.proEnd = parsed.proEnd ? new Date(parsed.proEnd) : null;
+                    return parsed;
+                } catch (e) {
+                    console.error("Failed to parse license data from localStorage.", e);
+                    localStorage.removeItem(DOWNLOADER_LICENSE_KEY);
+                    return {};
+                }
+            }
+            return {};
+        };
+
+        /** Saves license data to localStorage. */
+        const saveLicenseData = (data) => {
+            const serializableData = {
+                ...data,
+                // Store dates as ISO strings for reliability
+                trialEnd: data.trialEnd ? data.trialEnd.toISOString() : null,
+                proEnd: data.proEnd ? data.proEnd.toISOString() : null
+            };
+            localStorage.setItem(DOWNLOADER_LICENSE_KEY, JSON.stringify(serializableData));
+        };
+
+        /** Generates a new unique user ID (USER-A1B2C3D4 format). */
+        const generateUniqueUserId = () => {
+            const hex = () => Math.floor((1 + Math.random()) * 0x100000000).toString(16).substring(1).toUpperCase();
+            return `USER-${hex()}`;
+        };
+
+        /** Main function to check license status and update UI/State. */
+        const checkLicenseStatusAndRender = () => {
+            let data = getLicenseData();
+            const now = new Date(); now.setHours(0,0,0,0);
+
+            // 1. Initial Setup (First Time User)
+            if (!data.uniqueUserId) {
+                const newUniqueUserId = generateUniqueUserId();
+                const trialEnd = new Date(now.getTime() + (DAYS_FREE_TRIAL * 24 * 60 * 60 * 1000));
+                data = { uniqueUserId: newUniqueUserId, trialEnd, proEnd: null };
+                saveLicenseData(data);
+            }
+
+            // 2. Determine Current Status
+            let expiryDate = null;
+            let isPro = false;
+            let isTrial = false;
+
+            const proEndDate = data.proEnd;
+            const trialEndDate = data.trialEnd;
+
+            // Priority: Pro subscription is active
+            if (proEndDate && proEndDate >= now) {
+                expiryDate = proEndDate;
+                isPro = true;
+            } 
+            // Second Priority: Trial is active (and Pro is either expired or non-existent)
+            else if (trialEndDate && trialEndDate >= now) {
+                expiryDate = trialEndDate;
+                isTrial = true;
+            }
+
+            const msLeft = expiryDate ? expiryDate.getTime() - now.getTime() : 0;
+            const daysLeft = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
+            
+            let status;
+            if (daysLeft > 0) {
+                status = 'ACTIVE';
+            } else if (proEndDate && proEndDate < now) {
+                status = 'PRO_EXPIRED';
+            } else {
+                status = 'TRIAL_EXPIRED';
+            }
+
+            // 3. Update global license state
+            licenseStatus = {
+                uniqueUserId: data.uniqueUserId,
+                trialEnd: trialEndDate,
+                proEnd: proEndDate,
+                currentDaysLeft: Math.max(0, daysLeft),
+                isPro,
+                isTrial,
+                status
+            };
+
+            // 4. Render the UI elements
+            renderLicenseUI();
+        };
+
+        /** Renders all license-related UI elements (badge, inputs, CTA). */
+        const renderLicenseUI = () => {
+            const badge = document.getElementById('open-license-modal-btn');
+            const fileInputContainer = document.getElementById('file-input-container');
+            const uniqueUserIdDisplay = document.getElementById('unique-user-id-display');
+            const ctaBox = document.getElementById('cta-box');
+            const ctaTitle = document.getElementById('cta-title');
+            const ctaMessage = document.getElementById('cta-message');
+            const downloadButton = document.getElementById('downloadButton'); // Also disable main button
+
+            const { uniqueUserId, currentDaysLeft, status } = licenseStatus;
+
+            // 4.1 Update Badge Status
+            if (status === 'ACTIVE') {
+                const daysText = currentDaysLeft === 1 ? 'Day' : 'Days';
+                badge.textContent = `${currentDaysLeft} ${daysText} Left - ${licenseStatus.isPro ? 'PRO' : 'TRIAL'}`;
+                badge.className = licenseStatus.isPro ? 'license-status-badge bg-green-600 text-white' : 'license-status-badge bg-yellow-500 text-yellow-900';
+                
+                // Enable functionality
+                fileInputContainer.classList.remove('input-disabled-overlay');
+                downloadButton.disabled = false; // Initial state: only disable if no license
+                ctaBox.classList.add('hidden');
+            } else {
+                // Disable functionality
+                badge.textContent = status === 'TRIAL_EXPIRED' ? 'Trial Over' : 'Subscription Ended';
+                badge.className = 'license-status-badge bg-red-600 text-white';
+                fileInputContainer.classList.add('input-disabled-overlay');
+                downloadButton.disabled = true; // Block main button when expired
+                ctaBox.classList.remove('hidden');
+
+                if (status === 'TRIAL_EXPIRED') {
+                    ctaTitle.textContent = "Your Free Trial Period is Over!";
+                    ctaMessage.innerHTML = `Please subscribe for Pro Tier at just $19/month. Your **Unique User ID (${uniqueUserId})** is needed for license activation.`;
+                } else if (status === 'PRO_EXPIRED') {
+                    ctaTitle.textContent = "Subscription Ended";
+                    ctaMessage.textContent = `Please Renew your subscription to continue using the batch downloader.`;
+                }
+            }
+
+            // 4.2 Update Modal/UUID Display
+            uniqueUserIdDisplay.textContent = uniqueUserId || 'N/A';
+        };
+        
+        // --- DOWNLOAD UTILITIES ---
+
+        /** Creates a safe and unique filename from a CSV row's data. */
+        function createSafeFilename(row, filenameColumnName, index) {
+            let name = '';
+            
+            if (filenameColumnName && row[filenameColumnName]) {
+                name = row[filenameColumnName];
+            } else {
+                name = `image_${index + 1}`;
+            }
+
+            let safeName = name.toString()
+                .trim()
+                .replace(/\s+/g, '_')
+                .replace(/[^a-z0-9\-\_\.]/gi, '')
+                .toLowerCase();
+            
+            if (safeName.length === 0 || safeName === '_') {
+                 safeName = `image_${index + 1}`;
+            }
+
+            if (!safeName.endsWith('.jpg') && !safeName.endsWith('.jpeg')) {
+                safeName += '.jpg';
+            }
+
+            return safeName;
+        }
+
+        /** Updates the visual progress bar and text indicators. */
+        function updateProgress(current, total) {
+            const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
+            document.getElementById('progressBarContainer').classList.remove('hidden');
+            document.getElementById('progressBar').style.width = `${percentage}%`;
+            document.getElementById('progressText').textContent = `Fetching Image ${current} of ${total} (${percentage}%)`;
+            document.getElementById('buttonText').textContent = `Fetching... (${percentage}%)`;
+        }
+
+        /** Logs a message to the status log area. */
+        function log(message, className = 'text-gray-700') {
+            const logContainer = document.getElementById('statusLog');
+            const p = document.createElement('p');
+            p.className = className;
+            p.innerHTML = `<span class="font-mono text-xs text-gray-400 mr-2">${new Date().toLocaleTimeString()}</span> ${message}`;
+            logContainer.prepend(p); 
+            while (logContainer.children.length > 50) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+
+        /** Fetches an external URL and converts it into a Blob. */
+        async function fetchImageBlob(url, index, row, filenameColumnName) { 
+            if (!url) return null;
+
+            const filename = createSafeFilename(row, filenameColumnName, index); 
+            
+            try {
+                log(`⏳ Fetching file ${index + 1}: attempting to save as ${filename}`, 'text-gray-500');
+
+                // 1. Fetch the image data
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                // 2. Convert data to a Blob
+                const blob = await response.blob();
+                
+                log(`✅ File ${index + 1} fetched successfully.`, 'text-green-600');
+                
+                return {
+                    filename: filename,
+                    blob: blob,
+                    originalUrl: url
+                };
+
+            } catch (error) {
+                log(`❌ Failed to fetch file ${index + 1}. Error: ${error.message}.`, 'text-red-500');
+                console.error(`Fetch Error for ${url}:`, error);
+
+                // Store failure data
+                downloadFailures.push({
+                    index: index + 1,
+                    url: url,
+                    filename: filename,
+                    error: error.message || 'Unknown network error.'
+                });
+
+                return null; 
+            }
+        }
+
+        /** Zips all collected files and triggers a single download. */
+        async function zipAndDownload() {
+            log(`Starting ZIP compression for ${fetchedFiles.length} files...`, 'text-indigo-600 font-bold');
+            
+            if (typeof JSZip === 'undefined' || typeof saveAs === 'undefined') {
+                log("Required JSZip or FileSaver libraries are missing.", 'text-red-500');
+                return;
+            }
+
+            const zip = new JSZip();
+
+            fetchedFiles.forEach(file => {
+                zip.file(file.filename, file.blob);
+            });
+
+            const zipFilename = `Map_Images_Batch_${Date.now()}.zip`;
+            
+            try {
+                document.getElementById('progressText').textContent = '100% Fetched. Generating ZIP file...';
+                log("Generating ZIP file. This may take a moment...", 'text-indigo-600');
+                
+                const content = await zip.generateAsync({ type: "blob" });
+                saveAs(content, zipFilename);
+                
+                log(`📦 Successfully generated and triggered download for: ${zipFilename}`, 'text-green-700 font-bold');
+
+            } catch (e) {
+                log(`❌ Error creating or saving ZIP file: ${e.message}`, 'text-red-500');
+                console.error("ZIP Generation Error:", e);
+            } finally {
+                fetchedFiles = [];
+                document.getElementById('progressBarContainer').classList.add('hidden');
+            }
+        }
+
+        /** Generates and displays the final download failure report. */
+        function displayDownloadReport() {
+            const reportContainer = document.getElementById('reportContainer');
+            const reportDiv = document.getElementById('downloadReport');
+            
+            reportDiv.innerHTML = '';
+            
+            if (downloadFailures.length === 0) {
+                reportContainer.classList.add('hidden');
+                log("🎉 All attempted files were fetched (or skipped due to invalid URL).", 'text-green-700 font-bold');
+                return;
+            }
+
+            // Show the report container
+            reportContainer.classList.remove('hidden');
+
+            const totalFailures = downloadFailures.length;
+            const intro = document.createElement('p');
+            intro.className = 'font-bold mb-3 text-red-700';
+            intro.innerHTML = `⚠️ Found ${totalFailures} failures during the fetch process. This is often due to browser CORS security restrictions.`;
+            reportDiv.appendChild(intro);
+            
+            const ul = document.createElement('ul');
+            ul.className = 'list-disc pl-5 space-y-3';
+
+            downloadFailures.forEach(fail => {
+                const li = document.createElement('li');
+                li.className = 'bg-red-100 p-3 rounded-lg border-l-4 border-red-600';
+                li.innerHTML = `
+                    <p class="font-semibold text-gray-800">File #${fail.index} - Intended Name: ${fail.filename}</p>
+                    <p class="truncate text-xs text-gray-600">URL: <a href="${fail.url}" target="_blank" class="text-blue-600 hover:underline">${fail.url}</a></p>
+                    <p class="mt-1 font-medium text-red-700">Reason: ${fail.error}</p>
+                `;
+                ul.appendChild(li);
+            });
+
+            reportDiv.appendChild(ul);
+        }
+
+        // --- CORE LOGIC ---
+
+        /** Handles the selection of the CSV file and starts parsing. */
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                log("No file selected.", 'text-red-500');
+                return;
+            }
+            if (licenseStatus.status !== 'ACTIVE') {
+                 log("Cannot upload file: License is inactive.", 'text-red-500');
+                 event.target.value = null; // Clear file input
+                 return;
+            }
+
+            log(`File uploaded: ${file.name}. Parsing started...`, 'text-indigo-600');
+            document.getElementById('downloadButton').disabled = true;
+
+            Papa.parse(file, {
+                header: true, 
+                skipEmptyLines: true,
+                complete: handleParseComplete,
+                error: (error) => {
+                    log(`Parsing error: ${error.message}`, 'text-red-500');
+                }
+            });
+        }
+
+        /** Callback function after PapaParse completes parsing the CSV. */
+        function handleParseComplete(results) {
+            parsedData = results.data;
+            const headers = results.meta.fields;
+
+            if (!headers || headers.length === 0) {
+                log("CSV appears to be empty or headers could not be found.", 'text-red-500');
+                document.getElementById('columnSelectionContainer').style.display = 'none';
+                document.getElementById('downloadActionContainer').style.display = 'none';
+                return;
+            }
+
+            log(`Parsing complete. Found ${parsedData.length} data rows and ${headers.length} columns.`, 'text-indigo-600');
+            populateColumnSelect(headers);
+
+            document.getElementById('columnSelectionContainer').style.display = 'block';
+            document.getElementById('downloadActionContainer').style.display = 'block';
+            document.getElementById('downloadButton').disabled = false;
+            document.getElementById('reportContainer').classList.add('hidden'); 
+        }
+
+        /** Populates the column selection dropdowns with CSV headers. */
+        function populateColumnSelect(headers) {
+            const urlSelect = document.getElementById('urlColumnSelect');
+            const filenameSelect = document.getElementById('filenameColumnSelect');
+
+            urlSelect.innerHTML = '<option value="" disabled selected>Select the URL column...</option>';
+            headers.forEach(header => {
+                const option = document.createElement('option');
+                option.value = header;
+                option.textContent = header;
+                urlSelect.appendChild(option);
+            });
+
+            filenameSelect.innerHTML = '<option value="">No Custom Renaming (Use image_1.jpg, etc.)</option>';
+            headers.forEach(header => {
+                const option = document.createElement('option');
+                option.value = header;
+                option.textContent = header;
+                filenameSelect.appendChild(option);
+            });
+        }
+
+        /** Initiates the asynchronous fetch, zip, and download process. */
+        async function startDownload() {
+            if (isDownloading) return;
+
+            // Enforce license check just before starting
+            if (licenseStatus.status !== 'ACTIVE') {
+                log("Download failed: License is inactive. Please activate or renew.", 'text-red-500');
+                document.getElementById('license-modal').classList.remove('hidden');
+                return;
+            }
+
+            const urlColumnName = document.getElementById('urlColumnSelect').value;
+            const filenameColumnName = document.getElementById('filenameColumnSelect').value.trim(); 
+            const downloadButton = document.getElementById('downloadButton');
+
+            if (!urlColumnName) {
+                log("Please select the column containing the image URLs.", 'text-red-500');
+                return;
+            }
+
+            fetchedFiles = [];
+            downloadFailures = []; 
+            document.getElementById('reportContainer').classList.add('hidden'); 
+
+            isDownloading = true;
+            downloadButton.disabled = true;
+            document.getElementById('buttonText').textContent = 'Fetching and Zipping...';
+
+            log(`Starting fetch process for URLs in column: "${urlColumnName}"`, 'text-indigo-600 font-bold');
+            
+            const rowsToProcess = parsedData
+                .filter(row => row[urlColumnName] && typeof row[urlColumnName] === 'string' && (row[urlColumnName].startsWith('http') || row[urlColumnName].startsWith('https')));
+
+            if (rowsToProcess.length === 0) {
+                log("No valid URLs found in the selected column to process.", 'text-red-500');
+                isDownloading = false;
+                downloadButton.disabled = false;
+                document.getElementById('buttonText').textContent = 'Fetch & ZIP Images';
+                return;
+            }
+
+            log(`Found ${rowsToProcess.length} files to process. Starting fetch process (1 second delay per file)...`, 'text-indigo-600');
+            let successfulFetches = 0;
+            const totalRows = rowsToProcess.length;
+
+            for (let i = 0; i < totalRows; i++) {
+                const row = rowsToProcess[i];
+                const url = row[urlColumnName];
+
+                const file = await fetchImageBlob(url, i, row, filenameColumnName); 
+
+                if (file) {
+                    fetchedFiles.push(file);
+                    successfulFetches++;
+                }
+                
+                updateProgress(i + 1, totalRows);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            
+            log(`Fetch complete. Successfully prepared ${successfulFetches} out of ${totalRows} files.`, 'text-indigo-600 font-bold');
+
+            if (fetchedFiles.length > 0) {
+                await zipAndDownload();
+            } else {
+                log("No files were successfully fetched to be zipped.", 'text-red-500');
+                document.getElementById('progressBarContainer').classList.add('hidden');
+            }
+            
+            displayDownloadReport();
+
+            isDownloading = false;
+            downloadButton.disabled = false;
+            document.getElementById('buttonText').textContent = 'Fetch & ZIP Images';
+        }
+
+        // --- EVENT LISTENERS & STARTUP ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Initial license check
+            checkLicenseStatusAndRender();
+
+            // 2. License Modal Events
+            document.getElementById('open-license-modal-btn').addEventListener('click', () => document.getElementById('license-modal').classList.remove('hidden'));
+            
+            // 3. Subscription Activation Logic
+            document.getElementById('activate-subscription-btn').addEventListener('click', async () => {
+                const licenseKeyInput = document.getElementById('license-key-input');
+                const licenseKey = licenseKeyInput.value.trim();
+                const validationMessage = document.getElementById('validation-message');
+                const activateButton = document.getElementById('activate-subscription-btn');
+
+                if (!licenseKey) {
+                    validationMessage.textContent = "Please enter a license key.";
+                    validationMessage.classList.add('text-red-500');
+                    return;
+                }
+
+                activateButton.disabled = true;
+                activateButton.textContent = 'Activating...';
+                validationMessage.textContent = 'Validating key...';
+                validationMessage.classList.remove('text-red-500', 'text-green-500');
+                validationMessage.classList.add('text-gray-500');
+
+                const uniqueUserId = licenseStatus.uniqueUserId;
+                const activationExpiryDate = await validateLicenseKey(licenseKey, uniqueUserId, SECRET_KEY);
+                
+                // Calculate the Pro end date 30 days from today (or the validated date if it comes from the key)
+                const newProEndDate = activationExpiryDate 
+                                    ? activationExpiryDate // Use date from key if valid
+                                    : new Date(new Date().getTime() + (DAYS_PRO_TIER * 24 * 60 * 60 * 1000));
+
+                if (activationExpiryDate) {
+                    let data = getLicenseData();
+                    data.proEnd = newProEndDate;
+                    saveLicenseData(data);
+                    checkLicenseStatusAndRender();
+
+                    validationMessage.textContent = `Subscription activated successfully! Pro Tier valid for ${DAYS_PRO_TIER} days.`;
+                    validationMessage.classList.remove('text-gray-500');
+                    validationMessage.classList.add('text-green-500');
+
+                    setTimeout(() => {
+                        document.getElementById('license-modal').classList.add('hidden');
+                        licenseKeyInput.value = '';
+                    }, 1500);
+                } else {
+                    validationMessage.textContent = "Invalid License Key. Check the key, expiration date, or Unique User ID.";
+                    validationMessage.classList.remove('text-gray-500');
+                    validationMessage.classList.add('text-red-500');
+                }
+                
+                activateButton.disabled = false;
+                activateButton.textContent = 'Activate Subscription';
+            });
+        });
+    </script>
+</body>
+</html>
